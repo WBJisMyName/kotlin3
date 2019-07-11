@@ -55,6 +55,8 @@ class EULAFragment : Fragment() {
     }
 
     fun initWebview(webView: WebView){
+        observableField.buttonVisibility = View.GONE
+        observableField.url = "file:///android_asset/EULA.html"
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {

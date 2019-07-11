@@ -60,6 +60,6 @@ class HelpFragment : Fragment() {
     }
 
     fun setValues(){
-        viewModel.webViewUrl.value = path
+        viewModel.webViewUrl.value = "https://help.transcendcloud.com/Elite/Android/TW"
     }
 }

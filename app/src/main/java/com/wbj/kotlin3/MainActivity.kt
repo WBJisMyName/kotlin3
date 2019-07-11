@@ -2,6 +2,7 @@ package com.wbj.kotlin3
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -76,13 +77,24 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         supportFragmentManager.beginTransaction().replace(R.id.container, f).commit()
     }
 
+
+
     override fun onBackPressed() {
         val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
-        (fragment as? BackpressCallback)?.onBackPressed()?.let {
-            if(it) super.onBackPressed()
-        }
-        (fragment as? BackpressCallback)?.onBackPressed()?.not().let {
+
+        if(fragment?.childFragmentManager?.fragments?.get(0) is BackpressCallback){
+            (fragment?.childFragmentManager?.fragments?.get(0)as? BackpressCallback)?.onBackPressed()?.let {
+                if(it) super.onBackPressed()
+            }
+        }else{
             super.onBackPressed()
         }
+//
+//        (fragment as? BackpressCallback)?.onBackPressed()?.let {
+//            if(it) super.onBackPressed()
+//        }
+//        (fragment as? BackpressCallback)?.onBackPressed()?.not().let {
+//            super.onBackPressed()
+//        }
     }
 }

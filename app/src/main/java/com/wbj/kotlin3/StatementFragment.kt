@@ -19,7 +19,7 @@ import kotlinx.android.synthetic.main.statement_fragment.*
 
 
 class StatementFragment : Fragment() {
-    val realurl = Url(url)
+    val realurl = Url("file:///android_asset/Statement.html")
 
     companion object {
         var url = ""

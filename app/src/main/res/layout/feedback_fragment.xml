@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable name="viewModel"
+                  type="com.wbj.kotlin3.viewmodels.FeedbackViewModel"/>
+
+    </data>
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/bottom_layout">
+
+            <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                <TextView
+                        android:id="@+id/text_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="bottom"
+                        android:text="@{viewModel.name}"/>
+
+                <EditText
+                        android:id="@+id/input_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/text_name"
+                        android:gravity="center_vertical"
+                        android:hint="@{viewModel.hint}"
+                        android:inputType="textLongMessage"
+                        android:afterTextChanged="@{viewModel::afterNameChanged}"
+                        android:maxLines="1"/>
+
+                <TextView
+                        android:id="@+id/text_email"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/input_name"
+                        android:gravity="bottom"
+                        android:text="@{viewModel.email}"/>
+
+                <EditText
+                        android:id="@+id/input_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/text_email"
+                        android:gravity="center_vertical"
+                        android:hint="@{viewModel.hint}"
+                        app:isEmailValid="@{viewModel.emailText}"
+                        android:afterTextChanged="@{viewModel::afterEmailChanged}"
+                        android:inputType="textEmailAddress"/>
+
+                <TextView
+                        android:id="@+id/text_sn_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/input_email"
+                        android:gravity="bottom"
+                        android:text="@{viewModel.sn}"/>
+
+                <ImageView
+                        android:id="@+id/sn_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/text_sn_number"
+                        android:layout_toEndOf="@+id/text_sn_number"
+                        android:visibility="gone"
+                        android:src="@drawable/ic_feedback_sn_info_grey"/>
+
+                <EditText
+                        android:id="@+id/input_sn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/text_sn_number"
+                        android:gravity="center_vertical"
+                        android:afterTextChanged="@{viewModel::afterSNChanged}"
+                        android:maxLength="10"
+                        app:isSNValid="@{viewModel.snText}"
+                        android:text="@{viewModel.snText}"/>
+
+                <TextView
+                        android:id="@+id/text_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/input_sn"
+                        android:gravity="bottom"
+                        android:text="@{viewModel.message}"/>
+
+                <EditText
+                        android:id="@+id/input_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/text_message"
+                        android:gravity="left"
+                        android:hint="@{viewModel.hint}"
+                        android:inputType="textMultiLine"
+                        android:lines="10"
+                        android:afterTextChanged="@{viewModel::afterMessageChanged}"/>/>
+
+            </RelativeLayout>
+        </ScrollView>
+
+        <RelativeLayout
+                android:id="@+id/bottom_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:gravity="center">
+
+            <Button
+                    android:id="@+id/btn_send"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewModel.send}"
+                    android:enabled="@{viewModel.sendEnable}"
+                    android:onClick="@{() -> viewModel.onSendClick()}"
+                    android:textAllCaps="false"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+                android:id="@+id/feedback_progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:visibility="@{safeUnbox(viewModel.progress)}">
+
+            <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:theme="@style/ProgressBar"/>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+</layout>

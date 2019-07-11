@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/EULAFragment"
+            android:title="@string/eulaTitle"/>
+    <item
+            android:id="@+id/statementFragment"
+            android:title="@string/statementTitle"/>
+    <item
+            android:id="@+id/feedbackFragment"
+            android:title="@string/feedbackTitle"/>
+    <item
+            android:id="@+id/helpFragment"
+            android:title="@string/helpTitle"/>
+    <item
+            android:id="@+id/browserFragment"
+            android:title="@string/browserTitle"/>
+
+</menu>

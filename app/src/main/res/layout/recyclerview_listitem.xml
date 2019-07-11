@@ -5,7 +5,7 @@
                 xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <RelativeLayout
-            android:id="@+id/item_manage"
+            android:id="@+id/item_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         <androidx.cardview.widget.CardView
@@ -61,7 +61,13 @@
 
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
-
-
     </RelativeLayout>
+
+    <TextView
+            android:id="@+id/noFile_tv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="NO FILES"
+            android:textSize="50sp"
+    />
 </RelativeLayout>

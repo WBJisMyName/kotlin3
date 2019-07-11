@@ -3,6 +3,7 @@ package com.wbj.kotlin3.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -36,10 +37,19 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback) : Li
     inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         private val titleTv = itemView.findViewById<TextView>(R.id.item_title)
         private val subTitleTv = itemView.findViewById<TextView>(R.id.item_subtitle)
-
+        private val layout = itemView.findViewById<RelativeLayout>(R.id.item_layout)
+        private val noFile = itemView.findViewById<TextView>(R.id.noFile_tv)
         fun bind(fileInfo: FileInfo) {
             titleTv.text = fileInfo.name
             subTitleTv.text = fileInfo.path
+            if(fileInfo.visibility == View.VISIBLE){
+                layout.visibility = fileInfo.visibility
+                noFile.visibility = View.GONE
+            }else{
+                layout.visibility = fileInfo.visibility
+                noFile.visibility = View.VISIBLE
+            }
+
 
             itemView.setOnClickListener {
                 mRecyclerViewClickCallback?.onClick(fileInfo)

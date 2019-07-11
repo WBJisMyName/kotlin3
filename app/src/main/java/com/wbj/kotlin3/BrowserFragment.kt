@@ -54,7 +54,6 @@ class BrowserFragment : Fragment(), BackpressCallback {
         mBinding!!.buttonDelete.setOnClickListener{
             viewModel.deleteAll()
         }
-        mBinding!!.hasFiles = true
         return mBinding!!.root
     }
 
@@ -67,12 +66,7 @@ class BrowserFragment : Fragment(), BackpressCallback {
         recyclerView.setHasFixedSize(true);
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
         viewModel.getAllFileInfos().observe(this, Observer { fileInfo->
-            if(fileInfo.size > 0){
-                mBinding?.hasFiles = !(fileInfo[0].name == "空" && fileInfo[0].path == "空")
-            }
-
             adapter.submitList(fileInfo)
-
         })
     }
 
@@ -81,7 +75,7 @@ class BrowserFragment : Fragment(), BackpressCallback {
     fun getLocalFile(){
         val localPath = Environment.getExternalStorageDirectory().getAbsolutePath()
         val localFile = File(localPath)
-        var list =localFile.listFiles()
+        var list = localFile.listFiles()
         for (file in list) {
             if(file.name.toString().startsWith("."))
                 continue
@@ -92,6 +86,7 @@ class BrowserFragment : Fragment(), BackpressCallback {
                 info.parent = file.parent
             else
                 info.parent = ""
+            info.visibility = View.VISIBLE
             viewModel.insert(info)
         }
     }
@@ -118,6 +113,7 @@ class BrowserFragment : Fragment(), BackpressCallback {
                 info.name = "空"
                 info.path = "空"
                 info.parent = folderString
+                info.visibility = View.GONE
                 fileInfoList.add(info)
             }
             viewModel.insertAll(fileInfoList)

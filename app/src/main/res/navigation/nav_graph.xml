@@ -28,12 +28,40 @@
               android:name="com.wbj.kotlin3.StatementFragment"
               android:label="StatementFragment"
               tools:layout="@layout/statement_fragment"/>
-    <fragment android:id="@+id/homeFragment" android:name="com.wbj.kotlin3.HomeFragment" android:label="fragment_home"
+
+    <fragment android:id="@+id/homeFragment"
+              android:name="com.wbj.kotlin3.HomeFragment"
+              android:label="HomeFragment"
               tools:layout="@layout/fragment_home">
-        <action android:id="@+id/action_homeFragment_to_browserFragment" app:destination="@id/browserFragment"/>
-        <action android:id="@+id/action_homeFragment_to_feedbackFragment" app:destination="@id/feedbackFragment"/>
-        <action android:id="@+id/action_homeFragment_to_statementFragment" app:destination="@id/statementFragment"/>
-        <action android:id="@+id/action_homeFragment_to_helpFragment" app:destination="@id/helpFragment"/>
-        <action android:id="@+id/action_homeFragment_to_EULAFragment" app:destination="@id/EULAFragment"/>
+        <action android:id="@+id/action_homeFragment_to_browserFragment"
+                app:destination="@id/browserFragment"
+                app:enterAnim="@anim/slide_in_right"
+                app:exitAnim="@anim/slide_out_left"
+                app:popEnterAnim="@anim/slide_in_left"
+                app:popExitAnim="@anim/slide_out_right"/>
+        <action android:id="@+id/action_homeFragment_to_feedbackFragment"
+                app:destination="@id/feedbackFragment"
+                app:enterAnim="@anim/slide_in_right"
+                app:exitAnim="@anim/slide_out_left"
+                app:popEnterAnim="@anim/slide_in_left"
+                app:popExitAnim="@anim/slide_out_right"/>
+        <action android:id="@+id/action_homeFragment_to_statementFragment"
+                app:destination="@id/statementFragment"
+                app:enterAnim="@anim/slide_in_right"
+                app:exitAnim="@anim/slide_out_left"
+                app:popEnterAnim="@anim/slide_in_left"
+                app:popExitAnim="@anim/slide_out_right"/>
+        <action android:id="@+id/action_homeFragment_to_helpFragment"
+                app:destination="@id/helpFragment"
+                app:enterAnim="@anim/slide_in_right"
+                app:exitAnim="@anim/slide_out_left"
+                app:popEnterAnim="@anim/slide_in_left"
+                app:popExitAnim="@anim/slide_out_right"/>
+        <action android:id="@+id/action_homeFragment_to_EULAFragment"
+                app:destination="@id/EULAFragment"
+                app:enterAnim="@anim/slide_in_right"
+                app:exitAnim="@anim/slide_out_left"
+                app:popEnterAnim="@anim/slide_in_left"
+                app:popExitAnim="@anim/slide_out_right"/>
     </fragment>
 </navigation>

@@ -30,15 +30,6 @@
                 android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/recyclerview_listitem"
-                app:isGone="@{!hasFiles}"
-        />
-
-        <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="NO FILES"
-                android:textSize="50sp"
-                app:isGone="@{hasFiles}"
         />
 
     </LinearLayout>

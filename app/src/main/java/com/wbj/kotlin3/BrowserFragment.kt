@@ -82,11 +82,13 @@ class BrowserFragment : Fragment(), BackpressCallback {
             var info = FileInfo()
             info.name = file.name
             info.path = file.path
+            info.lastModifyTime = file.lastModified()
+            info.size = file.length()
+            info.fileType = if(file.isDirectory) 0 else 1
             if(file.parent != null)
                 info.parent = file.parent
             else
                 info.parent = ""
-            info.visibility = View.VISIBLE
             viewModel.insert(info)
         }
     }
@@ -102,6 +104,9 @@ class BrowserFragment : Fragment(), BackpressCallback {
                 var info = FileInfo()
                 info.name = file.name
                 info.path = file.path
+                info.lastModifyTime = file.lastModified()
+                info.size = file.length()
+                info.fileType = if(file.isDirectory) 0 else 1
                 if(file.parent != null)
                     info.parent = file.parent
                 else
@@ -113,7 +118,6 @@ class BrowserFragment : Fragment(), BackpressCallback {
                 info.name = "空"
                 info.path = "空"
                 info.parent = folderString
-                info.visibility = View.GONE
                 fileInfoList.add(info)
             }
             viewModel.insertAll(fileInfoList)

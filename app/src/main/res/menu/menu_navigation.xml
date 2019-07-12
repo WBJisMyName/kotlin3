@@ -3,18 +3,23 @@
 
     <item
             android:id="@+id/EULAFragment"
-            android:title="@string/eulaTitle"/>
+            android:title="@string/eulaTitle"
+            android:icon="@mipmap/ic_drawer_settings_grey"/>
     <item
             android:id="@+id/statementFragment"
-            android:title="@string/statementTitle"/>
+            android:title="@string/statementTitle"
+            android:icon="@mipmap/ic_check_circle_gray"/>
     <item
             android:id="@+id/feedbackFragment"
-            android:title="@string/feedbackTitle"/>
+            android:title="@string/feedbackTitle"
+            android:icon="@mipmap/ic_drawer_feedback_grey"/>
     <item
             android:id="@+id/helpFragment"
-            android:title="@string/helpTitle"/>
+            android:title="@string/helpTitle"
+            android:icon="@mipmap/ic_drawer_help_grey"/>
     <item
             android:id="@+id/browserFragment"
-            android:title="@string/browserTitle"/>
+            android:title="@string/browserTitle"
+            android:icon="@mipmap/ic_drawer_myphone_grey"/>
 
 </menu>

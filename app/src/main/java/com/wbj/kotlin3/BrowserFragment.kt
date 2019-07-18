@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wbj.kotlin3.data.FileInfo
@@ -39,7 +40,7 @@ class BrowserFragment : Fragment(), BackpressCallback {
     companion object {
         fun newInstance() = BrowserFragment()
     }
-
+    private lateinit var progressView: RelativeLayout
     private lateinit var viewModel: BrowserViewModel
     private lateinit var adapter: FileInfoAdapter
     var mBinding: BrowserFragmentBinding? = null
@@ -59,6 +60,7 @@ class BrowserFragment : Fragment(), BackpressCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        progressView = progress_view
         val lm = LinearLayoutManager(context)
         adapter = FileInfoAdapter(mRecyclerViewClickCallback)
         recyclerView.adapter = adapter
@@ -66,13 +68,17 @@ class BrowserFragment : Fragment(), BackpressCallback {
         recyclerView.setHasFixedSize(true);
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
         viewModel.getAllFileInfos().observe(this, Observer { fileInfo->
+            progressView.visibility = View.GONE
             adapter.submitList(fileInfo)
         })
+        viewModel.deleteAll()
+        getLocalFile()
     }
 
 
 
     fun getLocalFile(){
+        progressView.visibility = View.VISIBLE
         val localPath = Environment.getExternalStorageDirectory().getAbsolutePath()
         val localFile = File(localPath)
         var list = localFile.listFiles()
@@ -94,6 +100,7 @@ class BrowserFragment : Fragment(), BackpressCallback {
     }
 
     fun getFolderFolderFile(folderString:String){
+        progressView.visibility = View.VISIBLE
         val localFile = File(folderString)
         var list =localFile.listFiles()
         if(list!=null){

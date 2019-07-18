@@ -6,11 +6,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.wbj.kotlin3.R
 import com.wbj.kotlin3.data.FileInfo
+import com.wbj.kotlin3.databinding.BrowserFragmentBinding
+import com.wbj.kotlin3.databinding.RecyclerviewListitemBinding
 import com.wbj.kotlin3.utilities.RecyclerViewClickCallback
 import java.text.SimpleDateFormat
 import java.util.*
@@ -22,8 +25,13 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback) : Li
     var mRecyclerViewClickCallback: RecyclerViewClickCallback? = recyclerViewClickCallback
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.recyclerview_listitem, parent, false)
-        return ViewHolder(view)
+
+        return ViewHolder(
+            DataBindingUtil.inflate(
+                LayoutInflater.from(parent.context),
+                R.layout.recyclerview_listitem, parent, false
+            )
+        )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -37,7 +45,8 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback) : Li
             return ""
     }
 
-    inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(private val binding: RecyclerviewListitemBinding)
+        : RecyclerView.ViewHolder(binding.root) {
         private val titleTv = itemView.findViewById<TextView>(R.id.item_title)
         private val subTitleTv = itemView.findViewById<TextView>(R.id.item_subtitle)
         private val layout = itemView.findViewById<RelativeLayout>(R.id.item_layout)
@@ -53,7 +62,7 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback) : Li
             }
             else{
                 arrowIv.visibility = View.GONE
-                fileTypeIv.setImageResource(R.mipmap.ic_brower_listview_filearrow)
+                fileTypeIv.setImageResource(R.mipmap.ic_filelist_pic_grey)
             }
 
 

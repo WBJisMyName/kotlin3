@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 按壓時 -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/transcend_dark_red" />
+        </shape>
+    </item>
+
+    <!-- 預設時 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/transcend_red" />
+        </shape>
+    </item>
+
+</selector>
+

@@ -10,20 +10,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             tools:context=".BrowserFragment">
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:id="@+id/buttons"
-        android:visibility="gone">
-            <Button android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/buttonLocal"
-                    android:text="source"/>
-            <Button android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/buttonDelete"
-                    android:text="clear"/>
-
-        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
@@ -34,12 +20,21 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/recyclerview_listitem"
         />
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/img_page_dataempty"
+                android:id="@+id/imageView"
+                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="true"
+                app:visible="@{viewModel.isEmpty()}"/>
 
         <RelativeLayout
                 android:id="@+id/progress_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clickable="true">
+                android:clickable="true"
+                app:visible="@{viewModel.isLoading()}">
 
             <ProgressBar
                     android:layout_width="wrap_content"

@@ -3,7 +3,9 @@ package com.wbj.kotlin3.adapter
 import android.util.Patterns
 import android.view.View
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.databinding.BindingAdapter
+import com.bumptech.glide.Glide
 
 object BindingAdapter {
 
@@ -39,4 +41,17 @@ object BindingAdapter {
         }
     }
 
+    @BindingAdapter("visible")
+    @JvmStatic
+    fun setVisible(view: View, visible: Boolean){
+        view.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    @BindingAdapter("imageResource")
+    @JvmStatic
+    fun setImageResource(imageView : ImageView, resId : Int){
+        Glide.with(imageView.context)
+            .load(resId)
+            .into(imageView)
+    }
 }

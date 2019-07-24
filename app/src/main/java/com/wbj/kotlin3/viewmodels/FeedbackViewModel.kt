@@ -78,7 +78,7 @@ class FeedbackViewModel : ViewModel() {
     val progress = ObservableInt(View.GONE)
 
     init {
-        _name.value = "name"
+        _name.value = "title"
         _email.value = "E-mail"
         _sn.value = "sn"
         _message.value = "Message"
@@ -300,7 +300,7 @@ class FeedbackViewModel : ViewModel() {
                 val srvType = msg.data.getString(KEY_SERVICE_TYPE)
                 val srvCategory = msg.data.getString(KEY_SERVICE_CATEGORY)
                 val platformInfo = "App v" + AppVersion + " OS version: " + Build.VERSION.SDK_INT +
-                        " device name: " + getAndroidDeviceName()
+                        " device title: " + getAndroidDeviceName()
 
                 jsonData = "{\"DataModel\":{\"CustName\":\"" + nameText.get()?.toString() + "\"" +
                         ",\"CustEmail\":\"" + emailText.get()?.toString() + "\"" +

@@ -8,12 +8,13 @@ class FileRepository(application: Application) {
 
     private val fileInfoDatabase = FileInfoDatabase.getInstance(application)!!
     private val fileInfoDao: FileInfoDao = fileInfoDatabase.fileInfoDao()
-    private val fileInfos: LiveData<List<FileInfo>> = fileInfoDao.getAllFileInfos()
-
-
 
     fun getAllFileInfos(): LiveData<List<FileInfo>> {
-        return fileInfos
+        return fileInfoDao.getAllFileInfos()
+    }
+
+    fun getAllFileInfos(parent: String): List<FileInfo> {
+        return fileInfoDao.getAllFileInfos(parent)
     }
 
     fun insert(fileInfo: FileInfo) {

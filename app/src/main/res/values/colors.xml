@@ -8,4 +8,19 @@
     <color name="colorGray">#BDBDBD</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlack">#000000</color>
+
+    <color name="transcend_red">#960014</color>
+    <color name="transcend_dark_red">#610000</color>
+    <color name="transcend_light_red">#ce433b</color>
+
+    <color name="colorBlack_transparency">#65000000</color>
+    <color name="colorBlack_dark_transparency">#90000000</color>
+    <color name="transparency">#00000000</color>
+
+    <color name="c_02">#4d4d4d</color>
+    <color name="c_03">#8e8e93</color>
+    <color name="c_04">#ceced2</color>
+    <color name="c_04_transparency">#75ceced2</color>
+    <color name="c_05">#efeff4</color>
+    <color name="c_06">#0074ff</color>
 </resources>

@@ -1,64 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
-
+        <import type="android.view.Gravity" />
+        <variable name="recyclerModel" type="com.wbj.kotlin3.data.FileInfo"/>
+        <variable name="recyclerViewModel" type="com.wbj.kotlin3.viewmodels.BrowserViewModel"/>
     </data>
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:card_view="http://schemas.android.com/tools"
-                    xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true" >
 
         <RelativeLayout
-                android:id="@+id/item_layout"
+                android:id="@+id/item_manage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_listitem">
 
             <FrameLayout
-                    android:id="@+id/listitem_file_manage_icon_layout"
+                    android:id="@+id/item_icon_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="5dp">
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:paddingStart="10dp">
 
                 <ImageView
                         android:id="@+id/item_icon"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:scaleType="centerCrop"/>
-
-                <ImageView
-                        android:id="@+id/item_mime"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="8dp"
-                        android:scaleType="fitCenter"/>
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:scaleType="centerInside"
+                />
 
                 <ImageView
                         android:id="@+id/item_mark"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
                         android:layout_gravity="center"
-                        android:src="@mipmap/ic_check_circle_gray"
-                        android:visibility="invisible"/>
+                        android:src="@{recyclerModel.isSelected() ? @drawable/ic_page_select_selected : @drawable/ic_page_select_empty}"
+                        app:visible="@{recyclerViewModel.isOnSelectMode()}"/>
 
             </FrameLayout>
 
             <FrameLayout
-                    android:id="@+id/listitem_file_manage_info_layout"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:layout_alignParentRight="true">
+                    android:id="@+id/listitem_manage_info_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true">
 
                 <ImageView
                         android:id="@+id/item_info"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:clickable="true"
-                        android:padding="20dp"
-                        android:src="@mipmap/ic_brower_listview_filearrow"
-                        android:visibility="visible"/>
+                        android:focusable="true"
+                        android:padding="5dp"
+                        android:layout_marginEnd="10dp"
+                        app:visible="@{recyclerModel.infoIcon != 0}"
+                        app:imageResource="@{recyclerModel.infoIcon}"/>
 
             </FrameLayout>
 
@@ -66,14 +65,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="72dp"
                     android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@+id/listitem_file_manage_info_layout"
-                    android:layout_toRightOf="@+id/listitem_file_manage_icon_layout">
+                    android:layout_toStartOf="@+id/listitem_manage_info_layout"
+                    android:layout_toEndOf="@+id/item_icon_layout">
 
                 <LinearLayout
                         android:id="@+id/item_title_layout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:layout_marginStart="15dp">
 
                     <TextView
                             android:id="@+id/item_title"
@@ -81,10 +81,12 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:ellipsize="marquee"
+                            android:gravity="@{recyclerModel.subtitle == null ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM}"
                             android:marqueeRepeatLimit="marquee_forever"
                             android:singleLine="true"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="16sp"/>
+                            android:textSize="16sp"
+                            android:text="@{recyclerModel.title}"
+                            android:textColorLink="@color/c_02"/>
 
                     <TextView
                             android:id="@+id/item_subtitle"
@@ -92,22 +94,18 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:ellipsize="marquee"
+                            android:gravity="top"
                             android:marqueeRepeatLimit="marquee_forever"
                             android:singleLine="true"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="14sp"/>
+                            android:textSize="12sp"
+                            android:text="@{recyclerModel.subtitle}"
+                            app:visible="@{recyclerModel.subtitle != null}"
+                            android:textColorLink="@color/c_03"/>
 
                 </LinearLayout>
 
             </RelativeLayout>
-        </RelativeLayout>
 
-        <TextView
-                android:id="@+id/noFile_tv"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="NO FILES"
-                android:textSize="50sp"
-        />
+        </RelativeLayout>
     </RelativeLayout>
 </layout>

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.wbj.kotlin3.data.FileInfo
+import com.wbj.kotlin3.databinding.RecyclerviewGriditemBinding
 import com.wbj.kotlin3.databinding.RecyclerviewListitemBinding
 import com.wbj.kotlin3.task.ImageLoaderTask
 import com.wbj.kotlin3.utilities.Constant
@@ -28,16 +29,32 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
         val Grid = 2
     }
 
+    var mViewType: Int = List
+
     var mRecyclerViewClickCallback: RecyclerViewClickCallback? = recyclerViewClickCallback
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolderList(RecyclerviewListitemBinding.inflate(inflater))
+//        return ViewHolderList(RecyclerviewListitemBinding.inflate(inflater))
+        val viewType = getItemViewType(position)
+        return when (viewType) {
+            List -> ViewHolderList(RecyclerviewListitemBinding.inflate(inflater))
+            else -> ViewHolderGrid(RecyclerviewGriditemBinding.inflate(inflater))
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (holder is ViewHolderList)
             holder.bind(getItem(position))
+        else if (holder is ViewHolderGrid)
+            holder.bind(getItem(position))
+    }
+
+    override fun getItemViewType(position: Int): Int = mViewType
+
+    fun setViewType(viewType: Int){
+        mViewType = viewType
+//        notifyDataSetChanged()
     }
 
     open inner class ViewHolder(view : View) : RecyclerView.ViewHolder(view)
@@ -76,40 +93,40 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
         }
     }
 
-//    inner class ViewHolder(private val binding: RecyclerviewListitemBinding) : RecyclerView.ViewHolder(binding.root) {
-//        private val titleTv = itemView.findViewById<TextView>(R.id.item_title)
-//        private val subTitleTv = itemView.findViewById<TextView>(R.id.item_subtitle)
-////        private val layout = itemView.findViewById<RelativeLayout>(R.id.item_layout)
-////        private val noFile = itemView.findViewById<TextView>(R.id.noFile_tv)
-//        private val fileTypeIv = itemView.findViewById<ImageView>(R.id.item_icon)
-//        private val arrowIv = itemView.findViewById<ImageView>(R.id.item_info)
-//        fun bind(fileInfo: FileInfo) {
-//            titleTv.text = fileInfo.title
-//            subTitleTv.text = getTime(fileInfo.lastModifyTime)
-//            if(fileInfo.fileType == 0){
-//                arrowIv.visibility = View.VISIBLE
-//                fileTypeIv.setImageResource(R.mipmap.ic_filelist_folder_grey)
-//            }
-//            else{
-//                arrowIv.visibility = View.GONE
-//                fileTypeIv.setImageResource(R.mipmap.ic_filelist_pic_grey)
-//            }
-//
-//
-////            if(fileInfo.title == "空" && fileInfo.path == "空"){
-////                layout.visibility = View.GONE
-////                noFile.visibility = View.VISIBLE
-////            }else{
-////                layout.visibility = View.VISIBLE
-////                noFile.visibility = View.GONE
-////            }
-//
-//
-//            itemView.setOnClickListener {
-//                mRecyclerViewClickCallback?.onClick(fileInfo)
-//            }
-//        }
-//    }
+    inner class ViewHolderGrid(var gridItemBinding: RecyclerviewGriditemBinding) : ViewHolder(gridItemBinding.root) {
+        fun bind(item : FileInfo){
+            gridItemBinding.recyclerModel = item
+            gridItemBinding.recyclerViewModel = viewModel
+
+            itemView.setOnClickListener {
+                mRecyclerViewClickCallback?.onClick(item)
+            }
+
+            gridItemBinding.itemIcon.setImageResource(item.defaultIcon) //載入預設圖片
+            gridItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE  //設定顯示格式
+            if (isMedia(item.fileType)) {
+                val cache = MainApplication.thumbnailsCache?.get(item.path + Constant.thumbnailCacheTail)
+                if (cache != null) {
+                    gridItemBinding.itemIcon.setImageBitmap(cache)
+                    gridItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_CROP
+                } else {
+                    val thumbSize = Point(180, 180)
+                    object : ImageLoaderTask(item.path, item.fileType, thumbSize) {
+                        override fun onFinished(bitmap: Bitmap?) {
+                            if (bitmap != null) {
+                                MainApplication.thumbnailsCache?.put(
+                                    item.path + Constant.thumbnailCacheTail,
+                                    bitmap
+                                )  //將thumbnail記錄於Cache
+                                gridItemBinding.itemIcon.setImageBitmap(bitmap)
+                                gridItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_CROP
+                            }
+                        }
+                    }.execute()
+                }
+            }
+        }
+    }
 
     fun getTime(time: Long): String {
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")

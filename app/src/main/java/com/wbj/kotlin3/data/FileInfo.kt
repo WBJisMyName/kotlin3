@@ -30,8 +30,13 @@ data class FileInfo(
     constructor() : this("", "", "", 0, 0, 0)
 
     var isSelected = false
-
-    var subtitle: String? = null
     var defaultIcon: Int = R.drawable.ic_filelist_others_grey
+
+    //List
+    var subtitle: String? = null
     var infoIcon: Int = 0
+
+    //Grid
+    var smallMediaIconResId: Int = 0
+    var isShowTitleLayout: Boolean = true
 }

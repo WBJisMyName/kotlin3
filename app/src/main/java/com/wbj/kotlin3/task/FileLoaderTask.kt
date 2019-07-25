@@ -57,7 +57,7 @@ class FileLoaderTask(val viewModel: BrowserViewModel) : AsyncTask<String, Unit, 
     }
 
     override fun onPostExecute(result: Unit?) {
+        Thread.sleep(200)   //需等待，否則取出的數據不正確
         viewModel.getAllFileInfos(parent)
-//        viewModel.onDisplayFileInfos.postValue(tmp)
     }
 }

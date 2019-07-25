@@ -1,25 +1,31 @@
 package com.wbj.kotlin3
 
+import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wbj.kotlin3.adapter.FileInfoAdapter
 import com.wbj.kotlin3.data.FileInfo
 import com.wbj.kotlin3.databinding.BrowserFragmentBinding
-import com.wbj.kotlin3.utilities.BackpressCallback
-import com.wbj.kotlin3.utilities.Constant
-import com.wbj.kotlin3.utilities.RecyclerViewClickCallback
+import com.wbj.kotlin3.utilities.*
 import com.wbj.kotlin3.viewmodels.BrowserViewModel
 import kotlinx.android.synthetic.main.browser_fragment.*
 import java.io.File
 
 
 class BrowserFragment : Fragment(), BackpressCallback {
+
+    var mContext = context
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mContext = context
+    }
+
     override fun onBackPressed(): Boolean {
         if(viewModel.mPath.equals(Constant.LOCAL_ROOT))
             return true
@@ -32,7 +38,6 @@ class BrowserFragment : Fragment(), BackpressCallback {
         if(currentPath != null){
             val currentFile = File(currentPath)
             val currentFileParentString = currentFile.parent
-//            getFolderFolderFile(currentFileParentString)
             viewModel.doLoadFiles(currentFileParentString)
         }
     }
@@ -47,6 +52,9 @@ class BrowserFragment : Fragment(), BackpressCallback {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
+
+        setHasOptionsMenu(true)
+
         mBinding = BrowserFragmentBinding.inflate(inflater, container, false)
         return mBinding!!.root
     }
@@ -54,6 +62,12 @@ class BrowserFragment : Fragment(), BackpressCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val lm = LinearLayoutManager(context)
+
+        if (mContext == null)
+            mContext = activity
+
+        if (!PermissionHandle.isReadPermissionGranted(mContext!!))
+            PermissionHandle.requestReadPermission(activity!!)
 
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
         viewModel.items.observe(this, Observer { fileInfo->
@@ -68,70 +82,53 @@ class BrowserFragment : Fragment(), BackpressCallback {
         recyclerView.adapter = adapter
         recyclerView.setLayoutManager(lm);
         recyclerView.setHasFixedSize(true);
-
-//        getLocalFile()
     }
-
-//    fun getLocalFile(){
-//        progressView.visibility = View.VISIBLE
-//        val localPath = Environment.getExternalStorageDirectory().getAbsolutePath()
-//        val localFile = File(localPath)
-//        var list = localFile.listFiles()
-//        for (file in list) {
-//            if(file.name.toString().startsWith("."))
-//                continue
-//            var info = FileInfo()
-//            info.title = file.name
-//            info.path = file.path
-//            info.lastModifyTime = file.lastModified()
-//            info.size = file.length()
-//            info.fileType = if(file.isDirectory) 0 else 1
-//            if(file.parent != null)
-//                info.parent = file.parent
-//            else
-//                info.parent = ""
-//            viewModel.insert(info)
-//        }
-//    }
-//
-//    fun getFolderFolderFile(folderString:String){
-//        progressView.visibility = View.VISIBLE
-//        val localFile = File(folderString)
-//        var list =localFile.listFiles()
-//        if(list!=null){
-//            var fileInfoList : MutableList<FileInfo> = mutableListOf()
-//            for (file in list) {
-//                if(file.name.toString().startsWith("."))
-//                    continue
-//                var info = FileInfo()
-//                info.title = file.name
-//                info.path = file.path
-//                info.lastModifyTime = file.lastModified()
-//                info.size = file.length()
-//                info.fileType = if(file.isDirectory) 0 else 1
-//                if(file.parent != null)
-//                    info.parent = file.parent
-//                else
-//                    info.parent = ""
-//                fileInfoList.add(info)
-//            }
-//            if(fileInfoList.size == 0){
-//                var info = FileInfo()
-//                info.title = "空"
-//                info.path = "空"
-//                info.parent = folderString
-//                fileInfoList.add(info)
-//            }
-//            viewModel.insertAll(fileInfoList)
-//        }
-//    }
 
     val mRecyclerViewClickCallback = object : RecyclerViewClickCallback {
         override fun onClick(fileInfo: FileInfo) {
-//            getFolderFolderFile(fileInfo.path)
             viewModel.doLoadFiles(fileInfo.path)
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        when(id){
+            R.id.action_view_type -> {
+                changeViewType()
+            }
+            R.id.action_select_mode -> {
+//                changeSelectMode()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun changeViewType(){   //更改顯示模式
+        if (adapter.itemCount > 0) {
+            var currentViewType = adapter.getItemViewType(0)
+            when (currentViewType) {
+                FileInfoAdapter.Grid -> {
+                    val listLayoutManager = LinearLayoutManager(mContext)
+                    recyclerView.layoutManager = listLayoutManager
+                    adapter.setViewType(FileInfoAdapter.List)
+                }
+                FileInfoAdapter.List -> {
+                    val gridLayoutManager = GridLayoutManager(mContext, getGridColCount())
+                    recyclerView.layoutManager = gridLayoutManager
+                    adapter.setViewType(FileInfoAdapter.Grid)
+                }
+            }
+        }
+    }
+
+    fun getGridColCount() : Int{    //平板一行6個；手機一行3個
+        if (MainApplication().isPad())
+            return 6
+        return 3
+    }
 }

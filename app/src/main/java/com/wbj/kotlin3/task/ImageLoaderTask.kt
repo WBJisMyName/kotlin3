@@ -23,7 +23,7 @@ abstract class ImageLoaderTask(internal val mPath: String,
             return null
 
         var result: Bitmap? = null
-        try {
+        try {   //landscape 轉portrait
             if (mType == Constant.TYPE_IMAGE) run {
                 result = decodeFullScreenBitmapFromPath(mPath, mThumbSize.x, mThumbSize.y)
             } else if (mType == Constant.TYPE_VIDEO)

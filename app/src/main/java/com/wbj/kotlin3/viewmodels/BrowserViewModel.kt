@@ -36,7 +36,8 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
 
     fun getAllFileInfos(parent: String){
         thread {
-            val list = sort(repository.getAllFileInfos(parent))
+            var originalList = repository.getAllFileInfos(parent)
+            val list = sort(originalList)
             items.postValue(list)
             isEmpty.set(list.size == 0)
         }

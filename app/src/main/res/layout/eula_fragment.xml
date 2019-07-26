@@ -7,7 +7,7 @@
         <variable name="onClickListener"
                   type="android.view.View.OnClickListener"/>
         <variable name="observable"
-                  type="com.wbj.kotlin3.data.EULAOberableField"/>
+                  type="com.transcend.otg.data.EULAOberableField"/>
     </data>
 
     <RelativeLayout

@@ -9,7 +9,7 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.wbj.kotlin3"
+        applicationId "com.transcend.otg"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1

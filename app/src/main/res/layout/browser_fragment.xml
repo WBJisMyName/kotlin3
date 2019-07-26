@@ -3,7 +3,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
-        <variable name="viewModel" type="com.wbj.kotlin3.viewmodels.BrowserViewModel"/>
+        <variable name="viewModel" type="com.transcend.otg.viewmodels.BrowserViewModel"/>
     </data>
     <RelativeLayout
             android:layout_width="match_parent"

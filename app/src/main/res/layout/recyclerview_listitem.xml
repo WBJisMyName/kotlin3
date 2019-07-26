@@ -2,8 +2,8 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="android.view.Gravity" />
-        <variable name="recyclerModel" type="com.wbj.kotlin3.data.FileInfo"/>
-        <variable name="recyclerViewModel" type="com.wbj.kotlin3.viewmodels.BrowserViewModel"/>
+        <variable name="recyclerModel" type="com.transcend.otg.data.FileInfo"/>
+        <variable name="recyclerViewModel" type="com.transcend.otg.viewmodels.BrowserViewModel"/>
     </data>
     <RelativeLayout
             android:layout_width="match_parent"

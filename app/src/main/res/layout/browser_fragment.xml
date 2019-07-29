@@ -16,10 +16,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:layout_below="@+id/buttons"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/recyclerview_listitem"
-        />
+                tools:listitem="@layout/recyclerview_listitem"/>
         <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

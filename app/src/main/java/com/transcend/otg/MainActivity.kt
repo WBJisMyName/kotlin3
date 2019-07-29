@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.documentfile.provider.DocumentFile
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import com.transcend.otg.databinding.ActivityMainBinding
 import com.transcend.otg.utilities.BackpressCallback
@@ -15,6 +17,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.transcend.otg.viewmodels.MainActivityViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
     override fun onEulaAgreeClick(v: View) {
@@ -31,27 +35,21 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.buttonEULA.setOnClickListener{
-            replaceFragment(binding.buttonEULA.text.toString())
-        }
-        binding.buttonStatement.setOnClickListener{
-            replaceFragment(binding.buttonStatement.text.toString())
-        }
-        binding.buttonHelp.setOnClickListener{
-            replaceFragment(binding.buttonHelp.text.toString())
-        }
-        binding.buttonFeedback.setOnClickListener{
-            replaceFragment(binding.buttonFeedback.text.toString())
-        }
-        binding.buttonBrowser.setOnClickListener{
-            replaceFragment(binding.buttonBrowser.text.toString())
-        }
-
+        val viewModel = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
+        binding.viewModel = viewModel
         EULAFragment.setOnEulaClickListener(this)
 
         drawerLayout = binding.drawerLayout
 
         navController = findNavController(R.id.container)
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if(destination.id == R.id.browserFragment) {
+                viewModel.dropdownVisibility.set(View.VISIBLE)
+            } else {
+                viewModel.dropdownVisibility.set(View.GONE)
+            }
+        }
+
         appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
         setSupportActionBar(binding.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -62,19 +60,19 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    private fun replaceFragment(fragment:String){
-        var f:Fragment
-        when(fragment){
-            getString(R.string.eulaTitle) -> f = EULAFragment.newInstance(true, eulaPath)
-            getString(R.string.statementTitle) -> f = StatementFragment.newInstance(statementPath)
-            getString(R.string.helpTitle) -> f = HelpFragment.newInstance(helpPath)
-            getString(R.string.feedbackTitle) -> f = FeedbackFragment.newInstance()
-            getString(R.string.browserTitle) -> f = BrowserFragment.newInstance()
-            else -> f = EULAFragment.newInstance(true, eulaPath)
-        }
-
-        supportFragmentManager.beginTransaction().replace(R.id.container, f).commit()
-    }
+//    private fun replaceFragment(fragment:String){
+//        var f:Fragment
+//        when(fragment){
+//            getString(R.string.eulaTitle) -> f = EULAFragment.newInstance(true, eulaPath)
+//            getString(R.string.statementTitle) -> f = StatementFragment.newInstance(statementPath)
+//            getString(R.string.helpTitle) -> f = HelpFragment.newInstance(helpPath)
+//            getString(R.string.feedbackTitle) -> f = FeedbackFragment.newInstance()
+//            getString(R.string.browserTitle) -> f = BrowserFragment.newInstance()
+//            else -> f = EULAFragment.newInstance(true, eulaPath)
+//        }
+//
+//        supportFragmentManager.beginTransaction().replace(R.id.container, f).commit()
+//    }
 
 
 

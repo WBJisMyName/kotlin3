@@ -4,6 +4,7 @@
         xmlns:tools="http://schemas.android.com/tools" xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable name="viewModel" type="com.transcend.otg.viewmodels.MainActivityViewModel"/>
+        <variable name="browserViewModel" type="com.transcend.otg.viewmodels.BrowserViewModel"/>
     </data>
 
     <androidx.drawerlayout.widget.DrawerLayout
@@ -40,6 +41,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@null"
+                                android:dropDownVerticalOffset = "20dp"
+                                android:dropDownHorizontalOffset = "20dp"
                                 android:gravity="center"/>
 
                         <ImageView

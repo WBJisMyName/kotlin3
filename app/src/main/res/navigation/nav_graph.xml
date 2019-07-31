@@ -6,7 +6,7 @@
 
     <fragment android:id="@+id/browserFragment"
               android:name="com.transcend.otg.BrowserFragment"
-              android:label="@string/browserTitle"
+              android:label=" "
               tools:layout="@layout/browser_fragment"/>
 
     <fragment android:id="@+id/EULAFragment"

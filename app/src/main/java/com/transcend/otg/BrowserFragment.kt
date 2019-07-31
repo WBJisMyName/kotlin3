@@ -55,11 +55,12 @@ class BrowserFragment : Fragment(), BackpressCallback {
         super.onViewCreated(view, savedInstanceState)
         val lm = LinearLayoutManager(context)
 
-        viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
+        viewModel = ViewModelProviders.of(activity as MainActivity).get(BrowserViewModel::class.java)
         viewModel.items.observe(this, Observer { fileInfo->
             adapter.submitList(fileInfo)
             viewModel.isLoading.set(false)
         })
+
 
         viewModel.doLoadFiles(Constant.LOCAL_ROOT)
         mBinding?.viewModel = viewModel  //Bind view and view model

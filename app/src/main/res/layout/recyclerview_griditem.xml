@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <import type="android.view.Gravity"/>
+        <variable name="recyclerModel" type="com.transcend.otg.data.FileInfo"/>
+        <variable name="recyclerViewModel" type="com.transcend.otg.viewmodels.BrowserViewModel"/>
+    </data>
+    <com.transcend.otg.utilities.SquareRelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true">
+
+        <FrameLayout
+                android:id="@+id/item_manage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/selector_griditem"
+                android:padding="0.1dp">
+
+
+            <!--<RelativeLayout-->
+            <!--android:id="@+id/default_layout"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/item_default_title"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="25dp"-->
+            <!--android:layout_alignParentBottom="true"-->
+            <!--android:ellipsize="marquee"-->
+            <!--android:focusable="true"-->
+            <!--android:focusableInTouchMode="true"-->
+            <!--android:gravity="center"-->
+            <!--android:marqueeRepeatLimit="marquee_forever"-->
+            <!--android:singleLine="true"-->
+            <!--android:textSize="12sp"-->
+            <!--android:textColor="@color/c_02"-->
+            <!--android:text="@{recyclerModel.title}"-->
+            <!--app:visible="@{recyclerModel.smallMediaIconResId == 0}"-->
+            <!--android:layout_marginStart="5dp"-->
+            <!--android:layout_marginRight="5dp"/>-->
+
+            <!--<ImageView-->
+            <!--android:id="@+id/item_default_icon"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_centerInParent="true"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:scaleType="centerInside"-->
+            <!--app:imageResource="@{recyclerModel.default_icon}"/>-->
+            <!--</RelativeLayout>-->
+
+            <ImageView
+                    android:id="@+id/item_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_above="@id/item_title"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:scaleType="centerInside"
+            />
+
+            <ImageView
+                    android:id="@+id/item_icon_mask"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_above="@id/item_title"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:alpha="0.7"
+                    android:scaleType="centerCrop"
+                    android:src="@color/colorWhite"
+                    app:visible="@{recyclerModel.isSelected()}"/>
+
+            <ImageView
+                    android:id="@+id/item_mark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_gravity="top|right"
+                    android:src="@{recyclerModel.isSelected() ? @drawable/ic_page_select_selected : @drawable/ic_page_select_empty}"
+                    app:visible="@{recyclerViewModel.isOnSelectMode()}"/>
+
+            <LinearLayout
+                    android:id="@+id/item_title_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_gravity="bottom"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:background="@{recyclerModel.smallMediaIconResId != 0 ? @color/colorBlack_transparency : @color/transparency}"
+                    app:visible="@{recyclerModel.isShowTitleLayout}"
+            >
+
+                <ImageView
+                        android:id="@+id/item_title_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:visible="@{recyclerModel.smallMediaIconResId != 0}"
+                        app:imageResource="@{recyclerModel.smallMediaIconResId}"
+                />
+
+                <TextView
+                        android:id="@+id/item_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:ellipsize="marquee"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:gravity="@{recyclerModel.smallMediaIconResId == 0 ? Gravity.CENTER : Gravity.LEFT}"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:singleLine="true"
+                        android:textSize="12sp"
+                        android:textColor="@{recyclerModel.smallMediaIconResId != 0 ? @color/colorWhite : @color/c_02}"
+                        android:text="@{recyclerModel.title}"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginRight="5dp"/>
+
+            </LinearLayout>
+
+        </FrameLayout>
+    </com.transcend.otg.utilities.SquareRelativeLayout>
+</layout>

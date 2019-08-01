@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+            android:id="@+id/more"
+            android:icon="@drawable/ic_navi_more_android_white"
+            android:title="more"
+            app:showAsAction="always">
+
+        <menu>
+
+            <item
+                    android:id="@+id/action_view_type"
+                    android:enabled="true"
+                    android:icon="@drawable/ic_drawer_backup_grey"
+                    android:title="切換顯示"
+                    app:showAsAction="never"/>
+            <item
+                    android:id="@+id/action_select_mode"
+                    android:enabled="true"
+                    android:icon="@drawable/ic_tab_select_grey"
+                    android:title="選取模式"
+                    app:showAsAction="never"/>
+        </menu>
+    </item>
+</menu>

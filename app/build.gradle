@@ -9,8 +9,8 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.wbj.kotlin3"
-        minSdkVersion 21
+        applicationId "com.transcend.otg"
+        minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -64,4 +64,9 @@ dependencies {
     //Glide 圖片加載工具測試
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     kapt 'com.github.bumptech.glide:compiler:4.9.0'
+
+    //photoview
+    implementation 'com.github.chrisbanes.photoview:library:1.2.3'
+
+
 }

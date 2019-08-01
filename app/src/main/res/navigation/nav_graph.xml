@@ -5,32 +5,33 @@
             app:startDestination="@id/homeFragment">
 
     <fragment android:id="@+id/browserFragment"
-              android:name="com.wbj.kotlin3.BrowserFragment"
+              android:name="com.transcend.otg.BrowserFragment"
               android:label="BrowserFragment"
-              tools:layout="@layout/browser_fragment"/>
+              tools:layout="@layout/browser_fragment">
+    </fragment>
 
     <fragment android:id="@+id/EULAFragment"
-              android:name="com.wbj.kotlin3.EULAFragment"
+              android:name="com.transcend.otg.EULAFragment"
               android:label="EULAFragment"
               tools:layout="@layout/eula_fragment"/>
 
     <fragment android:id="@+id/feedbackFragment"
-              android:name="com.wbj.kotlin3.FeedbackFragment"
+              android:name="com.transcend.otg.FeedbackFragment"
               android:label="FeedbackFragment"
               tools:layout="@layout/feedback_fragment"/>
 
     <fragment android:id="@+id/helpFragment"
-              android:name="com.wbj.kotlin3.HelpFragment"
+              android:name="com.transcend.otg.HelpFragment"
               android:label="HelpFragment"
               tools:layout="@layout/help_fragment"/>
 
     <fragment android:id="@+id/statementFragment"
-              android:name="com.wbj.kotlin3.StatementFragment"
+              android:name="com.transcend.otg.StatementFragment"
               android:label="StatementFragment"
               tools:layout="@layout/statement_fragment"/>
 
     <fragment android:id="@+id/homeFragment"
-              android:name="com.wbj.kotlin3.HomeFragment"
+              android:name="com.transcend.otg.HomeFragment"
               android:label="HomeFragment"
               tools:layout="@layout/fragment_home">
         <action android:id="@+id/action_homeFragment_to_browserFragment"

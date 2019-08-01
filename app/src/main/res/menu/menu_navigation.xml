@@ -4,22 +4,27 @@
     <item
             android:id="@+id/EULAFragment"
             android:title="@string/eulaTitle"
-            android:icon="@mipmap/ic_drawer_settings_grey"/>
+            android:icon="@drawable/ic_drawer_settings_grey"/>
     <item
             android:id="@+id/statementFragment"
             android:title="@string/statementTitle"
-            android:icon="@mipmap/ic_check_circle_gray"/>
+            android:icon="@drawable/ic_drawer_recent_grey"/>
     <item
             android:id="@+id/feedbackFragment"
             android:title="@string/feedbackTitle"
-            android:icon="@mipmap/ic_drawer_feedback_grey"/>
+            android:icon="@drawable/ic_drawer_feedback_grey"/>
     <item
             android:id="@+id/helpFragment"
             android:title="@string/helpTitle"
-            android:icon="@mipmap/ic_drawer_help_grey"/>
+            android:icon="@drawable/ic_drawer_help_grey"/>
     <item
             android:id="@+id/browserFragment"
             android:title="@string/browserTitle"
-            android:icon="@mipmap/ic_drawer_myphone_grey"/>
+            android:icon="@drawable/ic_drawer_myphone_grey"/>
+
+    <item
+            android:id="@+id/sdFragment"
+            android:title="@string/sdTitle"
+            android:icon="@drawable/ic_drawer_microsd_grey"/>
 
 </menu>

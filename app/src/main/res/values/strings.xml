@@ -1,10 +1,13 @@
 <resources>
-    <string name="app_name">kotlin3</string>
+    <string name="app_name">Elite with kotlin</string>
     <string name="eulaTitle">EULA</string>
     <string name="statementTitle">Statement</string>
     <string name="feedbackTitle">Feedback</string>
     <string name="helpTitle">Help</string>
     <string name="browserTitle">Browser</string>
+    <string name="sdTitle">Sdcard</string>
+
+    <string name="samsung">samsung</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

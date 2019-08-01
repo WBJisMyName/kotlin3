@@ -5,7 +5,7 @@
 
     <data>
         <variable name="viewModel"
-                  type="com.wbj.kotlin3.viewmodels.HelpViewModel"/>
+                  type="com.transcend.otg.viewmodels.HelpViewModel"/>
     </data>
 
     <RelativeLayout

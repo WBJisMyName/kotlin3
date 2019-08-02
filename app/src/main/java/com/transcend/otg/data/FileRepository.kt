@@ -2,9 +2,6 @@ package com.transcend.otg.data
 
 import android.app.Application
 import androidx.lifecycle.LiveData
-import com.transcend.otg.data.FileInfo
-import com.transcend.otg.data.FileInfoDao
-import com.transcend.otg.data.FileInfoDatabase
 
 class FileRepository(application: Application) {
 

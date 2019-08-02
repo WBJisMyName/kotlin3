@@ -14,7 +14,6 @@ import com.transcend.otg.databinding.EulaFragmentBinding
 import kotlinx.android.synthetic.main.eula_fragment.*
 import com.transcend.otg.EULAFragment.OnEulaClickListener as OnEulaClickListener
 
-
 class EULAFragment : Fragment() {
 
     interface OnEulaClickListener {

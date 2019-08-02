@@ -1,6 +1,5 @@
 package com.transcend.otg.utilities
 
-import com.transcend.otg.utilities.MimeTypeMapExt
 import org.apache.commons.io.FilenameUtils
 
 /**

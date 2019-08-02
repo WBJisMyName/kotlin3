@@ -6,7 +6,7 @@ import com.transcend.otg.viewmodels.StatementViewModelFactory
 
 object InjectorUtils {
 
-    fun provideStatementViewModelFactory(): StatementViewModelFactory {
+    fun provideStatementViewModelFactory():StatementViewModelFactory{
         val urlRepository = UrlRepository.getInstance(UrlDatabase.getInstance().urlDao)
         return StatementViewModelFactory(urlRepository)
     }

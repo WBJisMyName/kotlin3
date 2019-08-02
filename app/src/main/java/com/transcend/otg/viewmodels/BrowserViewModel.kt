@@ -3,6 +3,7 @@ package com.transcend.otg.viewmodels
 import android.app.Application
 import android.view.View
 import androidx.databinding.ObservableBoolean
+import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.LiveData
@@ -17,6 +18,9 @@ import kotlin.concurrent.thread
 class BrowserViewModel(application: Application) : AndroidViewModel(application) {
 
     var mPath = Constant.LOCAL_ROOT
+    var livePath = MutableLiveData<String>().apply {
+        this.value = ""
+    }
     var isLoading = ObservableBoolean(false)
     var isEmpty = ObservableBoolean(true)
 
@@ -59,6 +63,7 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
 
     fun doLoadFiles(path: String){
         mPath = path
+        livePath.postValue(mPath)
         isLoading.set(true)
 
         thread {

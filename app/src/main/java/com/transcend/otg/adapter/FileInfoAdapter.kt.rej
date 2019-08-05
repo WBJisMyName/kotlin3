@@ -1,0 +1,9 @@
+diff a/app/src/main/java/com/transcend/otg/adapter/FileInfoAdapter.kt b/app/src/main/java/com/transcend/otg/adapter/FileInfoAdapter.kt	(rejected hunks)
+@@ -0,6 +0,7 @@
+                     .transform(CenterInside(), CenterCrop())
+                     .into(listItemBinding.itemIcon)
+             } else if (item.fileType == Constant.TYPE_MUSIC) {
++                //TODO 專輯圖片
+                 loadAlbumThumbnail(listItemBinding.itemIcon, item)
+             } else {
+                 Glide.with(listItemBinding.root)

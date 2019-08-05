@@ -2,6 +2,7 @@ package com.transcend.otg
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -76,8 +77,6 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-
-
     override fun onBackPressed() {
         val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
 
@@ -88,13 +87,6 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         } else {
             super.onBackPressed()
         }
-//
-//        (fragment as? BackpressCallback)?.onBackPressed()?.let {
-//            if(it) super.onBackPressed()
-//        }
-//        (fragment as? BackpressCallback)?.onBackPressed()?.not().let {
-//            super.onBackPressed()
-//        }
     }
 
     override fun onPause() {

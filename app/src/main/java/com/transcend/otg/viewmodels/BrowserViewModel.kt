@@ -2,10 +2,10 @@ package com.transcend.otg.viewmodels
 
 import android.app.Application
 import android.view.View
+import android.widget.Toast
 import androidx.databinding.ObservableBoolean
-import androidx.databinding.ObservableField
-import androidx.lifecycle.AndroidViewModel
 import androidx.databinding.ObservableInt
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.transcend.otg.data.FileInfo
@@ -38,8 +38,7 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
 
     fun getAllFileInfos(parent: String){
         thread {
-            var originalList = repository.getAllFileInfos(parent)
-            val list = sort(originalList)
+            val list = sort(repository.getAllFileInfos(parent))
             items.postValue(list)
             isEmpty.set(list.size == 0)
         }

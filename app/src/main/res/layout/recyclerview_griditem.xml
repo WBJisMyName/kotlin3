@@ -82,7 +82,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:layout_gravity="top|right"
-                    android:src="@drawable/ic_page_select_empty"
+                    android:src="@{recyclerModel.selected ? @drawable/ic_page_select_selected : @drawable/ic_page_select_empty}"
                     app:visible="@{recyclerViewModel.isOnSelectMode()}"/>
 
             <LinearLayout

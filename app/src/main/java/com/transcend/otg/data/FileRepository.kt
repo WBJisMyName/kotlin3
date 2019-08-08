@@ -2,6 +2,7 @@ package com.transcend.otg.data
 
 import android.app.Application
 import androidx.lifecycle.LiveData
+import java.io.File
 
 class FileRepository(application: Application) {
 
@@ -37,10 +38,42 @@ class FileRepository(application: Application) {
         } catch (e: Exception) { }
     }
 
+    fun delete(path: String) {
+        try {
+            val thread = Thread(Runnable {
+                fileInfoDao.delete(path)
+            })
+            thread.start()
+        } catch (e: Exception) { }
+    }
+
+    fun deleteFilesUnderFolderPath(path: String) {
+        try {
+            val thread = Thread(Runnable {
+                fileInfoDao.deleteFilesUnderFolderPath(path+"%")    //尾端加%表示後面無論為何多長都算進去
+            })
+            thread.start()
+        } catch (e: Exception) { }
+    }
+
     fun deleteAll() {
         try {
             val thread = Thread(Runnable {
                 fileInfoDao.deleteAll()
+            })
+            thread.start()
+        } catch (e: Exception) { }
+    }
+
+    fun updateFileName(oldPath: String, newName: String){
+        try {
+            val thread = Thread(Runnable {
+                var fileInfo = fileInfoDao.getFile(oldPath)
+                val newPath = File(oldPath).parent + "/" + newName
+                fileInfo.title = newName
+                fileInfo.path = newPath
+                fileInfoDao.delete(oldPath)
+                fileInfoDao.insert(fileInfo)
             })
             thread.start()
         } catch (e: Exception) { }

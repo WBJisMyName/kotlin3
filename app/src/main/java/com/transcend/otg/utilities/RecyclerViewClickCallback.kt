@@ -4,6 +4,6 @@ import com.transcend.otg.data.FileInfo
 
 
 interface RecyclerViewClickCallback {
-    fun onClick(fileInfo: FileInfo, position: Int)
-    fun onLongClick(fileInfo: FileInfo, position: Int)
+    fun onClick(fileInfo: FileInfo)
+    fun onLongClick(fileInfo: FileInfo)
 }

@@ -46,9 +46,9 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (holder is ViewHolderList)
-            holder.bind(position)
+            holder.bind(getItem(position))
         else if (holder is ViewHolderGrid)
-            holder.bind(position)
+            holder.bind(getItem(position))
     }
 
     override fun getItemViewType(position: Int): Int = mViewType
@@ -60,18 +60,16 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
 
     open inner class ViewHolder(view : View) : RecyclerView.ViewHolder(view)
     inner class ViewHolderList(var listItemBinding: RecyclerviewListitemBinding) : ViewHolder(listItemBinding.root) {
-        fun bind(position: Int){
-            val item = getItem(position)
-
+        fun bind(item: FileInfo){
             listItemBinding.recyclerModel = item
             listItemBinding.recyclerViewModel = viewModel
 
             itemView.setOnClickListener {
-                mRecyclerViewClickCallback?.onClick(item, position)
+                mRecyclerViewClickCallback?.onClick(item)
             }
 
             itemView.setOnLongClickListener{
-                mRecyclerViewClickCallback?.onLongClick(item, position)
+                mRecyclerViewClickCallback?.onLongClick(item)
                 true
             }
 
@@ -96,18 +94,17 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
     }
 
     inner class ViewHolderGrid(var gridItemBinding: RecyclerviewGriditemBinding) : ViewHolder(gridItemBinding.root) {
-        fun bind(position: Int){
-            val item = getItem(position)
+        fun bind(item: FileInfo){
 
             gridItemBinding.recyclerModel = item
             gridItemBinding.recyclerViewModel = viewModel
 
             itemView.setOnClickListener {
-                mRecyclerViewClickCallback?.onClick(item, position)
+                mRecyclerViewClickCallback?.onClick(item)
             }
 
             itemView.setOnLongClickListener{
-                mRecyclerViewClickCallback?.onLongClick(item, position)
+                mRecyclerViewClickCallback?.onLongClick(item)
                 true
             }
 
@@ -164,6 +161,17 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
             for (file: FileInfo in currentList){
                 if (file.isSelected)
                     mList.add(file)
+            }
+        }
+        return mList
+    }
+
+    fun getSelectedFilesPath(): ArrayList<String>{
+        val mList = ArrayList<String>()
+        if (itemCount > 0){
+            for (file: FileInfo in currentList){
+                if (file.isSelected)
+                    mList.add(file.path)
             }
         }
         return mList

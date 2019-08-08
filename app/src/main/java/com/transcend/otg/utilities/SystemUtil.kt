@@ -164,4 +164,9 @@ class SystemUtil {
             Character.toUpperCase(first) + s.substring(1)
         }
     }
+
+    fun isSDCardPath(context: Context, path: String): Boolean {
+        val location = getSDLocation(context)
+        return location != null && path.contains(location)
+    }
 }

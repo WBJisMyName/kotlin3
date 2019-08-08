@@ -1,32 +1,49 @@
 package com.transcend.otg
 
+import android.content.Context
 import android.os.Bundle
 import android.view.*
-import android.widget.GridLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.loader.app.LoaderManager.LoaderCallbacks
+import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.textfield.TextInputLayout
+import com.transcend.otg.action.FileActionManager
+import com.transcend.otg.action.loader.LocalFileDeleteLoader
+import com.transcend.otg.action.loader.LocalFolderCreateLoader
+import com.transcend.otg.action.loader.LocalRenameLoader
+import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.databinding.BrowserFragmentBinding
 import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.utilities.LoaderID
 import com.transcend.otg.utilities.RecyclerViewClickCallback
 import com.transcend.otg.viewmodels.BrowserViewModel
 import kotlinx.android.synthetic.main.browser_fragment.*
+import kotlinx.android.synthetic.main.dialog_folder_create.*
 import java.io.File
 
-class BrowserFragment : Fragment(), BackpressCallback, ActionMode.Callback {
+class BrowserFragment : Fragment(),
+    BackpressCallback,
+    ActionMode.Callback,
+    LoaderCallbacks<Boolean>{
 
     var mActionMode: ActionMode? = null
     var mActionModeView: RelativeLayout? = null
     lateinit var mActionModeTitle: TextView
+
+    lateinit var mContext: Context
+    lateinit var mFileActionManager: FileActionManager
 
     override fun onBackPressed(): Boolean {
         if(viewModel.mPath.equals(Constant.LOCAL_ROOT))
@@ -52,11 +69,18 @@ class BrowserFragment : Fragment(), BackpressCallback, ActionMode.Callback {
     private lateinit var adapter: FileInfoAdapter
     var mBinding: BrowserFragmentBinding? = null
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mContext = context
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
 
         setHasOptionsMenu(true)
+
+        mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)
 
         mBinding = BrowserFragmentBinding.inflate(inflater, container, false)
         return mBinding!!.root
@@ -96,25 +120,45 @@ class BrowserFragment : Fragment(), BackpressCallback, ActionMode.Callback {
             R.id.action_select_mode -> {
                 (activity as AppCompatActivity).startSupportActionMode(this)
             }
+            R.id.action_new_folder -> {
+                val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
+                val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
+                 AlertDialog.Builder(mContext)
+                    .setTitle("New Folder")
+                    .setIcon(R.drawable.ic_tab_newfolder_grey)
+                    .setView(view)
+                    .setPositiveButton("Confirm",{ dialog, whichButton ->
+                        dialog_folder_create_name
+                        val tmp = textLayout.editText?.text.toString()
+                        mFileActionManager.createFolder(viewModel.mPath, tmp)
+                    })
+                    .setNegativeButton("Cancel", { dialog, whichButton ->
+                        println("cancel")
+                    })
+                    .setCancelable(true)
+                    .show()
+            }
         }
         return super.onOptionsItemSelected(item)
     }
 
     val mRecyclerViewClickCallback = object : RecyclerViewClickCallback {
-        override fun onClick(fileInfo: FileInfo, position: Int) {
+        override fun onClick(fileInfo: FileInfo) {
             if (mActionMode != null) {
                 fileInfo.isSelected = fileInfo.isSelected.not()
-                adapter.notifyItemChanged(position)
+                adapter.notifyItemChanged(adapter.currentList.indexOf(fileInfo))
+                updateActionTitle()
             } else
                 viewModel.doLoadFiles(fileInfo.path)
         }
 
-        override fun onLongClick(fileInfo: FileInfo, position: Int) {
+        override fun onLongClick(fileInfo: FileInfo) {
             if (mActionMode == null) {
                 (activity as AppCompatActivity).startSupportActionMode(this@BrowserFragment)
             }
             fileInfo.isSelected = fileInfo.isSelected.not()
-            adapter.notifyItemChanged(position)
+            adapter.notifyItemChanged(adapter.currentList.indexOf(fileInfo))
+            updateActionTitle()
         }
     }
 
@@ -140,13 +184,38 @@ class BrowserFragment : Fragment(), BackpressCallback, ActionMode.Callback {
         val id = item?.itemId
         when(id){
             R.id.action_delete -> {
-
+                // setup dialog builder
+                AlertDialog.Builder(mContext)
+                    .setTitle("Delete")
+                    .setPositiveButton("Confirm",{ dialog, whichButton ->
+                        mFileActionManager.delete(adapter.getSelectedFilesPath())
+                    })
+                    .setNegativeButton("Cancel", { dialog, whichButton ->
+                        println("cancel")
+                    })
+                    .show()
             }
             R.id.action_rename -> {
+                if (adapter.getSelectedFiles().size == 1) {
+                    val fileInfo = adapter.getSelectedFiles()[0]
 
-            }
-            R.id.action_new_folder -> {
-
+                    val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
+                    val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
+                    textLayout.editText?.setText(fileInfo.title)
+                    AlertDialog.Builder(mContext)
+                        .setTitle("Rename")
+                        .setIcon(R.drawable.ic_tab_rename_grey)
+                        .setView(view)
+                        .setPositiveButton("Confirm", { dialog, whichButton ->
+                            val name = textLayout.editText?.text.toString()
+                            mFileActionManager.rename(fileInfo.path, name)
+                        })
+                        .setNegativeButton("Cancel", { dialog, whichButton ->
+                            println("cancel")
+                        })
+                        .setCancelable(true)
+                        .show()
+                }
             }
             R.id.action_selectAll -> {
                 adapter.selectAll()
@@ -162,6 +231,7 @@ class BrowserFragment : Fragment(), BackpressCallback, ActionMode.Callback {
         mActionModeTitle = (mActionModeView as RelativeLayout).findViewById(R.id.action_mode_custom_title) as TextView
         mActionMode?.setCustomView(mActionModeView)
         viewModel.isOnSelectMode.set(true)
+        updateActionTitle()
         return true
     }
 
@@ -174,5 +244,38 @@ class BrowserFragment : Fragment(), BackpressCallback, ActionMode.Callback {
         viewModel.isOnSelectMode.set(false)
         adapter.deselectAll()
         mode?.finish()
+    }
+
+    fun updateActionTitle(){
+        val count = adapter.getSelectedFiles().size
+        val format = resources.getString(if (count <= 1) R.string.msg_file_selected else R.string.msg_files_selected)
+        mActionModeTitle.setText(String.format(format, count))
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
+        when(id){
+            LoaderID.LOCAL_FILE_DELETE -> return LocalFileDeleteLoader(mContext, args?.getStringArrayList("paths")!!)
+            LoaderID.LOCAL_NEW_FOLDER -> return LocalFolderCreateLoader(mContext, args?.getString("path")!!)
+            LoaderID.LOCAL_FILE_RENAME -> return LocalRenameLoader(mContext, args?.getString("path")!!, args.getString("name")!!)
+            else -> return NullLoader(mContext)
+        }
+    }
+
+    override fun onLoadFinished(loader: Loader<Boolean>, success: Boolean?) {
+        if (mActionMode != null)
+            onDestroyActionMode(mActionMode)
+
+        if (loader is LocalFileDeleteLoader){
+            viewModel.doRefresh()
+            adapter.notifyDataSetChanged()
+        } else if (loader is LocalFolderCreateLoader){
+            viewModel.doRefresh()
+        } else if (loader is LocalRenameLoader){
+            viewModel.doRefresh()
+        }
+    }
+
+    override fun onLoaderReset(loader: Loader<Boolean>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

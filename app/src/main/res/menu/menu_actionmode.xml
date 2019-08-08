@@ -40,12 +40,6 @@
                 app:showAsAction="never" />
 
             <item
-                    android:id="@+id/action_new_folder"
-                    android:icon="@drawable/ic_tab_newfolder_grey"
-                    android:title="@string/newFolder"
-                    app:showAsAction="never" />
-
-            <item
                 android:id="@+id/action_selectAll"
                 android:icon="@drawable/ic_tab_selectall_grey"
                 android:title="@string/selectAll"

@@ -1,10 +1,10 @@
 package com.transcend.otg.task
 
 import android.os.AsyncTask
-import com.transcend.otg.utilities.MimeUtil
 import com.transcend.otg.R
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.utilities.MimeUtil
 import com.transcend.otg.viewmodels.BrowserViewModel
 import java.io.File
 
@@ -58,7 +58,6 @@ class FileLoaderTask(val viewModel: BrowserViewModel) : AsyncTask<String, Unit, 
     }
 
     override fun onPostExecute(result: Unit?) {
-        Thread.sleep(200)   //需等待，否則取出的數據不正確
         viewModel.getAllFileInfos(parent)
     }
 }

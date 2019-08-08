@@ -5,6 +5,7 @@ import android.os.Environment
 object Constant{
     var DropDownMainTitle = ""
     val LOCAL_ROOT = Environment.getExternalStorageDirectory().absolutePath
+    public var SD_ROOT = ""
 
     val TYPE_DIR = 0
     val TYPE_IMAGE = 1

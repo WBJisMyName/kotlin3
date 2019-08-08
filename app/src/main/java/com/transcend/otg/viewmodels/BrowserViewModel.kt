@@ -2,7 +2,6 @@ package com.transcend.otg.viewmodels
 
 import android.app.Application
 import android.view.View
-import android.widget.Toast
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.AndroidViewModel
@@ -38,6 +37,7 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
 
     fun getAllFileInfos(parent: String){
         thread {
+            Thread.sleep(200)   //需等待，否則取出的數據不正確
             val list = sort(repository.getAllFileInfos(parent))
             items.postValue(list)
             isEmpty.set(list.size == 0)
@@ -50,6 +50,10 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
 
     fun delete(fileInfo: FileInfo) {
         repository.delete(fileInfo)
+    }
+
+    fun deleteFilesUnderFolderPath(folderPath: String) {
+        repository.deleteFilesUnderFolderPath(folderPath)
     }
 
     fun deleteAll(){
@@ -75,6 +79,10 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
                 isEmpty.set(false)
             }
         }
+    }
+
+    fun doRefresh(){
+        getAllFileInfos(mPath)
     }
 
     fun sort(list: List<FileInfo>): List<FileInfo>{

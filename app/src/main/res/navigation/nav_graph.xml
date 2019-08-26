@@ -8,6 +8,24 @@
               android:name="com.transcend.otg.BrowserFragment"
               android:label="BrowserFragment"
               tools:layout="@layout/browser_fragment">
+
+        <argument
+                android:name="root"
+                app:argType="string"
+                app:nullable="false"
+                android:defaultValue="none" />
+    </fragment>
+
+    <fragment android:id="@+id/sdFragment"
+              android:name="com.transcend.otg.BrowserFragment"
+              android:label="BrowserFragment"
+              tools:layout="@layout/browser_fragment">
+
+        <argument
+                android:name="root"
+                app:argType="string"
+                app:nullable="false"
+                android:defaultValue="none" />
     </fragment>
 
     <fragment android:id="@+id/EULAFragment"
@@ -39,30 +57,45 @@
                 app:enterAnim="@anim/slide_in_right"
                 app:exitAnim="@anim/slide_out_left"
                 app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"/>
+                app:popExitAnim="@anim/slide_out_right"
+                app:popUpTo="@id/browserFragment"
+                app:popUpToInclusive="true"
+                app:launchSingleTop="true"/>
         <action android:id="@+id/action_homeFragment_to_feedbackFragment"
                 app:destination="@id/feedbackFragment"
                 app:enterAnim="@anim/slide_in_right"
                 app:exitAnim="@anim/slide_out_left"
                 app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"/>
+                app:popExitAnim="@anim/slide_out_right"
+                app:popUpTo="@id/feedbackFragment"
+                app:popUpToInclusive="true"
+                app:launchSingleTop="true"/>
         <action android:id="@+id/action_homeFragment_to_statementFragment"
                 app:destination="@id/statementFragment"
                 app:enterAnim="@anim/slide_in_right"
                 app:exitAnim="@anim/slide_out_left"
                 app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"/>
+                app:popExitAnim="@anim/slide_out_right"
+                app:popUpTo="@id/statementFragment"
+                app:popUpToInclusive="true"
+                app:launchSingleTop="true"/>
         <action android:id="@+id/action_homeFragment_to_helpFragment"
                 app:destination="@id/helpFragment"
                 app:enterAnim="@anim/slide_in_right"
                 app:exitAnim="@anim/slide_out_left"
                 app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"/>
+                app:popExitAnim="@anim/slide_out_right"
+                app:popUpTo="@id/helpFragment"
+                app:popUpToInclusive="true"
+                app:launchSingleTop="true"/>
         <action android:id="@+id/action_homeFragment_to_EULAFragment"
                 app:destination="@id/EULAFragment"
                 app:enterAnim="@anim/slide_in_right"
                 app:exitAnim="@anim/slide_out_left"
                 app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"/>
+                app:popExitAnim="@anim/slide_out_right"
+                app:popUpTo="@id/EULAFragment"
+                app:popUpToInclusive="true"
+                app:launchSingleTop="true"/>
     </fragment>
 </navigation>

@@ -1,25 +1,19 @@
 package com.transcend.otg
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.core.os.bundleOf
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
-import com.transcend.otg.utilities.BackpressCallback
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.navigation.NavigationView
 import com.transcend.otg.databinding.ActivityMainBinding
+import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.SystemUtil
 
@@ -46,31 +40,22 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
         setSupportActionBar(binding.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
-//        binding.navigationView.setupWithNavController(navController)
+        binding.navigationView.setupWithNavController(navController)
 
-        binding.navigationView.setNavigationItemSelectedListener(
-            object: NavigationView.OnNavigationItemSelectedListener{
-                override fun onNavigationItemSelected(item: MenuItem): Boolean {
-                    val id = item.itemId
-                    when(id){
-                        R.id.EULAFragment -> navController.navigate(R.id.EULAFragment)
-                        R.id.helpFragment -> navController.navigate(R.id.helpFragment)
-                        R.id.feedbackFragment -> navController.navigate(R.id.feedbackFragment)
-                        R.id.statementFragment -> navController.navigate(R.id.statementFragment)
-                        R.id.browserFragment -> {
-                            var bundle: Bundle = bundleOf("root" to Constant.LOCAL_ROOT)
-                            navController.navigate(R.id.browserFragment, bundle)
-                        }
-                        R.id.sdFragment -> {
-                            var bundle: Bundle = bundleOf("root" to SystemUtil().getSDLocation(this@MainActivity))
-                            navController.navigate(R.id.browserFragment, bundle)
-                        }
-                    }
-                    drawerLayout.closeDrawers()
-                    return false
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            when(destination.id) {
+//                R.id.EULAFragment -> Toast.makeText(this@MainActivity, "EULA", Toast.LENGTH_SHORT)
+//                R.id.helpFragment -> Toast.makeText(this@MainActivity, "Help", Toast.LENGTH_SHORT)
+//                R.id.feedbackFragment -> Toast.makeText(this@MainActivity, "Feedback", Toast.LENGTH_SHORT)
+//                R.id.statementFragment -> Toast.makeText(this@MainActivity, "Statement", Toast.LENGTH_SHORT)
+                R.id.browserFragment -> {
+                    arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
+                }
+                R.id.sdFragment -> {
+                    arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
                 }
             }
-        )
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

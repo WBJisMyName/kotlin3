@@ -11,7 +11,7 @@ class ViewPagerZoomFixed : ViewPager {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {}
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
-        try {
+        try {   // FIX PINCH-TO-ZOOM ISSUE ON android.support.v4.view.ViewPager
             return super.onTouchEvent(ev)
         } catch (ex: IllegalArgumentException) {
             ex.printStackTrace()

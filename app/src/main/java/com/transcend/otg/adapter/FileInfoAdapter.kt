@@ -155,6 +155,7 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
         }
     }
 
+    //TODO
     fun getSelectedFiles(): List<FileInfo>{
         val mList = ArrayList<FileInfo>()
         if (itemCount > 0){
@@ -166,6 +167,7 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
         return mList
     }
 
+    //TODO
     fun getSelectedFilesPath(): ArrayList<String>{
         val mList = ArrayList<String>()
         if (itemCount > 0){

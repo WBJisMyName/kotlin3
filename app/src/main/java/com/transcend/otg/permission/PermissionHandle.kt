@@ -1,4 +1,4 @@
-package com.transcend.otg.utilities
+package com.transcend.otg.permission
 
 import android.Manifest.permission.*
 import android.app.Activity
@@ -21,10 +21,10 @@ object PermissionHandle {
 
     //*取得權限後的動作
     enum class ActionAfterGettingPermission {
-        Nothing, Download, Share, Upload
+        Nothing, GoToAct, Download, Share, Upload
     }
 
-    private fun isLocationPermissionGranted(context: Context): Boolean {
+    fun isLocationPermissionGranted(context: Context): Boolean {
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
             ContextCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) === PackageManager.PERMISSION_GRANTED
         else
@@ -47,6 +47,7 @@ object PermissionHandle {
         if (!isReadPermissionGranted(activity)) {
             permissionList.add(READ_EXTERNAL_STORAGE)
             permissionList.add(WRITE_EXTERNAL_STORAGE)
+            permissionList.add(ACCESS_FINE_LOCATION)
         }
 
         if (permissionList.size == 0)
@@ -63,7 +64,7 @@ object PermissionHandle {
             //未取得權限，向使用者要求允許權限
             ActivityCompat.requestPermissions(
                 activity,
-                arrayOf(ACCESS_FINE_LOCATION),
+                arrayOf<String>(ACCESS_FINE_LOCATION),
                 REQUEST_ACCESS_FINE_LOCATION
             )
 
@@ -74,42 +75,38 @@ object PermissionHandle {
     }
 
     fun requestReadPermission(activity: Activity): Boolean {
-        if (!isReadPermissionGranted(activity)) {
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, READ_EXTERNAL_STORAGE)) {
-                AlertDialog.Builder(activity)
-                    .setTitle("錯誤")
-                    .setMessage("請至設定調整權限")
-                    .setPositiveButton(
-                        "前往設定",
-                        DialogInterface.OnClickListener { dialog, which ->
-                            //引導用戶至設置頁手動授權
-                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            val uri = Uri.fromParts("package", activity.applicationContext.packageName, null)
-                            intent.data = uri
-                            activity.startActivity(intent)
-                        })
-                    .setNegativeButton(
-                        "取消",
-                        DialogInterface.OnClickListener { dialog, which ->
-                            //引導用戶至設置頁手動授權，權限請求失敗
-                        })
-                    .setOnCancelListener(DialogInterface.OnCancelListener {
-                        //引導用戶至設置頁手動授權，權限請求失敗
-                    })
-                    .show()
+        if (!isReadPermissionGranted(activity)) {    //沒有權限
+            //未取得權限，向使用者要求允許權限
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf<String>(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE),
+                REQUEST_READ_WRITE_EXTERNAL_STORAGE
+            )
 
-                return false
-            } else {
-                //未取得權限，向使用者要求允許權限
-                ActivityCompat.requestPermissions(
-                    activity,
-                    arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE),
-                    REQUEST_READ_WRITE_EXTERNAL_STORAGE
-                )
-
-                return false
-            }
+            return false
         }
         return true
+    }
+
+    fun showRequirePermissionDialog(activity: Activity) {
+        AlertDialog.Builder(activity)
+            .setTitle("Error")
+            .setMessage("Failed to get related permissions, some functions would not work properly. Please go to the setting page to authorize")
+            .setPositiveButton(
+                "Go to Settings",
+                DialogInterface.OnClickListener { dialog, which ->
+                    //引導用戶至設置頁手動授權
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    val uri = Uri.fromParts("package", activity.applicationContext.packageName, null)
+                    intent.data = uri
+                    activity.startActivity(intent)
+                })
+            .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
+                //引導用戶至設置頁手動授權，權限請求失敗
+            })
+            .setOnCancelListener(DialogInterface.OnCancelListener {
+                //引導用戶至設置頁手動授權，權限請求失敗
+            })
+            .show()
     }
 }

@@ -2,6 +2,7 @@ package com.transcend.otg.utilities
 
 import android.content.Context
 import android.os.Build
+import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import com.transcend.otg.R
@@ -9,6 +10,7 @@ import java.io.File
 import java.lang.reflect.Array
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.util.*
 
 class SystemUtil {
 
@@ -168,5 +170,56 @@ class SystemUtil {
     fun isSDCardPath(context: Context, path: String): Boolean {
         val location = getSDLocation(context)
         return location != null && path.contains(location)
+    }
+
+    fun getStorageList(context: Context): List<File> {
+        val list = ArrayList<File>()
+        val manager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+        try {
+            val paths = manager.javaClass.getMethod("getVolumePaths").invoke(manager) as ArrayList<String>
+            for (path in paths) {
+                val state =
+                    manager.javaClass.getMethod("getVolumeState", String::class.java).invoke(manager, path) as String
+                if (state == Environment.MEDIA_MOUNTED)
+                    list.add(File(path))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return list
+    }
+
+    fun getStoragePathsWithoutLocal(mContext: Context): List<String> {
+        //Log.d(TAG, "[Enter] getStoragePath()");
+        val stgList = ArrayList<String>()
+        val mStorageManager = mContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+        try {
+
+            val paths = mStorageManager.javaClass.getMethod("getVolumePaths").invoke(mStorageManager) as ArrayList<String>
+            for (p in paths) {
+                if (p == Constant.LOCAL_ROOT)
+                //1080123排除本機儲存
+                    continue
+                val status = mStorageManager.javaClass.getMethod("getVolumeState", String::class.java).invoke(
+                    mStorageManager,
+                    p
+                ) as String
+                if (Environment.MEDIA_MOUNTED == status) {
+                    stgList.add(p)
+                }
+            }
+        } catch (e: InvocationTargetException) {
+            e.printStackTrace()
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        } catch (e: NoSuchMethodException) {
+            e.printStackTrace()
+        }
+
+        //for (File sd : stgList) {
+        //    Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+        //}
+        return stgList
     }
 }

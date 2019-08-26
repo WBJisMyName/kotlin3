@@ -9,6 +9,7 @@ import com.transcend.otg.action.loader.PhoneActionService
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.SystemUtil
+import java.io.File
 import java.util.*
 
 class FileActionManager @JvmOverloads constructor(
@@ -16,8 +17,10 @@ class FileActionManager @JvmOverloads constructor(
     private var mFileActionServiceType: FileActionServiceType,
     callbacks: LoaderManager.LoaderCallbacks<Boolean>
 ) : AbstractActionManager(context, callbacks) {
-    var fileActionService: FileActionService? = null
+
+    var fileActionService: FileActionService? = null    //public getter and private (only internally modifiable) setter
         private set
+
     private var mFileActionServicePool: HashMap<FileActionServiceType, FileActionService>? = null
     private var isLockType = false
 
@@ -170,44 +173,33 @@ class FileActionManager @JvmOverloads constructor(
 
     }
 
-//    fun isTopDirectory(path: String?): Boolean {
-//        if (path == null)
-//            return false
-//
-//        val root = serviceRootPath
-//        when (mFileActionServiceType) {
-//            FileActionManager.FileActionServiceType.SD, FileActionManager.FileActionServiceType.PHONE -> {
-//                val base = File(root)
-//                val file = File(path)
-//                return file == base
-//            }
-//            FileActionManager.FileActionServiceType.RECENT, FileActionManager.FileActionServiceType.SMB -> return path == root
-//            else -> return path == root
-//        }
-//    }
-//
-//    fun isSubDirectory(dest: String, paths: ArrayList<String>): Boolean {
-//        for (path in paths) {
-//            if (dest.startsWith(path)) {
-//                return true
-//            }
-//        }
-//        return false
-//    }
-//
-//    fun isDirectorySupportFileAction(path: String): Boolean {
-//        return if (isRemoteAction(path) && isTopDirectory(path) && path != NASApp.ROOT_USB)
-//            false
-//        else
-//            true
-//    }
-//
-//    fun isDirectorySupportUpload(path: String): Boolean {
-//        return if (isRemoteAction(path) && !isTopDirectory(path) && path != NASApp.ROOT_USB)
-//            true
-//        else
-//            false
-//    }
+    fun isTopDirectory(path: String?): Boolean {
+        if (path == null)
+            return false
+
+        val root = serviceRootPath
+        when (mFileActionServiceType) {
+            FileActionServiceType.SD, FileActionServiceType.PHONE -> {
+                val base = File(root)
+                val file = File(path)
+                return file == base
+            }
+            else -> return path == root
+        }
+    }
+
+    fun isSubDirectory(dest: String, paths: ArrayList<String>): Boolean {
+        for (path in paths) {
+            if (dest.startsWith(path)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun isDirectorySupportFileAction(path: String): Boolean {
+        return isTopDirectory(path)
+    }
 
     fun doLockActionType() {
         isLockType = true

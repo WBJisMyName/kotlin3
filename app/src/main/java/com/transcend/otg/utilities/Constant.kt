@@ -6,6 +6,7 @@ object Constant{
     var DropDownMainTitle = ""
     val LOCAL_ROOT = Environment.getExternalStorageDirectory().absolutePath
     public var SD_ROOT = ""
+    var Storage_Root_Path = "Storage/"
 
     val TYPE_DIR = 0
     val TYPE_IMAGE = 1

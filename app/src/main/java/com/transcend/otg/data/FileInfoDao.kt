@@ -36,6 +36,9 @@ interface FileInfoDao {//data access object
     @Query("UPDATE files SET title = :newName AND path = :newPath WHERE path = :oldPath")
     fun updateFileName(oldPath: String, newPath: String, newName: String)
 
+    @Update
+    fun updateFile(fileInfo:FileInfo)
+    
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     @JvmSuppressWildcards
     fun insertAll(fileInfos :List<FileInfo>)

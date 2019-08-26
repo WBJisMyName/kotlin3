@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Build
 import com.transcend.otg.bitmap.ThumbnailCache
 
 class MainApplication: Application() {
@@ -46,5 +47,9 @@ class MainApplication: Application() {
 
     fun isPad() : Boolean{
         return mContext.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
+    }
+
+    fun OSisAfterNougat(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
     }
 }

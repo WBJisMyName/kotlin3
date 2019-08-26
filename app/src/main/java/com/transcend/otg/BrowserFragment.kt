@@ -1,10 +1,13 @@
 package com.transcend.otg
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
 import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -24,6 +27,8 @@ import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.databinding.BrowserFragmentBinding
+import com.transcend.otg.floatingbtn.BottomSheetFragment
+import com.transcend.otg.floatingbtn.ProgressFloatingButton
 import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.LoaderID
@@ -38,33 +43,17 @@ class BrowserFragment : Fragment(),
     ActionMode.Callback,
     LoaderCallbacks<Boolean>{
 
+    //action mode controller
     var mActionMode: ActionMode? = null
     var mActionModeView: RelativeLayout? = null
     lateinit var mActionModeTitle: TextView
 
     lateinit var mContext: Context
-    lateinit var mFileActionManager: FileActionManager
+    lateinit var mFileActionManager: FileActionManager  //action manager
+    lateinit var mBottomSheetFragment: BottomSheetFragment   //底部進度視窗
+    lateinit var mFloatingBtn: ProgressFloatingButton   //Custom floating btn
+    private var mRoot = Constant.LOCAL_ROOT //根目錄，本地 or SD
 
-    override fun onBackPressed(): Boolean {
-        if(viewModel.mPath.equals(Constant.LOCAL_ROOT))
-            return true
-        else
-            afterBackpress(File(viewModel.mPath).absolutePath)
-        return false
-    }
-
-    fun afterBackpress(currentPath:String?){
-        if(currentPath != null){
-            val currentFile = File(currentPath)
-            val currentFileParentString = currentFile.parent
-//            getFolderFolderFile(currentFileParentString)
-            viewModel.doLoadFiles(currentFileParentString)
-        }
-    }
-
-    companion object {
-        fun newInstance() = BrowserFragment()
-    }
     private lateinit var viewModel: BrowserViewModel
     private lateinit var adapter: FileInfoAdapter
     var mBinding: BrowserFragmentBinding? = null
@@ -78,9 +67,16 @@ class BrowserFragment : Fragment(),
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
 
-        setHasOptionsMenu(true)
+        if (mContext == null)   //避免未進入onAttach而造成的Null
+            mContext = activity as Context
 
-        mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)
+        setHasOptionsMenu(true)     //設定支援選單
+        setBottomSheetFragment()    //設定底部進度視窗
+
+        mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
+
+        if (arguments != null)
+            mRoot = arguments!!.getString("root")    //設定根目錄路徑
 
         mBinding = BrowserFragmentBinding.inflate(inflater, container, false)
         return mBinding!!.root
@@ -91,13 +87,13 @@ class BrowserFragment : Fragment(),
         val lm = LinearLayoutManager(context)
 
         viewModel = ViewModelProviders.of(activity as MainActivity).get(BrowserViewModel::class.java)
-        viewModel.items.observe(this, Observer { fileInfo->
-            adapter.submitList(fileInfo)
-            viewModel.isLoading.set(false)
+        viewModel.items.observe(this, Observer {    //觀察列表變化
+            fileInfo->
+                adapter.submitList(fileInfo)
+                viewModel.isLoading.set(false)
         })
 
-
-        viewModel.doLoadFiles(Constant.LOCAL_ROOT)
+        viewModel.doLoadFiles(mRoot)    //讀取根目錄
         mBinding?.viewModel = viewModel  //Bind view and view model
 
         adapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
@@ -114,15 +110,12 @@ class BrowserFragment : Fragment(),
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         when(id){
-            R.id.action_view_type -> {
-                changeViewType()
-            }
-            R.id.action_select_mode -> {
-                (activity as AppCompatActivity).startSupportActionMode(this)
-            }
+            R.id.action_view_type -> changeViewType()   //List or Grid
+            R.id.action_select_mode -> (activity as AppCompatActivity).startSupportActionMode(this) //啟動action mode
             R.id.action_new_folder -> {
                 val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
                 val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
+
                  AlertDialog.Builder(mContext)
                     .setTitle("New Folder")
                     .setIcon(R.drawable.ic_tab_newfolder_grey)
@@ -130,7 +123,7 @@ class BrowserFragment : Fragment(),
                     .setPositiveButton("Confirm",{ dialog, whichButton ->
                         dialog_folder_create_name
                         val tmp = textLayout.editText?.text.toString()
-                        mFileActionManager.createFolder(viewModel.mPath, tmp)
+                        mFileActionManager.createFolder(viewModel.mPath, tmp)   //通知action manager執行createFolder
                     })
                     .setNegativeButton("Cancel", { dialog, whichButton ->
                         println("cancel")
@@ -138,8 +131,65 @@ class BrowserFragment : Fragment(),
                     .setCancelable(true)
                     .show()
             }
+            R.id.action_progress_test -> {
+                count = 0
+                mFloatingBtn.visibility = View.VISIBLE
+                mFloatingBtn.setProgressMax(max)
+                mBottomSheetFragment.setProgressMax(max)
+                handler.post(ProgressTest())
+            }
+            R.id.action_locate_test -> {
+                startLocateActivity()
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    protected fun startLocateActivity() {
+        val args = Bundle()
+        args.putString("path", viewModel.mPath)
+        val intent = Intent()
+        intent.setClass(activity, FileActionLocateActivity::class.java)
+        intent.putExtras(args)
+        startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE)
+    }
+
+    fun setBottomSheetFragment(){
+        mBottomSheetFragment = BottomSheetFragment()
+        mFloatingBtn = (activity as MainActivity).findViewById(R.id.progress_floating_btn)
+        mFloatingBtn.visibility = View.GONE
+        mFloatingBtn.setOnClickListener(object: View.OnClickListener{
+            override fun onClick(v: View?) {
+                if (activity != null) {
+                    mBottomSheetFragment.show((activity as MainActivity).supportFragmentManager, "TAG")
+                    if (count >= max) {
+                        Toast.makeText(activity, "讀取完成!", Toast.LENGTH_SHORT)
+                        mFloatingBtn.visibility = View.GONE
+                    }
+                }
+            }
+        })
+    }
+
+    //TODO 測試底部進度視窗
+    private val handler = Handler()
+    private var count = 0
+    private var max = 100
+    inner private class ProgressTest : Runnable {
+        override fun run() {
+            count += 20
+            if (count <= 100) {
+                mFloatingBtn.setText("$count / $max")
+                mFloatingBtn.setProgressValue(count)
+                mBottomSheetFragment.setProcessText("$count / $max")
+                mBottomSheetFragment.setProgressValue(count)
+                handler.postDelayed(this, 1000)
+            } else if (count > 100){
+                mFloatingBtn.setProgressValue(0)
+                mBottomSheetFragment.setProgressValue(0)
+                mFloatingBtn.setText("Finished")
+            }
+        }
     }
 
     val mRecyclerViewClickCallback = object : RecyclerViewClickCallback {
@@ -277,5 +327,13 @@ class BrowserFragment : Fragment(),
 
     override fun onLoaderReset(loader: Loader<Boolean>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onBackPressed(): Boolean {
+        if(viewModel.mPath.equals(mRoot))   //到了根目錄，回傳true
+            return true
+        else
+            viewModel.doLoadFiles(File(viewModel.mPath).parent)  //讀取parent路徑
+        return false
     }
 }

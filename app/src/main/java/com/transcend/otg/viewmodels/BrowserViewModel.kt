@@ -14,16 +14,16 @@ import com.transcend.otg.utilities.Constant
 import kotlin.concurrent.thread
 
 
-class BrowserViewModel(application: Application) : AndroidViewModel(application) {
+open class BrowserViewModel(application: Application) : AndroidViewModel(application) {
 
-    var mPath = Constant.LOCAL_ROOT
+    var mPath = Constant.LOCAL_ROOT //記錄當前路徑
     var livePath = MutableLiveData<String>().apply {
         this.value = ""
     }
     var isLoading = ObservableBoolean(false)
     var isEmpty = ObservableBoolean(true)
 
-    private val repository = FileRepository(application)
+    val repository = FileRepository(application)
     var items = MutableLiveData<List<FileInfo>>().apply {
         this.value = ArrayList<FileInfo>()
     }
@@ -35,12 +35,14 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
         return repository.getAllFileInfos()
     }
 
-    fun getAllFileInfos(parent: String){
-        thread {
-            Thread.sleep(200)   //需等待，否則取出的數據不正確
-            val list = sort(repository.getAllFileInfos(parent))
-            items.postValue(list)
-            isEmpty.set(list.size == 0)
+    fun getAllFileInfos(parent: String?){
+        if (parent != null) {
+            thread {
+                Thread.sleep(200)   //需等待，否則取出的數據不正確
+                val list = sort(repository.getAllFileInfos(parent))
+                items.postValue(list)
+                isEmpty.set(list.size == 0)
+            }
         }
     }
 
@@ -64,13 +66,14 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
         repository.insertAll(fileInfos)
     }
 
-    fun doLoadFiles(path: String){
+    open fun doLoadFiles(path: String){
         mPath = path
         livePath.postValue(mPath)
         isLoading.set(true)
 
         thread {
-            val list =  sort(repository.getAllFileInfos(path))
+            val list =
+                sort(repository.getAllFileInfos(path))
             if (list.size == 0){    //無資料就進task處理
                 val task = FileLoaderTask(this)
                 task.execute(path)

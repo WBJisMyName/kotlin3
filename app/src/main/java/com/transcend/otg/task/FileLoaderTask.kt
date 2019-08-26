@@ -10,10 +10,10 @@ import java.io.File
 
 class FileLoaderTask(val viewModel: BrowserViewModel) : AsyncTask<String, Unit, Unit>(){
 
-    lateinit var parent: String
+    var parent: String? = null
 
     override fun doInBackground(vararg params: String?) {
-        parent = params[0]!!
+        parent = params[0]
 
         if (parent != null) {
             val localFile = File(parent)

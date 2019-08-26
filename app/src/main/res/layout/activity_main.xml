@@ -13,10 +13,10 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true">
 
-        <LinearLayout
+        <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+        >
 
             <com.google.android.material.appbar.AppBarLayout
                     android:id="@+id/appbar"
@@ -41,8 +41,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@null"
-                                android:dropDownVerticalOffset = "20dp"
-                                android:dropDownHorizontalOffset = "20dp"
+                                android:dropDownVerticalOffset="20dp"
+                                android:dropDownHorizontalOffset="20dp"
                                 android:gravity="center"/>
 
                         <ImageView
@@ -64,9 +64,51 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:defaultNavHost="true"
-                    app:navGraph="@navigation/nav_graph"/>
+                    app:navGraph="@navigation/nav_graph" android:layout_below="@id/appbar"/>
 
-        </LinearLayout>
+            <com.transcend.otg.floatingbtn.ProgressFloatingButton
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    app:layout_behavior="com.transcend.otg.floatingbtn.ProgressFloatingButton.Behavior"
+                    android:id="@+id/progress_floating_btn"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:visibility="gone">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/fab_btn"
+                        app:backgroundTint="@color/colorPrimary" android:layout_margin="8dp"/>
+
+                <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:indeterminate="false"
+                        android:max="100"
+                        android:progressDrawable="@drawable/floating_progress_bar"
+                        android:progress="30"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                <TextView
+                        android:text="TextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:elevation="10dp"
+                        android:id="@+id/textView"
+                        android:layout_gravity="center" android:textColor="@color/colorWhite"
+                        android:textSize="10sp"/>
+
+            </com.transcend.otg.floatingbtn.ProgressFloatingButton>
+
+        </RelativeLayout>
 
         <com.google.android.material.navigation.NavigationView
                 android:id="@+id/navigation_view"

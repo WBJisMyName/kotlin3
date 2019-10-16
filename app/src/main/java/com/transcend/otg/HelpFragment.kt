@@ -1,17 +1,17 @@
 package com.transcend.otg
 
 import android.graphics.Bitmap
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.transcend.otg.databinding.HelpFragmentBinding
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
+import com.transcend.otg.databinding.FragmentHelpBinding
 import com.transcend.otg.viewmodels.HelpViewModel
-import kotlinx.android.synthetic.main.help_fragment.*
+import kotlinx.android.synthetic.main.fragment_help.*
 
 
 class HelpFragment : Fragment() {
@@ -31,7 +31,7 @@ class HelpFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var binding = HelpFragmentBinding.inflate(inflater, container, false)
+        var binding = FragmentHelpBinding.inflate(inflater, container, false)
         viewModel = ViewModelProviders.of(this).get(HelpViewModel::class.java)
         binding.viewModel = viewModel
 

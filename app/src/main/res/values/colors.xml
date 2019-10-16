@@ -23,4 +23,9 @@
     <color name="c_04_transparency">#75ceced2</color>
     <color name="c_05">#efeff4</color>
     <color name="c_06">#0074ff</color>
+
+    <color name="colorAlphaBlack">#B3000000</color>
+    <color name="colorOrange">#ff8a62</color>
+    <color name="colorGreen">#068302</color>
+    <color name="colorYellow">#eec900</color>
 </resources>

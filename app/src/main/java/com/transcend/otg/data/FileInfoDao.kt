@@ -38,7 +38,7 @@ interface FileInfoDao {//data access object
 
     @Update
     fun updateFile(fileInfo:FileInfo)
-    
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     @JvmSuppressWildcards
     fun insertAll(fileInfos :List<FileInfo>)

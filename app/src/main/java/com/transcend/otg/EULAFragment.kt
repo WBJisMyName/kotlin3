@@ -2,17 +2,16 @@ package com.transcend.otg
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.databinding.ObservableInt
+import androidx.fragment.app.Fragment
 import com.transcend.otg.data.EULAOberableField
-import com.transcend.otg.databinding.EulaFragmentBinding
-import kotlinx.android.synthetic.main.eula_fragment.*
-import com.transcend.otg.EULAFragment.OnEulaClickListener as OnEulaClickListener
+import com.transcend.otg.databinding.FragmentEulaBinding
+import kotlinx.android.synthetic.main.fragment_eula.*
 
 class EULAFragment : Fragment() {
 
@@ -36,7 +35,7 @@ class EULAFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        var binding = EulaFragmentBinding.inflate(inflater, container, false)
+        var binding = FragmentEulaBinding.inflate(inflater, container, false)
         binding.observable = observableField
         binding.onClickListener = View.OnClickListener {
             mListener?.onEulaAgreeClick(it)

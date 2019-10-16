@@ -67,44 +67,48 @@
                     app:navGraph="@navigation/nav_graph" android:layout_below="@id/appbar"/>
 
             <com.transcend.otg.floatingbtn.ProgressFloatingButton
+                    android:id="@+id/progress_floating_btn"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    app:layout_behavior="com.transcend.otg.floatingbtn.ProgressFloatingButton.Behavior"
-                    android:id="@+id/progress_floating_btn"
-                    android:layout_marginTop="10dp"
                     android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginBottom="10dp"
-                    android:visibility="gone">
+                    android:visibility="gone"
+                    app:layout_behavior="com.transcend.otg.floatingbtn.ProgressFloatingButton.Behavior">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/fab_btn"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:id="@+id/fab_btn"
-                        app:backgroundTint="@color/colorPrimary" android:layout_margin="8dp"/>
+                        android:layout_margin="8dp"
+                        app:backgroundTint="@color/colorPrimary" />
 
                 <ProgressBar
                         android:id="@+id/progressBar"
                         style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:indeterminate="false"
                         android:max="100"
-                        android:progressDrawable="@drawable/floating_progress_bar"
                         android:progress="30"
+                        android:progressDrawable="@drawable/floating_progress_bar"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
+                        app:layout_constraintTop_toTopOf="parent" />
+
                 <TextView
-                        android:text="TextView"
+                        android:id="@+id/textView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:elevation="10dp"
-                        android:id="@+id/textView"
-                        android:layout_gravity="center" android:textColor="@color/colorWhite"
-                        android:textSize="10sp"/>
+                        android:text="TextView"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="10sp" />
 
             </com.transcend.otg.floatingbtn.ProgressFloatingButton>
 

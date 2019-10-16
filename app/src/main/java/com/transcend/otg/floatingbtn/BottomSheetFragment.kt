@@ -22,7 +22,7 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
 
     fun initView(){
         //Set the custom view
-        val view = LayoutInflater.from(context).inflate(R.layout.bottom_sheet, null)
+        val view = LayoutInflater.from(context).inflate(R.layout.backup_bottom_sheet, null)
         mProgressBar = view.findViewById(R.id.bottom_sheet_progressBar)
         mText = view.findViewById(R.id.bottom_sheet_text)
         mProcess = view.findViewById(R.id.bottom_sheet_process)

@@ -1,14 +1,17 @@
 <resources>
     <string name="app_name">Transcend Elite</string>
+
+    <!-- Fragments -->
     <string name="eulaTitle">EULA</string>
     <string name="statementTitle">Statement</string>
     <string name="feedbackTitle">Feedback</string>
     <string name="helpTitle">Help</string>
     <string name="browserTitle">Browser</string>
     <string name="sdTitle">Sdcard</string>
+    <string name="homeTitle">Home</string>
+    <string name="settingsTitle">Settings</string>
 
-    <string name="samsung">samsung</string>
-    
+    <!--  Actions -->
     <string name="more">More</string>
     <string name="share">Share</string>
     <string name="delete">Delete</string>
@@ -16,12 +19,172 @@
     <string name="rename">Rename</string>
     <string name="copy">Copy</string>
     <string name="move">Move</string>
+    <string name="encrypt">Encryption</string>
+    <string name="select">Select</string>
     <string name="selectAll">Select All</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="fail">Action Failed</string>
+    <string name="refresh">Refresh</string>
+    <string name="permission_guide_next">Next</string>
+    <string name="preguide_knowhow">Learn how</string>
+    <string name="title_copy_to">Copy to&#8230;</string>
+    <string name="title_move_to">Move to&#8230;</string>
+    <string name="copyitemsto">Copy Items to</string>
+    <string name="moveitemsto">Move Items to</string>
+    <string name="paste">Paste</string>
+    <string name="lockdisk">Lock</string>
+    <string name="unlockdisk">Unlock</string>
+    <string name="homepermissionButton">Allow Permission</string>
 
+    <!-- Normal title -->
+    <string name="nav_local">Local</string>
+    <string name="nav_sd">SD Card</string>
+    <string name="nav_otg">USB Storage</string>
+    <string name="invalid_name">Invalid name</string>
+    <string name="duplicate_name">Duplicate name</string>
+    <string name="illegal_name">Incorrect characters</string>
+    <string name="untitled_folder">Untitled Folder</string>
+    <string name="error">Error</string>
+    <string name="done">Action Finished</string>
+    <string name="encryptfilename">Encrypt File Name</string>
+    <string name="password">Password</string>
+    <string name="encrypting">Encrypting</string>
+    <string name="decrypt">Decryption</string>
+    <string name="decrypting">Decrypting</string>
+    <string name="filename">Decrypt Folder Name</string>
+    <string name="password_incorrect">Incorrect password</string>
+    <string name="security_notify">Notify</string>
+    <string name="allimages">All Images</string>
+    <string name="allvideos">All Videos</string>
+    <string name="allmusics">All Music</string>
+    <string name="alldocs">All Documents</string>
+    <string name="homeMedia">Media</string>
+    <string name="appInfo">App Info</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="reminder">Reminder</string>
+    <string name="backup">Backup</string>
+
+    <!-- File information -->
+    <string name="info_title">Information</string>
+    <string name="info_name">Name:</string>
+    <string name="info_type">Type:</string>
+    <string name="info_image">Photo</string>
+    <string name="info_video">Video</string>
+    <string name="info_music">Music</string>
+    <string name="info_document">Document</string>
+    <string name="info_folder">Directory</string>
+    <string name="info_other">Others</string>
+    <string name="info_size">Size:</string>
+    <string name="info_file_number">File/Folder counts:</string>
+    <string name="info_file_number_text1">file</string>
+    <string name="info_dir_number_text1">directory</string>
+    <string name="info_file_number_text2">files</string>
+    <string name="info_dir_number_text2">directories</string>
+    <string name="info_file_number_computing">Calculating&#8230;</string>
+    <string name="info_mtime">Last modified time:</string>
+    <string name="info_path">Path:</string>
+
+    <!-- Setting -->
+    <string name="setting_storage">Storage</string>
+    <string name="setting_capacity">Capacity</string>
+    <string name="setting_cleancache">Clean Cache</string>
+    <string name="setting_information">Information</string>
+    <string name="setting_about">About</string>
+    <string name="about_copyright" translatable="false">Copyright \u00A9 2019 Transcend Information Inc.\nAll rights reserved.</string>
+    <string name="about_enduser">End-User License Agreement</string>
+    <string name="about_opensource">Open Source Statement</string>
+    <string name="about_version">App Version</string>
+    <string name="used">Used capacity</string>
+
+    <!-- Security Information -->
+    <string name="Lsecurity" translatable="false">Disk Lock</string>
+    <string name="LLogin">Login</string>
+    <string name="LSetPW">Set password</string>
+    <string name="LRemovePW">Remove password</string>
+    <string name="LChangePW">Change password</string>
+    <string name="LNoPW">No password set</string>
+    <string name="LSettedPW">Lock enable</string>
+    <string name="LCurrentPW">Current Password</string>
+    <string name="LNewPW">New Password</string>
+    <string name="LConfirmPW">Confirm Password</string>
+    <string name="MSG_UserUnlockDisk">Enter your password to unlock the drive.</string>
+    <string name="MSG_UserRemovePWLostSecurity">Once the disk is unlocked, the device will not be password-protected.</string>
+    <string name="MSG_UserUseDiskViaElite">Once password is set, you can only open the drive via Elite.</string>
+    <string name="MSG_PWLimition">4~16 characters with no space</string>
+    <string name="MSG_NewPWNextLogin">Input new password at next login.</string>
+    <string name="MSG_SelectChangeOrRemove">You can select to change or remove password.</string>
+    <string name="msg_password_incorrect">Incorrect password</string>
+
+    <!-- Message -->
     <string name="msg_file_selected">%1$d file selected</string>
     <string name="msg_files_selected">%1$d files selected</string>
+    <string name="msg_file_deleted">%1$d item will be deleted.</string>
+    <string name="msg_files_deleted">%1$d items will be deleted.</string>
+    <string name="no_item_selected">No item selected</string>
+    <string name="empty">Empty Folder</string>
+    <string name="emptywording">You have no files here.</string>
+    <string name="loading">Now loading&#8230;</string>
+    <string name="not_enough_storage">Not Enough Storage</string>
+    <string name="openin_title">Please Choose App</string>
+    <string name="documenttree_guide_title">Need permission</string>
+    <string name="documenttree_guide">Please follow the guide to get permission.</string>
+    <string name="open_app_when_insert_otg">An USB device is connected, do you want to open Transcend Elite ?</string>
+    <string name="no_sd">SD card is not found.</string>
+    <string name="no_otg">USB is not found.</string>
+    <string name="select_folder_error">Destination folder cannot be same as the source folder.</string>
+    <string name="select_destination">Select a destination folder then tap the button in the bottom right corner to paste</string>
+    <string name="file_exist">This location already has a file with the same name</string>
+    <string name="preguide_message">Android OS versions have restricted access to your external storage.Please grant us permission first.</string>
+    <string name="rate_app">Rate this App</string>
+    <string name="security_not_support">This mobile phone does not support this device.</string>
+    <string name="runtimepermission">Please allow the app to access files on this device.</string>
+    <string name="security_lock_title">Enter a password \n to lock the disk.</string>
+    <string name="security_unlock_disk">Enter the password \n to unlock the disk.</string>
+    <string name="homepermission">Please allow "Storage" permission for Transcend Elite to access local files.</string>
+    <string name="homeBackup">Back up your data to the SD card or to the USB storage to ensure data safety.</string>
+    <string name="noSDwarning">Please check that your SD card has been inserted.</string>
+    <string name="noUSBwarning">Please check that your USB storage has been connected.</string>
+    <string name="resetPermissionDialog">You have refused permission for Transcend Elite to access the storage device. To reset, please go to App Info -&gt; Storage -&gt; Clear Data. This will not clear any data stored on the device.</string>
+    <string name="couldnotfindappsopen">Could not find apps to open this file.</string>
+    <string name="folderorfilenotfoumd">Folder/File is not found.</string>
+    <string name="q_sd_permission_selectwrong">Please select the outermost layer of the SD card and allow access.</string>
+    <string name="q_otg_permission_selectwrong">Please select the outermost layer of USB and allow access.</string>
+    <string name="q_sd_permission_remind">Elite has not yet obtained the rights to this SD card. Please select the outermost layer of the SD card and allow access.</string>
+    <string name="q_otg_permission_remind">Elite has not yet obtained the permissions of this USB. Please select the outermost layer of USB and allow access.</string>
+    <string name="permission_tryagain">Try again</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="homeTitle">Home</string>
+    <!-- Snackbar -->
+    <string name="snackbar_plz_select_otg">Please select USB device.</string>
+    <string name="snackbar_plz_select_sd">Please select SD card.</string>
+    <string name="snackbar_plz_select_top">Please select the root folder.</string>
+    <string name="snackbar_not_support_share">This File does not support Share function</string>
+
+    <!-- Format -->
+    <string name="date_format">MMM d, yyyy</string>
+    <string name="week_time_format" translatable="false">E HH:mm</string>
+
+    <!-- Others -->
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
+    <string name="samsung">samsung</string>
+    <string name="encrypt_subfilename" translatable="false">.enc</string>
+    <string name="top_arrow" translatable="false">&#9650;</string>
+    <string name="bottom_arrow" translatable="false">&#9660;</string>
+    <string name="external_device_name" translatable="false">esd</string>
+    <string name="transcend_short_name" translatable="false">ts</string>
+    <string name="transcend" translatable="false">transcend</string>
+    <string name="portable" translatable="false">portable</string>
+    <string name="storejet_transcend" translatable="false">storejet transcend</string>
+
+    <!-- Pref -->
+    <string name="pref_name" translatable="false">PREFERENCE</string>
+    <string name="pref_file_sort_type" translatable="false">FILE SORT TYPE</string>
+    <string name="pref_mainpage_location" translatable="false">MAINPAGE LOCATION</string>
+    <string name="pref_sd_location" translatable="false">SD LOCATION</string>
+    <string name="pref_camera_location" translatable="false">CAMERA LOCATION</string>
+    <string name="pref_download_location" translatable="false">DOWNLOAD LOCATION</string>
+    <string name="pref_pictures_location" translatable="false">PICTURES LOCATION</string>
+    <string name="pref_movies_location" translatable="false">MOVIES LOCATION</string>
+    <string name="pref_musics_location" translatable="false">MUSIC LOCATION</string>
 </resources>

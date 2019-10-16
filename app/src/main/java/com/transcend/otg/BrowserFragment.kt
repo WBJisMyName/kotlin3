@@ -26,7 +26,7 @@ import com.transcend.otg.action.loader.LocalRenameLoader
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.data.FileInfo
-import com.transcend.otg.databinding.BrowserFragmentBinding
+import com.transcend.otg.databinding.FragmentBrowserBinding
 import com.transcend.otg.floatingbtn.BottomSheetFragment
 import com.transcend.otg.floatingbtn.ProgressFloatingButton
 import com.transcend.otg.utilities.BackpressCallback
@@ -34,8 +34,8 @@ import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.LoaderID
 import com.transcend.otg.utilities.RecyclerViewClickCallback
 import com.transcend.otg.viewmodels.BrowserViewModel
-import kotlinx.android.synthetic.main.browser_fragment.*
 import kotlinx.android.synthetic.main.dialog_folder_create.*
+import kotlinx.android.synthetic.main.fragment_browser.*
 import java.io.File
 
 class BrowserFragment : Fragment(),
@@ -56,7 +56,7 @@ class BrowserFragment : Fragment(),
 
     private lateinit var viewModel: BrowserViewModel
     private lateinit var adapter: FileInfoAdapter
-    var mBinding: BrowserFragmentBinding? = null
+    var mBinding: FragmentBrowserBinding? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -78,7 +78,7 @@ class BrowserFragment : Fragment(),
         if (arguments != null)
             mRoot = arguments!!.getString("root")    //設定根目錄路徑
 
-        mBinding = BrowserFragmentBinding.inflate(inflater, container, false)
+        mBinding = FragmentBrowserBinding.inflate(inflater, container, false)
         return mBinding!!.root
     }
 

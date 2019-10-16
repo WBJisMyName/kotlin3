@@ -16,13 +16,13 @@ import com.transcend.otg.action.loader.LocalFolderCreateLoader
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.data.FileInfo
-import com.transcend.otg.databinding.BrowserFragmentBinding
+import com.transcend.otg.databinding.FragmentBrowserBinding
 import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.LoaderID
 import com.transcend.otg.utilities.RecyclerViewClickCallback
 import com.transcend.otg.viewmodels.ActionLocateViewModel
-import kotlinx.android.synthetic.main.browser_fragment.*
+import kotlinx.android.synthetic.main.fragment_browser.*
 import kotlinx.android.synthetic.main.dialog_folder_create.*
 import java.io.File
 
@@ -36,7 +36,7 @@ class FileActionLocateFragment : Fragment(),
 
     private lateinit var viewModel: ActionLocateViewModel
     private lateinit var adapter: FileInfoAdapter
-    var mBinding: BrowserFragmentBinding? = null    //共用browser_fragment.xml
+    var mBinding: FragmentBrowserBinding? = null    //共用browser_fragment.xml
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -61,7 +61,7 @@ class FileActionLocateFragment : Fragment(),
             }
         }
 
-        mBinding = BrowserFragmentBinding.inflate(inflater, container, false)
+        mBinding = FragmentBrowserBinding.inflate(inflater, container, false)
         return mBinding!!.root
     }
 

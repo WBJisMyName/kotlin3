@@ -5,7 +5,7 @@ import android.os.Environment
 object Constant{
     var DropDownMainTitle = ""
     val LOCAL_ROOT = Environment.getExternalStorageDirectory().absolutePath
-    public var SD_ROOT = ""
+    var SD_ROOT = ""
     var Storage_Root_Path = "Storage/"
 
     val TYPE_DIR = 0
@@ -13,6 +13,13 @@ object Constant{
     val TYPE_MUSIC = 2
     val TYPE_VIDEO = 3
     val TYPE_OTHERS = 4
+    val TYPE_DOC = 5
+
+    val SORT_BY_DATE = 0
+    val SORT_BY_NAME = 1
+    val SORT_BY_SIZE = 2
+    val SORT_ORDER_AS = 0
+    val SORT_ORDER_DES = 1
 
     val thumbnailCacheTail = "&thumbnail"
 
@@ -20,4 +27,6 @@ object Constant{
         var deviceName = android.os.Build.MODEL;
         return deviceName
     }
+
+    val onHOMEPERMISSIONS_REQUEST_WRITE_STORAGE = 86
 }

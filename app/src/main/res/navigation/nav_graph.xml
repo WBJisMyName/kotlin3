@@ -79,15 +79,6 @@
                 app:popUpTo="@id/statementFragment"
                 app:popUpToInclusive="true"
                 app:launchSingleTop="true"/>
-        <action android:id="@+id/action_homeFragment_to_helpFragment"
-                app:destination="@id/helpFragment"
-                app:enterAnim="@anim/slide_in_right"
-                app:exitAnim="@anim/slide_out_left"
-                app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"
-                app:popUpTo="@id/helpFragment"
-                app:popUpToInclusive="true"
-                app:launchSingleTop="true"/>
         <action android:id="@+id/action_homeFragment_to_EULAFragment"
                 app:destination="@id/EULAFragment"
                 app:enterAnim="@anim/slide_in_right"
@@ -97,5 +88,13 @@
                 app:popUpTo="@id/EULAFragment"
                 app:popUpToInclusive="true"
                 app:launchSingleTop="true"/>
+        <action
+                android:id="@+id/action_homeFragment_to_helpFragment"
+                app:destination="@id/helpFragment" />
     </fragment>
+
+    <fragment
+            android:id="@+id/startPermissionFragment"
+            android:name="com.transcend.otg.StartPermissionFragment"
+            android:label="PermissionFragment" />
 </navigation>

@@ -7,9 +7,11 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import com.transcend.otg.bitmap.ThumbnailCache
+import com.transcend.otg.browser.DropDownAdapter
 
 class MainApplication: Application() {
     private var mThumbnails: ThumbnailCache? = null
+    var mDropdownAdapter: DropDownAdapter? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -30,8 +32,6 @@ class MainApplication: Application() {
         } else if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
             mThumbnails!!.trimToSize(mThumbnails!!.size() / 2)
         }
-
-
     }
 
     companion object {
@@ -43,6 +43,16 @@ class MainApplication: Application() {
                 val app = mContext.applicationContext as MainApplication
                 return app.mThumbnails
             }
+
+        private var INSTANCE: MainApplication? = null
+        fun getInstance(): MainApplication? {
+            if (INSTANCE == null) {
+                synchronized(MainApplication::class) {
+                    INSTANCE = MainApplication()
+                }
+            }
+            return INSTANCE
+        }
     }
 
     fun isPad() : Boolean{
@@ -51,5 +61,11 @@ class MainApplication: Application() {
 
     fun OSisAfterNougat(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+    }
+
+    fun getDropdownAdapter(): DropDownAdapter{
+        if (mDropdownAdapter == null)
+            mDropdownAdapter = DropDownAdapter()
+        return mDropdownAdapter as DropDownAdapter
     }
 }

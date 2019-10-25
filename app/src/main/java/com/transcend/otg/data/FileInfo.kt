@@ -32,6 +32,8 @@ data class FileInfo(
     var isSelected = false
     var defaultIcon: Int = R.drawable.ic_filelist_others_grey
 
+    var uri: String? = null
+
     //List
     var subtitle: String? = null
     var infoIcon: Int = 0

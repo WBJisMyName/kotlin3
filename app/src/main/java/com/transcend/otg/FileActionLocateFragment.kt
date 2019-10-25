@@ -22,8 +22,8 @@ import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.LoaderID
 import com.transcend.otg.utilities.RecyclerViewClickCallback
 import com.transcend.otg.viewmodels.ActionLocateViewModel
-import kotlinx.android.synthetic.main.fragment_browser.*
 import kotlinx.android.synthetic.main.dialog_folder_create.*
+import kotlinx.android.synthetic.main.fragment_browser.*
 import java.io.File
 
 class FileActionLocateFragment : Fragment(),
@@ -73,7 +73,6 @@ class FileActionLocateFragment : Fragment(),
         viewModel.items.observe(this, Observer {    //觀察列表變化
             fileInfo->
                 adapter.submitList(fileInfo)
-                viewModel.isLoading.set(false)
         })
 
         viewModel.doLoadFiles(mRoot)    //讀取根目錄

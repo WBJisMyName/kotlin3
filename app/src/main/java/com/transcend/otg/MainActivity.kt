@@ -49,8 +49,8 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: MainActivityViewModel
+    lateinit var binding: ActivityMainBinding
+    lateinit var viewModel: MainActivityViewModel
 
     private var oneSecond = true    //Permission 等待時間
     private val mSDPermission = 1009
@@ -76,6 +76,11 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navigationView.setupWithNavController(navController)
 
+        binding.dropdownArrow.setOnClickListener {
+            view ->
+            binding.mainDropdown.performClick()
+        }
+
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
 
             binding.toolbar.setNavigationIcon(R.drawable.ic_toggle_menu)    //TODO toggle 圖示暫時固定為menu樣式，待修改
@@ -96,6 +101,10 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
                 }
                 R.id.sdFragment -> {
                     arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
+                    viewModel.updateTabMode(MainActivityViewModel.TabMode.Browser)
+                    viewModel.updateSystemMenuIconCount(1)
+                }
+                R.id.tabFragment -> {
                     viewModel.updateTabMode(MainActivityViewModel.TabMode.Browser)
                     viewModel.updateSystemMenuIconCount(1)
                 }

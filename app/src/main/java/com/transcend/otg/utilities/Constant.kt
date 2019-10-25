@@ -7,6 +7,7 @@ object Constant{
     val LOCAL_ROOT = Environment.getExternalStorageDirectory().absolutePath
     var SD_ROOT = ""
     var Storage_Root_Path = "Storage/"
+    var BrowserMainPageTitle = "Transcend Elite"
 
     val TYPE_DIR = 0
     val TYPE_IMAGE = 1

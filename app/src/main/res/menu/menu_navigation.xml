@@ -27,4 +27,9 @@
             android:title="@string/sdTitle"
             android:icon="@drawable/ic_drawer_microsd_grey"/>
 
+    <item
+            android:id="@+id/tabFragment"
+            android:title="Tab Test"
+            android:icon="@drawable/ic_drawer_myphone_grey"/>
+
 </menu>

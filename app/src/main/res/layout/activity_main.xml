@@ -40,19 +40,23 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@null"
-                                android:clickable="@{viewModel.dropdownArrowVisibility == View.GONE || viewModel.dropdownArrowVisibility == View.INVISIBLE}"
+                                android:clickable="false"
                                 android:gravity="center"
-                                android:visibility="@{viewModel.dropdownVisibility}" />
+                                android:visibility="@{viewModel.dropdownVisibility}"
+                                app:dropdownList="@{viewModel.mDropdownList}"
+                                app:enable="@{viewModel.dropdownArrowVisibility == View.VISIBLE}"
+                                />
 
                         <ImageView
                                 android:id="@+id/dropdown_arrow"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
                                 android:layout_marginLeft="1dp"
                                 android:layout_marginTop="1dp"
                                 android:layout_toRightOf="@id/main_dropdown"
-                                android:visibility="@{viewModel.dropdownArrowVisibility}"
-                                android:src="@drawable/ic_navi_historyarrow_solid_white" />
+                                android:src="@drawable/ic_navi_historyarrow_solid_white"
+                                android:visibility="@{viewModel.dropdownArrowVisibility}"/>
 
                         <TextView
                                 android:id="@+id/mid_title"

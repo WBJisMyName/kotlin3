@@ -14,6 +14,8 @@ class MainActivityViewModel : ViewModel() {
     var midTitlePaddingLeft = ObservableInt(0)
     var midTitlePaddingRight = ObservableInt(0)
 
+    var mDropdownList = ObservableField<List<String>>(ArrayList<String>())
+
     var mTabMode: TabMode = TabMode.Mid_Title_Only
     enum class TabMode{
         Mid_Title_Only, Browser
@@ -49,4 +51,5 @@ class MainActivityViewModel : ViewModel() {
             midTitlePaddingRight.set(0)
         }
     }
+
 }

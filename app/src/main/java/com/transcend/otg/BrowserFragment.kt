@@ -16,7 +16,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.loader.app.LoaderManager.LoaderCallbacks
 import androidx.loader.content.Loader
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.textfield.TextInputLayout
 import com.transcend.otg.action.FileActionManager
@@ -25,20 +24,19 @@ import com.transcend.otg.action.loader.LocalFolderCreateLoader
 import com.transcend.otg.action.loader.LocalRenameLoader
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.FileInfoAdapter
+import com.transcend.otg.browser.DropDownAdapter
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.databinding.FragmentBrowserBinding
 import com.transcend.otg.floatingbtn.BottomSheetFragment
 import com.transcend.otg.floatingbtn.ProgressFloatingButton
-import com.transcend.otg.utilities.BackpressCallback
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.LoaderID
-import com.transcend.otg.utilities.RecyclerViewClickCallback
+import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.BrowserViewModel
-import kotlinx.android.synthetic.main.dialog_folder_create.*
+import com.transcend.otg.viewmodels.MainActivityViewModel
 import kotlinx.android.synthetic.main.fragment_browser.*
 import java.io.File
+import kotlin.concurrent.thread
 
-class BrowserFragment : Fragment(),
+open class BrowserFragment : Fragment(),
     BackpressCallback,
     ActionMode.Callback,
     LoaderCallbacks<Boolean>{
@@ -52,15 +50,19 @@ class BrowserFragment : Fragment(),
     lateinit var mFileActionManager: FileActionManager  //action manager
     lateinit var mBottomSheetFragment: BottomSheetFragment   //底部進度視窗
     lateinit var mFloatingBtn: ProgressFloatingButton   //Custom floating btn
-    private var mRoot = Constant.LOCAL_ROOT //根目錄，本地 or SD
+    var mRoot = Constant.LOCAL_ROOT //根目錄，本地 or SD
 
-    private lateinit var viewModel: BrowserViewModel
-    private lateinit var adapter: FileInfoAdapter
+    lateinit var viewModel: BrowserViewModel
+    lateinit var adapter: FileInfoAdapter
     var mBinding: FragmentBrowserBinding? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mContext = context
+    }
+
+    override fun onResume() {
+        super.onResume()
     }
 
     override fun onCreateView(
@@ -70,7 +72,6 @@ class BrowserFragment : Fragment(),
         if (mContext == null)   //避免未進入onAttach而造成的Null
             mContext = activity as Context
 
-        setHasOptionsMenu(true)     //設定支援選單
         setBottomSheetFragment()    //設定底部進度視窗
 
         mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
@@ -78,71 +79,56 @@ class BrowserFragment : Fragment(),
         if (arguments != null)
             mRoot = arguments!!.getString("root")    //設定根目錄路徑
 
+        setDropdownList(Constant.LOCAL_ROOT)
+
         mBinding = FragmentBrowserBinding.inflate(inflater, container, false)
         return mBinding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val lm = LinearLayoutManager(context)
-
-        viewModel = ViewModelProviders.of(activity as MainActivity).get(BrowserViewModel::class.java)
-        viewModel.items.observe(this, Observer {    //觀察列表變化
-            fileInfo->
-                adapter.submitList(fileInfo)
-                viewModel.isLoading.set(false)
+        viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
+        viewModel.items.observe(this, Observer {
+            fileList ->
+            adapter.submitList(fileList)
+            viewModel.isLoading.set(false)
+            viewModel.isEmpty.set(fileList.size == 0)
         })
 
-        viewModel.doLoadFiles(mRoot)    //讀取根目錄
+        doLoadFiles(mRoot)    //讀取根目錄
         mBinding?.viewModel = viewModel  //Bind view and view model
 
+        val lm = LinearLayoutManager(context)
         adapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
         recyclerView.adapter = adapter
-        recyclerView.setLayoutManager(lm);
-        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(lm)
+        recyclerView.setHasFixedSize(true)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.main_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
+    fun setDropdownList(path: String){
+        var path = path
+        val mainViewModel: MainActivityViewModel = ViewModelProviders.of(activity as MainActivity).get(MainActivityViewModel::class.java)
+        val mainTitle = Constant.BrowserMainPageTitle
+        val sdcardRoot = SystemUtil().getSDLocation(mContext)
+        if (path.startsWith(Constant.LOCAL_ROOT))
+            path = path.replace(Constant.LOCAL_ROOT, mainTitle)
+        else if (sdcardRoot != null && path.startsWith(sdcardRoot))
+            path = path.replace(sdcardRoot, mainTitle)
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        when(id){
-            R.id.action_view_type -> changeViewType()   //List or Grid
-            R.id.action_select_mode -> (activity as AppCompatActivity).startSupportActionMode(this) //啟動action mode
-            R.id.action_new_folder -> {
-                val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
-                val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
-
-                 AlertDialog.Builder(mContext)
-                    .setTitle("New Folder")
-                    .setIcon(R.drawable.ic_tab_newfolder_grey)
-                    .setView(view)
-                    .setPositiveButton("Confirm",{ dialog, whichButton ->
-                        dialog_folder_create_name
-                        val tmp = textLayout.editText?.text.toString()
-                        mFileActionManager.createFolder(viewModel.mPath, tmp)   //通知action manager執行createFolder
-                    })
-                    .setNegativeButton("Cancel", { dialog, whichButton ->
-                        println("cancel")
-                    })
-                    .setCancelable(true)
-                    .show()
-            }
-            R.id.action_progress_test -> {
-                count = 0
-                mFloatingBtn.visibility = View.VISIBLE
-                mFloatingBtn.setProgressMax(max)
-                mBottomSheetFragment.setProgressMax(max)
-                handler.post(ProgressTest())
-            }
-            R.id.action_locate_test -> {
-                startLocateActivity()
-            }
+        val list = path.split("/").reversed().filter {
+            !it.equals("")  //過濾空字串
         }
-        return super.onOptionsItemSelected(item)
+        if(list.size == 1)
+            mainViewModel.dropdownArrowVisibility.set(View.GONE)
+        else
+            mainViewModel.dropdownArrowVisibility.set(View.VISIBLE)
+        mainViewModel.mDropdownList.set(list)
+
+        MainApplication.getInstance()?.getDropdownAdapter()?.setOnDropdownItemSelectedListener(object: DropDownAdapter.OnDropdownItemSelectedListener{
+            override fun onDropdownItemSelected(path: String) {
+                doLoadFiles(path)
+            }
+        })
     }
 
     protected fun startLocateActivity() {
@@ -199,7 +185,7 @@ class BrowserFragment : Fragment(),
                 adapter.notifyItemChanged(adapter.currentList.indexOf(fileInfo))
                 updateActionTitle()
             } else
-                viewModel.doLoadFiles(fileInfo.path)
+                doLoadFiles(fileInfo.path)
         }
 
         override fun onLongClick(fileInfo: FileInfo) {
@@ -209,24 +195,6 @@ class BrowserFragment : Fragment(),
             fileInfo.isSelected = fileInfo.isSelected.not()
             adapter.notifyItemChanged(adapter.currentList.indexOf(fileInfo))
             updateActionTitle()
-        }
-    }
-
-    fun changeViewType(){
-        if (adapter.itemCount > 0){
-            val currentItemType = adapter.getItemViewType(0)
-            when(currentItemType){
-                FileInfoAdapter.Grid -> {
-                    val listLayoutManager = LinearLayoutManager(context)
-                    recyclerView.layoutManager = listLayoutManager
-                    adapter.setViewType(FileInfoAdapter.List)
-                }
-                FileInfoAdapter.List -> {
-                    val gridLayoutManager = GridLayoutManager(context, 3)
-                    recyclerView.layoutManager = gridLayoutManager
-                    adapter.setViewType(FileInfoAdapter.Grid)
-                }
-            }
         }
     }
 
@@ -302,6 +270,14 @@ class BrowserFragment : Fragment(),
         mActionModeTitle.setText(String.format(format, count))
     }
 
+    fun doLoadFiles(path: String){
+        viewModel.doLoadFiles(path)
+        thread {
+            Thread.sleep(100)
+            setDropdownList(path)
+        }
+    }
+
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
         when(id){
             LoaderID.LOCAL_FILE_DELETE -> return LocalFileDeleteLoader(mContext, args?.getStringArrayList("paths")!!)
@@ -333,7 +309,7 @@ class BrowserFragment : Fragment(),
         if(viewModel.mPath.equals(mRoot))   //到了根目錄，回傳true
             return true
         else
-            viewModel.doLoadFiles(File(viewModel.mPath).parent)  //讀取parent路徑
+            doLoadFiles(File(viewModel.mPath).parent)  //讀取parent路徑
         return false
     }
 }

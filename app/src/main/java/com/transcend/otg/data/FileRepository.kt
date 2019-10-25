@@ -1,6 +1,7 @@
 package com.transcend.otg.data
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.LiveData
 import java.io.File
 
@@ -9,8 +10,8 @@ class FileRepository(application: Application) {
     private val fileInfoDatabase = FileInfoDatabase.getInstance(application)!!
     private val fileInfoDao: FileInfoDao = fileInfoDatabase.fileInfoDao()
 
-    fun getAllFileInfos(): LiveData<List<FileInfo>> {
-        return fileInfoDao.getAllFileInfos()
+    fun getAllFilesByType(type: Int): LiveData<List<FileInfo>> {
+        return fileInfoDao.getAllFilesByType(type)
     }
 
     fun getAllFileInfos(parent: String): List<FileInfo> {
@@ -26,7 +27,9 @@ class FileRepository(application: Application) {
             val thread = Thread(Runnable {
                 fileInfoDao.insert(fileInfo) })
             thread.start()
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            Log.e("FileRepository", e.toString())
+        }
     }
 
     fun delete(fileInfo: FileInfo) {
@@ -60,6 +63,15 @@ class FileRepository(application: Application) {
         try {
             val thread = Thread(Runnable {
                 fileInfoDao.deleteAll()
+            })
+            thread.start()
+        } catch (e: Exception) { }
+    }
+
+    fun deleteAll(type: Int) {
+        try {
+            val thread = Thread(Runnable {
+                fileInfoDao.deleteAll(type)
             })
             thread.start()
         } catch (e: Exception) { }

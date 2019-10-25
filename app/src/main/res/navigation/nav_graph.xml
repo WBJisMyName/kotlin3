@@ -52,15 +52,6 @@
               android:name="com.transcend.otg.HomeFragment"
               android:label="@string/homeTitle"
               tools:layout="@layout/fragment_home">
-        <action android:id="@+id/action_homeFragment_to_browserFragment"
-                app:destination="@id/browserFragment"
-                app:enterAnim="@anim/slide_in_right"
-                app:exitAnim="@anim/slide_out_left"
-                app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"
-                app:popUpTo="@id/browserFragment"
-                app:popUpToInclusive="true"
-                app:launchSingleTop="true"/>
         <action android:id="@+id/action_homeFragment_to_feedbackFragment"
                 app:destination="@id/feedbackFragment"
                 app:enterAnim="@anim/slide_in_right"
@@ -91,10 +82,17 @@
         <action
                 android:id="@+id/action_homeFragment_to_helpFragment"
                 app:destination="@id/helpFragment" />
+        <action
+                android:id="@+id/action_homeFragment_to_tabFragment"
+                app:destination="@id/tabFragment" />
     </fragment>
 
     <fragment
             android:id="@+id/startPermissionFragment"
             android:name="com.transcend.otg.StartPermissionFragment"
             android:label="PermissionFragment" />
+    <fragment
+            android:id="@+id/tabFragment"
+            android:name="com.transcend.otg.browser.TabFragment"
+            android:label="TabFragment" />
 </navigation>

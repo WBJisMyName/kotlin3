@@ -8,25 +8,22 @@ import android.view.View
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.transcend.otg.R
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.data.FileRepository
-import com.transcend.otg.task.FileLoaderTask
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.utilities.MainApplication
+import com.transcend.otg.utilities.MimeUtil
 import com.transcend.otg.utilities.SystemUtil
 import java.io.File
-import kotlin.concurrent.thread
 
 
 open class BrowserViewModel(application: Application) : AndroidViewModel(application) {
 
     var mPath = Constant.LOCAL_ROOT //記錄當前路徑
-    var livePath = MutableLiveData<String>().apply {
-        this.value = ""
-    }
     var isLoading = ObservableBoolean(false)
-    var isEmpty = ObservableBoolean(true)
+    var isEmpty = ObservableBoolean(false)
 
     val repository = FileRepository(application)
     var items = MutableLiveData<List<FileInfo>>().apply {
@@ -40,21 +37,6 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     var docItems = repository.getAllFilesByType(Constant.TYPE_DOC)
 
     var isOnSelectMode = ObservableBoolean(false)
-
-    fun getAllFileInfos(): LiveData<List<FileInfo>> {
-        return repository.getAllFileInfos()
-    }
-
-    fun getAllFileInfos(parent: String?){
-        if (parent != null) {
-            thread {
-                Thread.sleep(200)   //需等待，否則取出的數據不正確
-                val list = sort(repository.getAllFileInfos(parent))
-                items.postValue(list)
-                isEmpty.set(list.size == 0)
-            }
-        }
-    }
 
     fun insert(fileInfo: FileInfo) {
         repository.insert(fileInfo)
@@ -72,37 +54,107 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         repository.deleteAll()
     }
 
+    fun deleteAll(type: Int){
+        repository.deleteAll(type)
+    }
+
     fun insertAll(fileInfos:List<FileInfo>){
         repository.insertAll(fileInfos)
     }
 
     open fun doLoadFiles(path: String){
         mPath = path
-        livePath.postValue(mPath)
         isLoading.set(true)
 
-        thread {
-            val list =
-                sort(repository.getAllFileInfos(path))
-            if (list.size == 0){    //無資料就進task處理
-                val task = FileLoaderTask(this)
-                task.execute(path)
-            } else { //有資料則直接post上去
+        val thread = Thread(Runnable {
+            var list = sort(repository.getAllFileInfos(path))
+            if (list.size == 0) {   //無檔案時重新掃瞄一次
+                scanFolderFiles(path)
+            } else //有檔案時直接post上去
                 items.postValue(list)
-                isEmpty.set(false)
-            }
-        }
+        })
+        thread.start()
     }
 
     fun doRefresh(){
-        getAllFileInfos(mPath)
+        val thread = Thread(Runnable {
+            deleteFilesUnderFolderPath(mPath)
+            scanFolderFiles(mPath)
+        })
+        thread.start()
     }
 
     fun sort(list: List<FileInfo>): List<FileInfo>{
         return list.sortedWith(compareBy({it.fileType != 0}, {it.title}))   //先排資料夾，再照字母排
     }
 
-    fun scanLocalAllImage(context: Context) {
+    //撈資料夾擋按列表，撈完會post給liveData
+    fun scanFolderFiles(parent: String){
+        isLoading.set(true)
+        val localFile = File(parent)
+        var insert_count = 0
+        if (localFile.exists()) {
+            val list = localFile.listFiles()
+            if (list==null)
+                return
+            for (file in list) {
+                if (file.name.toString().startsWith("."))
+                    continue
+                val info = FileInfo()
+                info.title = file.name
+                info.path = file.path
+                info.lastModifyTime = file.lastModified()
+                info.size = file.length()
+                info.fileType = if (file.isDirectory) Constant.TYPE_DIR else MimeUtil.getFileType(file.path)
+                if (file.parent != null)
+                    info.parent = file.parent
+                else
+                    info.parent = ""
+
+                when(info.fileType){
+                    Constant.TYPE_DIR -> {
+                        info.defaultIcon = R.drawable.ic_filelist_folder_grey
+                        info.infoIcon = R.drawable.ic_brower_listview_filearrow
+                    }
+                    Constant.TYPE_IMAGE -> {
+                        info.defaultIcon = R.drawable.ic_filelist_pic_grey
+                    }
+                    Constant.TYPE_MUSIC -> {
+                        info.defaultIcon = R.drawable.ic_filelist_mp3_grey
+                    }
+                    Constant.TYPE_VIDEO -> {
+                        info.defaultIcon = R.drawable.ic_filelist_video_grey
+                    }
+                }
+                insert(info)
+                insert_count++
+            }
+        }
+        //scan完直接撈資料，可能造成檔案不完全
+        var list = repository.getAllFileInfos(parent)
+        var count = 0 //count表示撈幾次才正確
+        while (insert_count != list.size) {    //此處檢查撈到的資料跟insert的資料數量是否有一致
+            list = repository.getAllFileInfos(parent)
+            Thread.sleep(100)
+            count++
+        }
+        items.postValue(sort(list))
+    }
+
+    fun scanFileList(type: Int){
+        val thread = Thread(Runnable {
+            when(type){
+                Constant.TYPE_IMAGE -> scanLocalAllImage(MainApplication.mContext)
+                Constant.TYPE_MUSIC -> scanLocalAllMusics(MainApplication.mContext)
+                Constant.TYPE_VIDEO -> scanLocalAllVideos(MainApplication.mContext)
+                Constant.TYPE_DOC -> scanLocalAllDocs(MainApplication.mContext)
+            }
+        })
+        thread.start()
+    }
+
+    private fun scanLocalAllImage(context: Context) {
+        var count = 0
         try {
             val proj = arrayOf(
                 MediaStore.Images.Media.SIZE,
@@ -113,7 +165,7 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
             )
 
             var select = "(" + MediaStore.Files.FileColumns.DATA + " LIKE '" + Constant.LOCAL_ROOT + "%')"
-            val orderBy = MediaStore.Images.Media.DATE_MODIFIED
+            val orderBy = MediaStore.Images.Media.DISPLAY_NAME
             val order = " ASC"
             val imagecursor = context.getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, proj,
@@ -146,8 +198,10 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
                         fileInfo.fileType = Constant.TYPE_IMAGE
                         fileInfo.size = picSize
                         fileInfo.uri = imageUri.toString()
+                        fileInfo.defaultIcon = R.drawable.ic_filelist_pic_grey
 
                         insert(fileInfo)
+                        count++
                     }
                 }
                 imagecursor.close()
@@ -155,9 +209,11 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        isEmpty.set(count == 0)
     }
 
     private fun scanLocalAllMusics(context: Context){
+        var count = 0
         try {
             val proj = arrayOf(
                 MediaStore.Audio.Media.SIZE,
@@ -198,7 +254,9 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
                         fileInfo.fileType = Constant.TYPE_MUSIC
                         //                        fileInfo.album_id = albumId;
                         fileInfo.size = musicSize
+                        fileInfo.defaultIcon = R.drawable.ic_filelist_mp3_grey
                         insert(fileInfo)
+                        count++
                     }
                 }
                 musiccursor.close()
@@ -206,9 +264,11 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        isEmpty.set(count == 0)
     }
 
     private fun scanLocalAllVideos(context: Context){
+        var count = 0
         try {
             val videoTypes = arrayOf(
                 MediaStore.Video.Media.SIZE,
@@ -247,7 +307,9 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
                         fileInfo.lastModifyTime = videoTime
                         fileInfo.fileType = Constant.TYPE_VIDEO
                         fileInfo.size = videoSize
+                        fileInfo.defaultIcon = R.drawable.ic_filelist_video_grey
                         insert(fileInfo)
+                        count++
                     }
                 }
                 videocursor.close()
@@ -255,9 +317,11 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        isEmpty.set(count == 0)
     }
 
     private fun scanLocalAllDocs(context: Context) {
+        var count = 0
         try {
             val proj = arrayOf(
                 MediaStore.Files.FileColumns.MIME_TYPE,
@@ -311,6 +375,7 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
                         fileInfo.size = docSize
                         fileInfo.fileType = Constant.TYPE_DOC
                         insert(fileInfo)
+                        count++
                     }
                 }
                 docscursor.close()
@@ -318,5 +383,6 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        isEmpty.set(count == 0)
     }
 }

@@ -4,8 +4,9 @@ import android.util.Patterns
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatSpinner
 import androidx.databinding.BindingAdapter
-import com.bumptech.glide.Glide
+import com.transcend.otg.utilities.MainApplication
 
 object BindingAdapter {
 
@@ -50,8 +51,23 @@ object BindingAdapter {
     @BindingAdapter("imageResource")
     @JvmStatic
     fun setImageResource(imageView : ImageView, resId : Int){
-        Glide.with(imageView.context)
-            .load(resId)
-            .into(imageView)
+//        Glide.with(imageView.context)
+//            .load(resId)
+//            .into(imageView)
+        imageView.setImageResource(resId)
+    }
+
+    @JvmStatic
+    @BindingAdapter("dropdownList")
+    fun setDropdownList(spinner: AppCompatSpinner?, dropdownList: List<String>) {
+        val adapter = MainApplication.getInstance()?.getDropdownAdapter()
+        adapter?.setDropdowonList(dropdownList)
+        spinner?.adapter = adapter
+    }
+
+    @JvmStatic
+    @BindingAdapter("enable")
+    fun setSpinnerEnabled(spinner: AppCompatSpinner?, enable: Boolean) {
+        spinner?.isEnabled = enable
     }
 }

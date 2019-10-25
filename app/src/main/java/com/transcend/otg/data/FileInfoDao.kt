@@ -6,8 +6,8 @@ import androidx.room.*
 @Dao
 interface FileInfoDao {//data access object
 
-    @Query("SELECT * FROM files ORDER BY title ASC")
-    fun getAllFileInfos(): LiveData<List<FileInfo>>
+    @Query("SELECT * FROM files WHERE fileType = :type")
+    fun getAllFilesByType(type: Int): LiveData<List<FileInfo>>
 
     @Query("SELECT * FROM files WHERE parent = :parent ORDER BY title ASC")
     fun getAllFileInfos(parent: String): List<FileInfo>
@@ -32,6 +32,9 @@ interface FileInfoDao {//data access object
 
     @Query("DELETE FROM files")
     fun deleteAll()
+
+    @Query("DELETE FROM files WHERE fileType = :type")
+    fun deleteAll(type: Int)
 
     @Query("UPDATE files SET title = :newName AND path = :newPath WHERE path = :oldPath")
     fun updateFileName(oldPath: String, newPath: String, newName: String)

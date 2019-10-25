@@ -61,10 +61,6 @@ open class BrowserFragment : Fragment(),
         mContext = context
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
@@ -108,12 +104,13 @@ open class BrowserFragment : Fragment(),
     fun setDropdownList(path: String){
         var path = path
         val mainViewModel: MainActivityViewModel = ViewModelProviders.of(activity as MainActivity).get(MainActivityViewModel::class.java)
-        val mainTitle = Constant.BrowserMainPageTitle
+        val localMainTitle = Constant.LocalBrowserMainPageTitle
+        val sdMainTitle = Constant.SDBrowserMainPageTitle
         val sdcardRoot = SystemUtil().getSDLocation(mContext)
         if (path.startsWith(Constant.LOCAL_ROOT))
-            path = path.replace(Constant.LOCAL_ROOT, mainTitle)
+            path = path.replace(Constant.LOCAL_ROOT, localMainTitle)
         else if (sdcardRoot != null && path.startsWith(sdcardRoot))
-            path = path.replace(sdcardRoot, mainTitle)
+            path = path.replace(sdcardRoot, sdMainTitle)
 
         val list = path.split("/").reversed().filter {
             !it.equals("")  //過濾空字串
@@ -126,7 +123,12 @@ open class BrowserFragment : Fragment(),
 
         MainApplication.getInstance()?.getDropdownAdapter()?.setOnDropdownItemSelectedListener(object: DropDownAdapter.OnDropdownItemSelectedListener{
             override fun onDropdownItemSelected(path: String) {
-                doLoadFiles(path)
+                var selected_path = path
+                if (viewModel.mPath.startsWith(Constant.LOCAL_ROOT))
+                    selected_path = selected_path.replace(Constant.LocalBrowserMainPageTitle, Constant.LOCAL_ROOT)
+                else if (sdcardRoot != null && viewModel.mPath.startsWith(sdcardRoot))
+                    selected_path = selected_path.replace(Constant.SDBrowserMainPageTitle, sdcardRoot)
+                doLoadFiles(selected_path)
             }
         })
     }
@@ -273,7 +275,7 @@ open class BrowserFragment : Fragment(),
     fun doLoadFiles(path: String){
         viewModel.doLoadFiles(path)
         thread {
-            Thread.sleep(100)
+            Thread.sleep(100)   //睡0.1秒，避免黑畫面發生
             setDropdownList(path)
         }
     }

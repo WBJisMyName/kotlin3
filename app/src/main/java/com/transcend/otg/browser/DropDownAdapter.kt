@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.transcend.otg.R
-import com.transcend.otg.utilities.Constant
 import java.util.*
 
 
@@ -113,7 +112,7 @@ class DropDownAdapter : BaseAdapter() {
                         else
                             path = mList[i] + "/" + path
                     }
-                    dropdownItemListener!!.onDropdownItemSelected(path.replace(Constant.BrowserMainPageTitle, Constant.LOCAL_ROOT))
+                    dropdownItemListener!!.onDropdownItemSelected(path)
                 }
             }
             return true

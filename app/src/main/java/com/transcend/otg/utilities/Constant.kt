@@ -7,7 +7,8 @@ object Constant{
     val LOCAL_ROOT = Environment.getExternalStorageDirectory().absolutePath
     var SD_ROOT = ""
     var Storage_Root_Path = "Storage/"
-    var BrowserMainPageTitle = "Transcend Elite"
+    var LocalBrowserMainPageTitle = SystemUtil().getDeviceName()
+    var SDBrowserMainPageTitle = "SD Card"
 
     val TYPE_DIR = 0
     val TYPE_IMAGE = 1
@@ -25,7 +26,7 @@ object Constant{
     val thumbnailCacheTail = "&thumbnail"
 
     fun getDeviceName():String{
-        var deviceName = android.os.Build.MODEL;
+        var deviceName = android.os.Build.MODEL
         return deviceName
     }
 

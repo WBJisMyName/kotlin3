@@ -72,12 +72,6 @@ class TabFragment: Fragment(){
         var videoPage: MediaFragment
         var docPage: MediaFragment
 
-        val ALL_FILES_POS = 0
-        val IMAGE_POS = 1
-        val MUSIC_POS = 2
-        val VIDEO_POS = 3
-        val DOC_POS = 4
-
         init{
             allFilePage = BrowserFragment()
             imagePage = MediaFragment(Constant.TYPE_IMAGE)
@@ -88,10 +82,10 @@ class TabFragment: Fragment(){
 
         override fun getItem(position: Int): Fragment {
             when(position){
-                IMAGE_POS -> return imagePage
-                MUSIC_POS -> return musicPage
-                VIDEO_POS -> return videoPage
-                DOC_POS -> return docPage
+                Constant.TYPE_IMAGE -> return imagePage
+                Constant.TYPE_MUSIC -> return musicPage
+                Constant.TYPE_VIDEO -> return videoPage
+                Constant.TYPE_DOC -> return docPage
                 else -> return allFilePage
             }
         }
@@ -109,10 +103,10 @@ class TabFragment: Fragment(){
 
         fun doRefresh(position: Int){
             when(position){
-                IMAGE_POS -> imagePage.doRefresh(Constant.TYPE_IMAGE)
-                MUSIC_POS -> musicPage.doRefresh(Constant.TYPE_MUSIC)
-                VIDEO_POS -> videoPage.doRefresh(Constant.TYPE_VIDEO)
-                DOC_POS -> docPage.doRefresh(Constant.TYPE_DOC)
+                Constant.TYPE_IMAGE -> imagePage.doRefresh(Constant.TYPE_IMAGE)
+                Constant.TYPE_MUSIC -> musicPage.doRefresh(Constant.TYPE_MUSIC)
+                Constant.TYPE_VIDEO -> videoPage.doRefresh(Constant.TYPE_VIDEO)
+                Constant.TYPE_DOC -> docPage.doRefresh(Constant.TYPE_DOC)
                 else -> allFilePage.viewModel.doRefresh()
             }
         }

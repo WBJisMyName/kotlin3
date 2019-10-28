@@ -14,8 +14,11 @@ object Constant{
     val TYPE_IMAGE = 1
     val TYPE_MUSIC = 2
     val TYPE_VIDEO = 3
-    val TYPE_OTHERS = 4
-    val TYPE_DOC = 5
+    val TYPE_DOC = 4
+    val TYPE_OTHERS = 5
+
+    //用以判斷是否已讀取過，因為有件資料庫不須重新讀取
+    var hasLoadedTab: MutableList<Boolean> = mutableListOf(true, false, false, false, false)   //對應TYPE，分別為全部(此處理論上不會用到)、圖片、音樂、影片、文件
 
     val SORT_BY_DATE = 0
     val SORT_BY_NAME = 1

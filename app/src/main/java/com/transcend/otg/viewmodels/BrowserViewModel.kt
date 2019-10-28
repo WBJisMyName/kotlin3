@@ -149,6 +149,7 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
                 Constant.TYPE_VIDEO -> scanLocalAllVideos(MainApplication.mContext)
                 Constant.TYPE_DOC -> scanLocalAllDocs(MainApplication.mContext)
             }
+            Constant.hasLoadedTab.set(type, true)
         })
         thread.start()
     }

@@ -25,6 +25,10 @@ class MediaFragment(val mType: Int): BrowserFragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
+
+        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
+            viewModel.scanFileList(mType)
+
         when(mType){
             Constant.TYPE_IMAGE -> {
                 viewModel.imageItems.observe(this, Observer { fileList ->

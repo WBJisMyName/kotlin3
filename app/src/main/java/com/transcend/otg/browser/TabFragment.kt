@@ -15,7 +15,6 @@ import com.transcend.otg.R
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.databinding.FragmentTabBinding
 import com.transcend.otg.utilities.Constant
-import com.transcend.otg.viewmodels.MediaFragment
 import kotlinx.android.synthetic.main.dialog_folder_create.*
 import kotlinx.android.synthetic.main.fragment_browser.*
 

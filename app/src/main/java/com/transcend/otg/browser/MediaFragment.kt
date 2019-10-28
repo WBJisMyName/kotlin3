@@ -1,4 +1,4 @@
-package com.transcend.otg.viewmodels
+package com.transcend.otg.browser
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.transcend.otg.BrowserFragment
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.viewmodels.BrowserViewModel
 import kotlinx.android.synthetic.main.fragment_browser.*
 
 class MediaFragment(val mType: Int): BrowserFragment(){

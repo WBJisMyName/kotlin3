@@ -3,7 +3,6 @@ package com.transcend.otg.singleview
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.Observable
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
@@ -25,7 +24,7 @@ class ImageActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mPath = intent.getStringExtra("path")
+        mPath = intent.getStringExtra("folderPath")
         mTitle = intent.getStringExtra("title")
 
         var viewModel = ViewModelProviders.of(this).get(ImageViewModel::class.java)

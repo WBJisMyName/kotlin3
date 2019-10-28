@@ -29,6 +29,7 @@ import com.transcend.otg.data.FileInfo
 import com.transcend.otg.databinding.FragmentBrowserBinding
 import com.transcend.otg.floatingbtn.BottomSheetFragment
 import com.transcend.otg.floatingbtn.ProgressFloatingButton
+import com.transcend.otg.singleview.ImageActivity
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.BrowserViewModel
 import com.transcend.otg.viewmodels.MainActivityViewModel
@@ -186,8 +187,18 @@ open class BrowserFragment : Fragment(),
                 fileInfo.isSelected = fileInfo.isSelected.not()
                 adapter.notifyItemChanged(adapter.currentList.indexOf(fileInfo))
                 updateActionTitle()
-            } else
-                doLoadFiles(fileInfo.path)
+            } else {
+                when(fileInfo.fileType){
+                    Constant.TYPE_IMAGE -> {
+                        val intent = Intent(activity, ImageActivity::class.java)
+                        intent.putExtra("folderPath", viewModel.mPath)
+                        intent.putExtra("title", fileInfo.title)
+                        //TODO 須判斷是否顯示全部檔案
+                        activity?.startActivity(intent)
+                    }
+                    Constant.TYPE_DIR -> doLoadFiles(fileInfo.path)
+                }
+            }
         }
 
         override fun onLongClick(fileInfo: FileInfo) {

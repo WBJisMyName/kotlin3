@@ -38,7 +38,7 @@ dependencies {
     def lifecycle_version = "2.1.0"
     def room_version = "2.1.0"
     def kxtVersion = "1.0.2"
-    def navigationVersion = "2.1.0"
+    def navigationVersion = "2.0.0"
     kapt "androidx.room:room-compiler:$room_version"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -61,6 +61,7 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
     implementation "androidx.core:core-ktx:$kxtVersion"
 
+    //注意: 2.1.0會發生argument前後不一而無法傳遞參數，先將回2.0.0
     implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
 

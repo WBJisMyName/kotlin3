@@ -102,17 +102,11 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
                 }
                 R.id.browserFragment -> {
                     arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
-                    viewModel.updateTabMode(MainActivityViewModel.TabMode.Browser)
-                    viewModel.updateSystemMenuIconCount(1)
+                    setToolbarMode(MainActivityViewModel.TabMode.Browser)
                 }
                 R.id.sdFragment -> {
                     arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
-                    viewModel.updateTabMode(MainActivityViewModel.TabMode.Browser)
-                    viewModel.updateSystemMenuIconCount(1)
-                }
-                R.id.tabFragment -> {
-                    viewModel.updateTabMode(MainActivityViewModel.TabMode.Browser)
-                    viewModel.updateSystemMenuIconCount(1)
+                    setToolbarMode(MainActivityViewModel.TabMode.Browser)
                 }
             }
         }
@@ -124,10 +118,14 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         viewModel.setMidTitleText(title)
     }
 
-    private fun setToolbarMode(mode: MainActivityViewModel.TabMode, menuCount: Int, mid_title: String?){
+    private fun setToolbarMode(mode: MainActivityViewModel.TabMode, menuCount: Int, mid_title: String){
         viewModel.updateTabMode(mode)
         viewModel.updateSystemMenuIconCount(menuCount)
-        viewModel.midTitle.set(mid_title)
+        setMidTitle(mid_title)
+    }
+
+    private fun setToolbarMode(mode: MainActivityViewModel.TabMode){
+        viewModel.updateTabMode(mode)
     }
 
     override fun onSupportNavigateUp(): Boolean {

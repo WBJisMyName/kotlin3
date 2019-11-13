@@ -10,8 +10,8 @@
 <!--            android:title="@string/statementTitle"-->
 <!--            android:icon="@drawable/ic_drawer_recent_grey"/>-->
     <item
-            android:id="@+id/tabFragment"
-            android:title="Tab Test"
+            android:id="@+id/browserFragment"
+            android:title="@string/browserTitle"
             android:icon="@drawable/ic_drawer_myphone_grey"/>
 
     <item

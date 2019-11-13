@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.fragment_browser.*
 import java.io.File
 import kotlin.concurrent.thread
 
-open class BrowserFragment : Fragment(),
+open class BrowserFragment(val mRoot: String) : Fragment(),
     BackpressCallback,
     ActionMode.Callback,
     LoaderCallbacks<Boolean>{
@@ -51,7 +51,6 @@ open class BrowserFragment : Fragment(),
     lateinit var mFileActionManager: FileActionManager  //action manager
     lateinit var mBottomSheetFragment: BottomSheetFragment   //底部進度視窗
     lateinit var mFloatingBtn: ProgressFloatingButton   //Custom floating btn
-    var mRoot = Constant.LOCAL_ROOT //根目錄，本地 or SD
 
     lateinit var viewModel: BrowserViewModel
     lateinit var adapter: FileInfoAdapter
@@ -73,10 +72,7 @@ open class BrowserFragment : Fragment(),
 
         mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
 
-        if (arguments != null)
-            mRoot = arguments!!.getString("root")    //設定根目錄路徑
-
-        setDropdownList(Constant.LOCAL_ROOT)
+        setDropdownList(mRoot)
 
         mBinding = FragmentBrowserBinding.inflate(inflater, container, false)
         return mBinding!!.root

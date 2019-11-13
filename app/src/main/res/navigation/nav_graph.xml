@@ -5,7 +5,7 @@
             app:startDestination="@id/homeFragment">
 
     <fragment android:id="@+id/browserFragment"
-              android:name="com.transcend.otg.BrowserFragment"
+              android:name="com.transcend.otg.browser.TabFragment"
               android:label="BrowserFragment"
               tools:layout="@layout/fragment_browser">
 
@@ -17,7 +17,7 @@
     </fragment>
 
     <fragment android:id="@+id/sdFragment"
-              android:name="com.transcend.otg.BrowserFragment"
+              android:name="com.transcend.otg.browser.TabFragment"
               android:label="BrowserFragment"
               tools:layout="@layout/fragment_browser">
 

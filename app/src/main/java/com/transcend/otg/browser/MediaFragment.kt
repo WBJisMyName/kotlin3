@@ -13,7 +13,7 @@ import com.transcend.otg.utilities.Constant
 import com.transcend.otg.viewmodels.BrowserViewModel
 import kotlinx.android.synthetic.main.fragment_browser.*
 
-class MediaFragment(val mType: Int): BrowserFragment(){
+class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
 
     lateinit var searchAdapter: FileInfoAdapter
 
@@ -36,8 +36,8 @@ class MediaFragment(val mType: Int): BrowserFragment(){
         recyclerView.setLayoutManager(lm)
         recyclerView.setHasFixedSize(true)
 
-//        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
-//            viewModel.scanFileList(mType)
+        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
+            viewModel.scanFileList(mType)
 
         when(mType){
             Constant.TYPE_IMAGE -> {

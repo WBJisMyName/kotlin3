@@ -1,6 +1,5 @@
 package com.transcend.otg.browser
 
-import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AlertDialog
@@ -33,6 +32,7 @@ class TabFragment: Fragment(){
         R.drawable.ic_browser_filetype_video,
         R.drawable.ic_browser_filetype_document)
     lateinit var mMenu: Menu
+    private var mRoot = Constant.LOCAL_ROOT
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +42,11 @@ class TabFragment: Fragment(){
 
         setHasOptionsMenu(true)     //設定支援選單
 
+        if (arguments != null && arguments!!.getString("root") != null) {
+            if (!arguments!!.getString("root").equals("none"))
+                mRoot = arguments!!.getString("root")    //設定根目錄路徑
+        }
+
         mBinding = FragmentTabBinding.inflate(inflater, container, false)
         return mBinding.root
     }
@@ -49,7 +54,7 @@ class TabFragment: Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mAdapter = TabPagerAdapter(activity!!, context!!)
+        mAdapter = TabPagerAdapter(activity!!, mRoot)
         mBinding.viewPager.adapter = mAdapter
         mBinding.viewPager.setCurrentItem(0)
         mBinding.viewPager.offscreenPageLimit = 1
@@ -69,7 +74,7 @@ class TabFragment: Fragment(){
         }
     }
 
-    class TabPagerAdapter(fragmentActivity: FragmentActivity, val context: Context): FragmentStateAdapter(fragmentActivity) {
+    class TabPagerAdapter(fragmentActivity: FragmentActivity, root: String): FragmentStateAdapter(fragmentActivity) {
         val Pager_Count = 5
         var allFilePage: BrowserFragment
         var imagePage: MediaFragment
@@ -77,10 +82,8 @@ class TabFragment: Fragment(){
         var videoPage: MediaFragment
         var docPage: MediaFragment
 
-        var mLastPosition: Int = 0
-
         init{
-            allFilePage = BrowserFragment()
+            allFilePage = BrowserFragment(root)
             imagePage = MediaFragment(Constant.TYPE_IMAGE)
             musicPage = MediaFragment(Constant.TYPE_MUSIC)
             videoPage = MediaFragment(Constant.TYPE_VIDEO)

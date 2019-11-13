@@ -63,6 +63,7 @@ class MainApplication: Application() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
     }
 
+    //設在這裡的原因為，binding後每次讀取都要新建一個adapter，導致無法監聽item click
     fun getDropdownAdapter(): DropDownAdapter{
         if (mDropdownAdapter == null)
             mDropdownAdapter = DropDownAdapter()

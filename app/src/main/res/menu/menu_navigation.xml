@@ -1,25 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+<!--    <item-->
+<!--            android:id="@+id/EULAFragment"-->
+<!--            android:title="@string/eulaTitle"-->
+<!--            android:icon="@drawable/ic_drawer_settings_grey"/>-->
+<!--    <item-->
+<!--            android:id="@+id/statementFragment"-->
+<!--            android:title="@string/statementTitle"-->
+<!--            android:icon="@drawable/ic_drawer_recent_grey"/>-->
     <item
-            android:id="@+id/EULAFragment"
-            android:title="@string/eulaTitle"
-            android:icon="@drawable/ic_drawer_settings_grey"/>
-    <item
-            android:id="@+id/statementFragment"
-            android:title="@string/statementTitle"
-            android:icon="@drawable/ic_drawer_recent_grey"/>
-    <item
-            android:id="@+id/feedbackFragment"
-            android:title="@string/feedbackTitle"
-            android:icon="@drawable/ic_drawer_feedback_grey"/>
-    <item
-            android:id="@+id/helpFragment"
-            android:title="@string/helpTitle"
-            android:icon="@drawable/ic_drawer_help_grey"/>
-    <item
-            android:id="@+id/browserFragment"
-            android:title="@string/browserTitle"
+            android:id="@+id/tabFragment"
+            android:title="Tab Test"
             android:icon="@drawable/ic_drawer_myphone_grey"/>
 
     <item
@@ -28,8 +20,21 @@
             android:icon="@drawable/ic_drawer_microsd_grey"/>
 
     <item
-            android:id="@+id/tabFragment"
-            android:title="Tab Test"
-            android:icon="@drawable/ic_drawer_myphone_grey"/>
+            android:id="@+id/settingsFragment"
+            android:title="@string/settingsTitle"
+            android:icon="@drawable/ic_drawer_settings_grey"/>
+
+    <item
+            android:id="@+id/feedbackFragment"
+            android:title="@string/feedbackTitle"
+            android:icon="@drawable/ic_drawer_feedback_grey"/>
+    <item
+            android:id="@+id/helpFragment"
+            android:title="@string/helpTitle"
+            android:icon="@drawable/ic_drawer_help_grey"/>
+<!--    <item-->
+<!--            android:id="@+id/browserFragment"-->
+<!--            android:title="@string/browserTitle"-->
+<!--            android:icon="@drawable/ic_drawer_myphone_grey"/>-->
 
 </menu>

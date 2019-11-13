@@ -65,4 +65,9 @@ class EULAFragment : Fragment() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as MainActivity).setMidTitle(getString(R.string.about_enduser))
+    }
 }

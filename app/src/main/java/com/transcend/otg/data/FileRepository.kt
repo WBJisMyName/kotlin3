@@ -3,6 +3,7 @@ package com.transcend.otg.data
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
+import com.transcend.otg.utilities.Constant
 import java.io.File
 
 class FileRepository(application: Application) {
@@ -12,6 +13,13 @@ class FileRepository(application: Application) {
 
     fun getAllFilesByType(type: Int): LiveData<List<FileInfo>> {
         return fileInfoDao.getAllFilesByType(type)
+    }
+
+    fun getSearchFiles(searchText: String, type: Int): List<FileInfo>{
+        if (type == Constant.TYPE_IMAGE || type == Constant.TYPE_MUSIC || type == Constant.TYPE_VIDEO || type == Constant.TYPE_DOC)
+            return fileInfoDao.getSearchFilesByType("%"+searchText+"%", type)
+        else
+            return fileInfoDao.getSearchFiles("%"+searchText+"%")   //不管前後文，有符合的就撈出來
     }
 
     fun getAllFileInfos(parent: String): List<FileInfo> {

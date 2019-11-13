@@ -15,6 +15,8 @@ import kotlinx.android.synthetic.main.fragment_browser.*
 
 class MediaFragment(val mType: Int): BrowserFragment(){
 
+    lateinit var searchAdapter: FileInfoAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -25,44 +27,53 @@ class MediaFragment(val mType: Int): BrowserFragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
+        viewModel.isLoading.set(true)
 
-        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
-            viewModel.scanFileList(mType)
+        val lm = LinearLayoutManager(context)
+        adapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
+        searchAdapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
+        recyclerView.adapter = adapter
+        recyclerView.setLayoutManager(lm)
+        recyclerView.setHasFixedSize(true)
+
+//        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
+//            viewModel.scanFileList(mType)
 
         when(mType){
             Constant.TYPE_IMAGE -> {
-                viewModel.imageItems.observe(this, Observer { fileList ->
+                viewModel.imageItems.observe(this@MediaFragment, Observer { fileList ->
                     adapter.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_MUSIC -> {
-                viewModel.musicItems.observe(this, Observer { fileList ->
+                viewModel.musicItems.observe(this@MediaFragment, Observer { fileList ->
                     adapter.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_VIDEO -> {
-                viewModel.videoItems.observe(this, Observer { fileList ->
+                viewModel.videoItems.observe(this@MediaFragment, Observer { fileList ->
                     adapter.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_DOC -> {
-                viewModel.docItems.observe(this, Observer { fileList ->
+                viewModel.docItems.observe(this@MediaFragment, Observer { fileList ->
                     adapter.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
         }
 
-        mBinding?.viewModel = viewModel  //Bind view and view model
+        viewModel.searchItems.observe(this@MediaFragment, Observer {
+                fileList ->
+            searchAdapter.submitList(fileList)
+            viewModel.isLoading.set(false)
+            viewModel.isEmpty.set(fileList.size == 0)
+        })
 
-        val lm = LinearLayoutManager(context)
-        adapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
-        recyclerView.adapter = adapter
-        recyclerView.setLayoutManager(lm)
-        recyclerView.setHasFixedSize(true)
+        mBinding?.viewModel = viewModel  //Bind view and view model
     }
 
     fun doRefresh(type: Int){

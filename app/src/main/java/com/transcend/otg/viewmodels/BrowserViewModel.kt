@@ -24,19 +24,18 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     var mPath = Constant.LOCAL_ROOT //記錄當前路徑
     var isLoading = ObservableBoolean(false)
     var isEmpty = ObservableBoolean(false)
+    var isOnSelectMode = ObservableBoolean(false)
 
     val repository = FileRepository(application)
-    var items = MutableLiveData<List<FileInfo>>().apply {
-        this.value = ArrayList<FileInfo>()
-    }
     var progress = ObservableInt(View.GONE)
+
+    var items = MutableLiveData<List<FileInfo>>()
+    var searchItems = MutableLiveData<List<FileInfo>>()
 
     var imageItems = repository.getAllFilesByType(Constant.TYPE_IMAGE)
     var musicItems = repository.getAllFilesByType(Constant.TYPE_MUSIC)
     var videoItems = repository.getAllFilesByType(Constant.TYPE_VIDEO)
     var docItems = repository.getAllFilesByType(Constant.TYPE_DOC)
-
-    var isOnSelectMode = ObservableBoolean(false)
 
     fun insert(fileInfo: FileInfo) {
         repository.insert(fileInfo)
@@ -80,6 +79,18 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         val thread = Thread(Runnable {
             deleteFilesUnderFolderPath(mPath)
             scanFolderFiles(mPath)
+        })
+        thread.start()
+    }
+
+    fun doSearch(searchText: String, type: Int){
+        isLoading.set(true)
+        val thread = Thread(Runnable {
+            val list = sort(repository.getSearchFiles(searchText, type))
+            if (type == Constant.TYPE_IMAGE || type == Constant.TYPE_MUSIC || type == Constant.TYPE_VIDEO || type == Constant.TYPE_DOC)
+                searchItems.postValue(list)
+            else
+                items.postValue(list)
         })
         thread.start()
     }

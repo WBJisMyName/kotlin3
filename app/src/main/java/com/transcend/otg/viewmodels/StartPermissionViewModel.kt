@@ -49,6 +49,4 @@ class StartPermissionViewModel(val activity: Activity) : ViewModel(){
         myDialog?.dismiss()
         myDialog = alertDialog.show()
     }
-
-
 }

@@ -43,12 +43,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                <com.transcend.otg.utilities.CustomViewPager
+                <androidx.viewpager2.widget.ViewPager2
                         android:id="@+id/viewPager"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-                <!-- 處理RecyclerView會與AppBarLayout重疊，而加上app:layout_behavior -->F
+                        android:layout_height="match_parent" />
 
             </com.transcend.otg.browser.PagerSwipeRefreshLayout>
         </LinearLayout>

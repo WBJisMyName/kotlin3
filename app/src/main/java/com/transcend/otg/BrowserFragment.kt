@@ -85,8 +85,9 @@ open class BrowserFragment : Fragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
+
         viewModel.items.observe(this, Observer {
-            fileList ->
+                fileList ->
             adapter.submitList(fileList)
             viewModel.isLoading.set(false)
             viewModel.isEmpty.set(fileList.size == 0)
@@ -104,24 +105,26 @@ open class BrowserFragment : Fragment(),
 
     fun setDropdownList(path: String){
         var path = path
-        val mainViewModel: MainActivityViewModel = ViewModelProviders.of(activity as MainActivity).get(MainActivityViewModel::class.java)
+        val mainViewModel: MainActivityViewModel = ViewModelProviders.of(activity as MainActivity).get(MainActivityViewModel::class.java)   //取得activity的viewmodel
         val localMainTitle = Constant.LocalBrowserMainPageTitle
         val sdMainTitle = Constant.SDBrowserMainPageTitle
         val sdcardRoot = SystemUtil().getSDLocation(mContext)
-        if (path.startsWith(Constant.LOCAL_ROOT))
+        if (path.startsWith(Constant.LOCAL_ROOT))   //置換本地根目錄的名稱
             path = path.replace(Constant.LOCAL_ROOT, localMainTitle)
-        else if (sdcardRoot != null && path.startsWith(sdcardRoot))
+        else if (sdcardRoot != null && path.startsWith(sdcardRoot)) //置換SD根目錄名稱
             path = path.replace(sdcardRoot, sdMainTitle)
 
         val list = path.split("/").reversed().filter {
             !it.equals("")  //過濾空字串
         }
-        if(list.size == 1)
-            mainViewModel.dropdownArrowVisibility.set(View.GONE)
-        else
-            mainViewModel.dropdownArrowVisibility.set(View.VISIBLE)
+
+        //根目錄時隱藏下拉箭頭
+        val arrowVisibility = if(list.size == 1) View.GONE else View.VISIBLE
+        mainViewModel.dropdownArrowVisibility.set(arrowVisibility)
+
         mainViewModel.mDropdownList.set(list)
 
+        //監控Dropdown item click
         MainApplication.getInstance()?.getDropdownAdapter()?.setOnDropdownItemSelectedListener(object: DropDownAdapter.OnDropdownItemSelectedListener{
             override fun onDropdownItemSelected(path: String) {
                 var selected_path = path
@@ -138,7 +141,7 @@ open class BrowserFragment : Fragment(),
         val args = Bundle()
         args.putString("path", viewModel.mPath)
         val intent = Intent()
-        intent.setClass(activity, FileActionLocateActivity::class.java)
+        intent.setClass(activity as MainActivity, FileActionLocateActivity::class.java)
         intent.putExtras(args)
         startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE)
     }

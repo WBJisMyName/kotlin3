@@ -4,11 +4,14 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textfield.TextInputLayout
 import com.transcend.otg.BrowserFragment
 import com.transcend.otg.R
@@ -17,6 +20,7 @@ import com.transcend.otg.databinding.FragmentTabBinding
 import com.transcend.otg.utilities.Constant
 import kotlinx.android.synthetic.main.dialog_folder_create.*
 import kotlinx.android.synthetic.main.fragment_browser.*
+
 
 class TabFragment: Fragment(){
 
@@ -28,6 +32,7 @@ class TabFragment: Fragment(){
         R.drawable.ic_browser_filetype_music,
         R.drawable.ic_browser_filetype_video,
         R.drawable.ic_browser_filetype_document)
+    lateinit var mMenu: Menu
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,17 +49,17 @@ class TabFragment: Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mAdapter = TabPagerAdapter(fragmentManager!!, context!!)
+        mAdapter = TabPagerAdapter(activity!!, context!!)
         mBinding.viewPager.adapter = mAdapter
         mBinding.viewPager.setCurrentItem(0)
         mBinding.viewPager.offscreenPageLimit = 1
-        mBinding.tabLayout.setupWithViewPager(mBinding.viewPager)
 
-
-        for (i in icons.indices) {
-            //mTitleIcons[i]和mTitleNames[i]是放圖片和文字的資源的陣列
-            mBinding.tabLayout.getTabAt(i)!!.setIcon(icons[i])//.setText(mTitleNames[i])
-        }
+        TabLayoutMediator(mBinding.tabLayout, mBinding.viewPager, object : TabLayoutMediator.OnConfigureTabCallback {
+            override fun onConfigureTab(tab: TabLayout.Tab, position: Int) {
+                // Styling each tab here
+                tab.setIcon(icons[position])
+            }
+        }).attach()
 
         mBinding.swiperefresh.setColorSchemeResources(R.color.c_06)
         mBinding.swiperefresh.setOnRefreshListener {
@@ -64,13 +69,15 @@ class TabFragment: Fragment(){
         }
     }
 
-    class TabPagerAdapter(fm: FragmentManager, val context: Context): FragmentStatePagerAdapter(fm) {
+    class TabPagerAdapter(fragmentActivity: FragmentActivity, val context: Context): FragmentStateAdapter(fragmentActivity) {
         val Pager_Count = 5
         var allFilePage: BrowserFragment
         var imagePage: MediaFragment
         var musicPage: MediaFragment
         var videoPage: MediaFragment
         var docPage: MediaFragment
+
+        var mLastPosition: Int = 0
 
         init{
             allFilePage = BrowserFragment()
@@ -80,7 +87,9 @@ class TabFragment: Fragment(){
             docPage = MediaFragment(Constant.TYPE_DOC)
         }
 
-        override fun getItem(position: Int): Fragment {
+        override fun getItemCount(): Int = Pager_Count
+
+        override fun createFragment(position: Int): Fragment {
             when(position){
                 Constant.TYPE_IMAGE -> return imagePage
                 Constant.TYPE_MUSIC -> return musicPage
@@ -90,16 +99,7 @@ class TabFragment: Fragment(){
             }
         }
 
-        override fun getCount(): Int = Pager_Count
 
-        override fun instantiateItem(container: ViewGroup, position: Int): Any {
-            return super.instantiateItem(container, position)
-        }
-
-        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-            super.destroyItem(container, position, `object`)
-            println("position Destory$position")
-        }
 
         fun doRefresh(position: Int){
             when(position){
@@ -114,6 +114,54 @@ class TabFragment: Fragment(){
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_menu, menu)
+        mMenu = menu
+
+        val searchView: SearchView = menu.findItem(R.id.action_search).actionView as SearchView
+        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                //TODO
+                if (newText == null)
+                    return false
+                when(mBinding.viewPager.currentItem){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.viewModel.doSearch(newText, Constant.TYPE_IMAGE)
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.viewModel.doSearch(newText, Constant.TYPE_MUSIC)
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.viewModel.doSearch(newText, Constant.TYPE_VIDEO)
+                    Constant.TYPE_DOC -> mAdapter.docPage.viewModel.doSearch(newText, Constant.TYPE_DOC)
+                    else -> mAdapter.allFilePage.viewModel.doSearch(newText, Constant.TYPE_DIR)
+                }
+                return true
+            }
+        })
+
+        menu.findItem(R.id.action_search).setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                menu.findItem(R.id.more).setVisible(false)
+                when(mBinding.viewPager.currentItem){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.searchAdapter
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.searchAdapter
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.searchAdapter
+                    Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.searchAdapter
+                }
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                menu.findItem(R.id.more).setVisible(true)
+                when(mBinding.viewPager.currentItem){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.searchAdapter
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.searchAdapter
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.searchAdapter
+                    Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.searchAdapter
+                    else -> mAdapter.allFilePage.viewModel.doRefresh()
+                }
+                return true
+            }
+        })
+
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -159,10 +207,10 @@ class TabFragment: Fragment(){
         var adapter: FileInfoAdapter? = null
 
         when(mBinding.viewPager.currentItem){
-            1 -> adapter = mAdapter.imagePage.adapter
-            2 -> adapter = mAdapter.musicPage.adapter
-            3 -> adapter = mAdapter.videoPage.adapter
-            4 -> adapter = mAdapter.docPage.adapter
+            Constant.TYPE_IMAGE -> adapter = mAdapter.imagePage.adapter
+            Constant.TYPE_MUSIC -> adapter = mAdapter.musicPage.adapter
+            Constant.TYPE_VIDEO -> adapter = mAdapter.videoPage.adapter
+            Constant.TYPE_DOC -> adapter = mAdapter.docPage.adapter
             else -> adapter = mAdapter.allFilePage.adapter
         }
 

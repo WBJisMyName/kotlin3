@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+                name="viewModel"
+                type="com.transcend.otg.viewmodels.SettingsViewModel" />
+    </data>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorLightLightGray"
+            android:orientation="vertical">
+
+        <LinearLayout
+                android:id="@+id/storage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:gravity="bottom"
+                    android:paddingStart="16dp"
+                    android:text="@string/setting_storage"
+                    android:textColor="@color/c_02"
+                    android:textSize="16sp" />
+
+            <LinearLayout
+                    android:id="@+id/layout_cleancache"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="10">
+
+                <TextView
+                        android:id="@+id/cleanCache"
+                        android:layout_width="wrap_content"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="6"
+                        android:background="@color/colorWhite"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="@dimen/design_navigation_icon_size"
+                        android:text="@string/setting_cleancache"
+                        android:textColor="@color/c_02"
+                        android:textSize="16sp" />
+
+                <TextView
+                        android:id="@+id/cacheValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="4"
+                        android:background="@color/colorWhite"
+                        android:gravity="center"
+                        android:text="@{viewModel.cacheValue}"
+                        android:textColor="@color/c_02"
+                        android:textSize="16sp" />
+
+                <ProgressBar
+                        android:id="@+id/cleanCacheProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorWhite"
+                        android:gravity="center_vertical|right"
+                        android:padding="10dp"
+                        app:visible="@{viewModel.cacheProgressVisible}" />
+
+            </LinearLayout>
+
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:gravity="bottom"
+                    android:paddingStart="16dp"
+                    android:text="@string/setting_information"
+                    android:textColor="@color/c_02"
+                    android:textSize="16sp" />
+
+            <LinearLayout
+                    android:id="@+id/layout_about"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="10">
+
+                <TextView
+                        android:id="@+id/about"
+                        android:layout_width="wrap_content"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="9"
+                        android:background="@color/colorWhite"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="@dimen/design_navigation_icon_size"
+                        android:text="@string/setting_about"
+                        android:textColor="@color/c_02"
+                        android:textSize="16sp" />
+
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorWhite"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_brower_listview_filearrow" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>

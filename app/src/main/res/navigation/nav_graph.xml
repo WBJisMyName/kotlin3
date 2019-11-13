@@ -61,30 +61,15 @@
                 app:popUpTo="@id/feedbackFragment"
                 app:popUpToInclusive="true"
                 app:launchSingleTop="true"/>
-        <action android:id="@+id/action_homeFragment_to_statementFragment"
-                app:destination="@id/statementFragment"
-                app:enterAnim="@anim/slide_in_right"
-                app:exitAnim="@anim/slide_out_left"
-                app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"
-                app:popUpTo="@id/statementFragment"
-                app:popUpToInclusive="true"
-                app:launchSingleTop="true"/>
-        <action android:id="@+id/action_homeFragment_to_EULAFragment"
-                app:destination="@id/EULAFragment"
-                app:enterAnim="@anim/slide_in_right"
-                app:exitAnim="@anim/slide_out_left"
-                app:popEnterAnim="@anim/slide_in_left"
-                app:popExitAnim="@anim/slide_out_right"
-                app:popUpTo="@id/EULAFragment"
-                app:popUpToInclusive="true"
-                app:launchSingleTop="true"/>
         <action
                 android:id="@+id/action_homeFragment_to_helpFragment"
                 app:destination="@id/helpFragment" />
         <action
                 android:id="@+id/action_homeFragment_to_tabFragment"
                 app:destination="@id/tabFragment" />
+        <action
+                android:id="@+id/action_homeFragment_to_settingsFragment"
+                app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -95,4 +80,23 @@
             android:id="@+id/tabFragment"
             android:name="com.transcend.otg.browser.TabFragment"
             android:label="TabFragment" />
+    <fragment
+            android:id="@+id/settingsFragment"
+            android:name="com.transcend.otg.SettingsFragment"
+            android:label="SettingsFragment" >
+        <action
+                android:id="@+id/action_settingsFragment_to_aboutFragment"
+                app:destination="@id/aboutFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/aboutFragment"
+            android:name="com.transcend.otg.AboutFragment"
+            android:label="AboutFragment" >
+        <action
+                android:id="@+id/action_aboutFragment_to_statementFragment"
+                app:destination="@id/statementFragment" />
+        <action
+                android:id="@+id/action_aboutFragment_to_EULAFragment"
+                app:destination="@id/EULAFragment" />
+    </fragment>
 </navigation>

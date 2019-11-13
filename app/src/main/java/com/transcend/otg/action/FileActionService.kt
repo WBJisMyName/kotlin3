@@ -46,9 +46,9 @@ abstract class FileActionService {
     }
 
     fun onCreateLoader(context: Context, id: FileAction, args: Bundle): AsyncTaskLoader<*>? {
-        val paths = args.getStringArrayList("paths")
-        val path = args.getString("path")
-        val name = args.getString("name")
+        val paths = args.getStringArrayList("paths")!!
+        val path = args.getString("path")!!
+        val name = args.getString("name")!!
         when (id) {
             FileActionService.FileAction.RENAME -> return rename(context, path, name)
             FileActionService.FileAction.COPY -> return copy(context, paths, path)

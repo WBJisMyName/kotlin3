@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout="@layout/preference_item">
+
+    <Preference
+            android:key="@string/about_version"
+            android:layout="@layout/preference_item"
+            android:textColor="@color/c_02"
+            android:title="@string/about_version"
+            app:allowDividerAbove="true"
+            app:allowDividerBelow="true" />
+
+    <Preference
+            android:key="@string/about_enduser"
+            android:layout="@layout/preference_item"
+            android:textColor="@color/c_02"
+            android:title="@string/about_enduser"
+            app:allowDividerAbove="true"
+            app:allowDividerBelow="true" />
+
+    <Preference
+            android:key="@string/about_opensource"
+            android:layout="@layout/preference_item"
+            android:textColor="@color/c_02"
+            android:title="@string/about_opensource"
+            app:allowDividerAbove="true"
+            app:allowDividerBelow="true" />
+
+</androidx.preference.PreferenceScreen>

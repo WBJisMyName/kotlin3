@@ -91,8 +91,14 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
 
             when(destination.id) {
                 //不須帶參數的Fragment切換讓他自動實作
-                R.id.EULAFragment, R.id.helpFragment, R.id.feedbackFragment, R.id.statementFragment -> {
-                    //TODO
+                R.id.helpFragment -> {
+                    setToolbarMode(MainActivityViewModel.TabMode.Mid_Title_Only, 0, getString(R.string.helpTitle))
+                }
+                R.id.feedbackFragment -> {
+                    setToolbarMode(MainActivityViewModel.TabMode.Mid_Title_Only, 0, getString(R.string.feedbackTitle))
+                }
+                R.id.settingsFragment -> {
+                    setToolbarMode(MainActivityViewModel.TabMode.Mid_Title_Only, 0, getString(R.string.settingsTitle))
                 }
                 R.id.browserFragment -> {
                     arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
@@ -112,6 +118,16 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         }
 
         checkLocalPermission()
+    }
+
+    fun setMidTitle(title: String){
+        viewModel.setMidTitleText(title)
+    }
+
+    private fun setToolbarMode(mode: MainActivityViewModel.TabMode, menuCount: Int, mid_title: String?){
+        viewModel.updateTabMode(mode)
+        viewModel.updateSystemMenuIconCount(menuCount)
+        viewModel.midTitle.set(mid_title)
     }
 
     override fun onSupportNavigateUp(): Boolean {

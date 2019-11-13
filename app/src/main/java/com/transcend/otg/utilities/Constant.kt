@@ -28,10 +28,5 @@ object Constant{
 
     val thumbnailCacheTail = "&thumbnail"
 
-    fun getDeviceName():String{
-        var deviceName = android.os.Build.MODEL
-        return deviceName
-    }
-
     val onHOMEPERMISSIONS_REQUEST_WRITE_STORAGE = 86
 }

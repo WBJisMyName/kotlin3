@@ -85,11 +85,13 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     fun doSearch(searchText: String, type: Int){
         isLoading.set(true)
         val thread = Thread(Runnable {
-            val list = sort(repository.getSearchFiles(searchText, type))
-            if (type == Constant.TYPE_IMAGE || type == Constant.TYPE_MUSIC || type == Constant.TYPE_VIDEO || type == Constant.TYPE_DOC)
+            if (type == Constant.TYPE_IMAGE || type == Constant.TYPE_MUSIC || type == Constant.TYPE_VIDEO || type == Constant.TYPE_DOC) {
+                val list = sort(repository.getSearchFiles(searchText, type))
                 searchItems.postValue(list)
-            else
+            } else {
+                val list = sort(repository.getSearchFiles(searchText, mPath))
                 items.postValue(list)
+            }
         })
         thread.start()
     }

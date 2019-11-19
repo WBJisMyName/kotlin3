@@ -14,10 +14,12 @@
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="stateUnspecified|adjustPan"
             android:theme="@style/AppTheme">
-        <activity android:name="com.transcend.otg.MainActivity">
+        <activity
+                android:name="com.transcend.otg.MainActivity"
+                android:screenOrientation="portrait"
+                android:launchMode="singleTask"
+                android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -27,9 +29,7 @@
         <activity
                 android:name=".FileActionLocateActivity"
                 android:screenOrientation="portrait"
-                android:launchMode="singleTask"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:windowSoftInputMode="stateUnspecified|adjustPan">
+                android:launchMode="singleTask">
         </activity>
         <activity android:name=".singleview.ImageActivity"/>
     </application>

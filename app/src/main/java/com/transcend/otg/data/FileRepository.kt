@@ -3,7 +3,6 @@ package com.transcend.otg.data
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
-import com.transcend.otg.utilities.Constant
 import java.io.File
 
 class FileRepository(application: Application) {
@@ -16,10 +15,11 @@ class FileRepository(application: Application) {
     }
 
     fun getSearchFiles(searchText: String, type: Int): List<FileInfo>{
-        if (type == Constant.TYPE_IMAGE || type == Constant.TYPE_MUSIC || type == Constant.TYPE_VIDEO || type == Constant.TYPE_DOC)
-            return fileInfoDao.getSearchFilesByType("%"+searchText+"%", type)
-        else
-            return fileInfoDao.getSearchFiles("%"+searchText+"%")   //不管前後文，有符合的就撈出來
+        return fileInfoDao.getSearchFilesByType("%"+searchText+"%", type)
+    }
+
+    fun getSearchFiles(searchText: String, folderPath: String): List<FileInfo>{
+        return fileInfoDao.getSearchFilesAtFolder("%"+searchText+"%", folderPath)   //不管前後文，有符合的就撈出來
     }
 
     fun getAllFileInfos(parent: String): List<FileInfo> {
@@ -33,7 +33,8 @@ class FileRepository(application: Application) {
     fun insert(fileInfo: FileInfo) {
         try {
             val thread = Thread(Runnable {
-                fileInfoDao.insert(fileInfo) })
+                fileInfoDao.insert(fileInfo)
+            })
             thread.start()
         } catch (e: Exception) {
             Log.e("FileRepository", e.toString())

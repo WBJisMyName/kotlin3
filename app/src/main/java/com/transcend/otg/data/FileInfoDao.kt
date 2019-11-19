@@ -12,8 +12,8 @@ interface FileInfoDao {//data access object
     @Query("SELECT * FROM files WHERE fileType = :type AND title LIKE :searchText")
     fun getSearchFilesByType(searchText: String, type: Int): List<FileInfo>
 
-    @Query("SELECT * FROM files WHERE title LIKE :searchText")
-    fun getSearchFiles(searchText: String): List<FileInfo>
+    @Query("SELECT * FROM files WHERE title LIKE :searchText AND parent = :folderPath")
+    fun getSearchFilesAtFolder(searchText: String, folderPath: String): List<FileInfo>
 
     @Query("SELECT * FROM files WHERE parent = :parent ORDER BY title ASC")
     fun getAllFileInfos(parent: String): List<FileInfo>

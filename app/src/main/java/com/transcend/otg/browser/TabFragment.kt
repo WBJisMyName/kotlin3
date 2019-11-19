@@ -145,15 +145,19 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                //TODO
                 if (newText == null)
                     return false
-                when(mBinding.viewPager.currentItem){
-                    Constant.TYPE_IMAGE -> mAdapter.imagePage.viewModel.doSearch(newText, Constant.TYPE_IMAGE)
-                    Constant.TYPE_MUSIC -> mAdapter.musicPage.viewModel.doSearch(newText, Constant.TYPE_MUSIC)
-                    Constant.TYPE_VIDEO -> mAdapter.videoPage.viewModel.doSearch(newText, Constant.TYPE_VIDEO)
-                    Constant.TYPE_DOC -> mAdapter.docPage.viewModel.doSearch(newText, Constant.TYPE_DOC)
-                    else -> mAdapter.allFilePage.viewModel.doSearch(newText, Constant.TYPE_DIR)
+                if (newText.equals("")){
+                    setBrowserAdapter()
+                } else {
+                    setSearchAdapter()
+                    when(mBinding.viewPager.currentItem){
+                        Constant.TYPE_IMAGE -> mAdapter.imagePage.viewModel.doSearch(newText, Constant.TYPE_IMAGE)
+                        Constant.TYPE_MUSIC -> mAdapter.musicPage.viewModel.doSearch(newText, Constant.TYPE_MUSIC)
+                        Constant.TYPE_VIDEO -> mAdapter.videoPage.viewModel.doSearch(newText, Constant.TYPE_VIDEO)
+                        Constant.TYPE_DOC -> mAdapter.docPage.viewModel.doSearch(newText, Constant.TYPE_DOC)
+                        else -> mAdapter.allFilePage.viewModel.doSearch(newText, Constant.TYPE_DIR)
+                    }
                 }
                 return true
             }
@@ -162,29 +166,37 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         menu.findItem(R.id.action_search).setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 menu.findItem(R.id.more).setVisible(false)
-                when(mBinding.viewPager.currentItem){
-                    Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.searchAdapter
-                    Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.searchAdapter
-                    Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.searchAdapter
-                    Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.searchAdapter
-                }
+                setSearchAdapter()
                 return true
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
                 menu.findItem(R.id.more).setVisible(true)
-                when(mBinding.viewPager.currentItem){
-                    Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.searchAdapter
-                    Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.searchAdapter
-                    Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.searchAdapter
-                    Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.searchAdapter
-                    else -> mAdapter.allFilePage.viewModel.doRefresh()
-                }
+                setBrowserAdapter()
                 return true
             }
         })
 
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    fun setSearchAdapter(){
+        when(mBinding.viewPager.currentItem){
+            Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.searchAdapter
+            Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.searchAdapter
+            Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.searchAdapter
+            Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.searchAdapter
+        }
+    }
+
+    fun setBrowserAdapter(){
+        when(mBinding.viewPager.currentItem){
+            Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.adapter
+            Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.adapter
+            Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.adapter
+            Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.adapter
+            else -> mAdapter.allFilePage.viewModel.doRefresh()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

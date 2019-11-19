@@ -25,6 +25,13 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
+            viewModel.scanFileList(mType)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
         viewModel.isLoading.set(true)
@@ -35,9 +42,6 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         recyclerView.adapter = adapter
         recyclerView.setLayoutManager(lm)
         recyclerView.setHasFixedSize(true)
-
-        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
-            viewModel.scanFileList(mType)
 
         when(mType){
             Constant.TYPE_IMAGE -> {

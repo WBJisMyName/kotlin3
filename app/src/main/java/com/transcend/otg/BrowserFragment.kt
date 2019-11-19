@@ -61,6 +61,10 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         mContext = context
     }
 
+    override fun onResume() {
+        super.onResume()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {

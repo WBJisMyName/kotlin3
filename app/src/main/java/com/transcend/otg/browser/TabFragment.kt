@@ -2,10 +2,14 @@ package com.transcend.otg.browser
 
 import android.os.Bundle
 import android.view.*
+import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.loader.app.LoaderManager
+import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -14,14 +18,20 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textfield.TextInputLayout
 import com.transcend.otg.BrowserFragment
 import com.transcend.otg.R
+import com.transcend.otg.action.FileActionManager
+import com.transcend.otg.action.loader.LocalFolderCreateLoader
+import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.databinding.FragmentTabBinding
+import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.utilities.LoaderID
+import com.transcend.otg.utilities.SystemUtil
 import kotlinx.android.synthetic.main.dialog_folder_create.*
 import kotlinx.android.synthetic.main.fragment_browser.*
 
 
-class TabFragment: Fragment(){
+class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<Boolean> {
 
     lateinit var mAdapter: TabPagerAdapter
     lateinit var mBinding: FragmentTabBinding
@@ -33,6 +43,7 @@ class TabFragment: Fragment(){
         R.drawable.ic_browser_filetype_document)
     lateinit var mMenu: Menu
     private var mRoot = Constant.LOCAL_ROOT
+    lateinit var mFileActionManager: FileActionManager  //action manager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,10 +53,16 @@ class TabFragment: Fragment(){
 
         setHasOptionsMenu(true)     //設定支援選單
 
-        if (arguments != null && arguments!!.getString("root") != null) {
-            if (!arguments!!.getString("root").equals("none"))
-                mRoot = arguments!!.getString("root")    //設定根目錄路徑
+        if (arguments != null && arguments!!.getString("root") != null)
+            mRoot = arguments!!.getString("root")    //設定根目錄路徑
+
+
+        if (mRoot.startsWith(SystemUtil().getSDLocation(context!!) ?: "Sdcard")){
+            mFileActionManager = FileActionManager(context!!, FileActionManager.FileActionServiceType.SD, this)   //action manager
+        } else if (mRoot.startsWith(Constant.LOCAL_ROOT)){
+            mFileActionManager = FileActionManager(context!!, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
         }
+        //TODO OTG
 
         mBinding = FragmentTabBinding.inflate(inflater, container, false)
         return mBinding.root
@@ -102,8 +119,6 @@ class TabFragment: Fragment(){
             }
         }
 
-
-
         fun doRefresh(position: Int){
             when(position){
                 Constant.TYPE_IMAGE -> imagePage.doRefresh(Constant.TYPE_IMAGE)
@@ -120,6 +135,10 @@ class TabFragment: Fragment(){
         mMenu = menu
 
         val searchView: SearchView = menu.findItem(R.id.action_search).actionView as SearchView
+        val search_editText = searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
+        search_editText.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorWhite))
+        search_editText.setTextColor(ContextCompat.getColor(context!!, R.color.c_02))
+        search_editText.setHintTextColor(ContextCompat.getColor(context!!, R.color.c_04))
         searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return true
@@ -184,7 +203,11 @@ class TabFragment: Fragment(){
                     .setPositiveButton("Confirm",{ dialog, whichButton ->
                         dialog_folder_create_name
                         val tmp = textLayout.editText?.text.toString()
-//                        mFileActionManager.createFolder(viewModel.mPath, tmp)   //通知action manager執行createFolder
+
+                        if(mBinding.viewPager.currentItem == Constant.TYPE_DIR){    //Tab在第一個(全檔案)時才能執行新增資料夾
+                            val path = mAdapter.allFilePage.getPath()
+                            mFileActionManager.createFolder(path, tmp)   //通知action manager執行createFolder
+                        }
                     })
                     .setNegativeButton("Cancel", { dialog, whichButton ->
                         println("cancel")
@@ -232,5 +255,34 @@ class TabFragment: Fragment(){
                 }
             }
         }
+    }
+
+    override fun onBackPressed(): Boolean {
+        when(mBinding.viewPager.currentItem){
+            Constant.TYPE_IMAGE, Constant.TYPE_MUSIC, Constant.TYPE_VIDEO, Constant.TYPE_DOC ->
+                mBinding.viewPager.setCurrentItem(0, false) //回到第一個tab
+            else -> return mAdapter.allFilePage.onBackPressed()
+        }
+        return false
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
+        when(id) {
+            LoaderID.LOCAL_NEW_FOLDER -> return LocalFolderCreateLoader(
+                context!!,
+                args?.getString("path")!!
+            )
+            else -> return NullLoader(context!!)
+        }
+    }
+
+    override fun onLoadFinished(loader: Loader<Boolean>, data: Boolean?) {
+        if (loader is LocalFolderCreateLoader){
+            mAdapter.doRefresh(Constant.TYPE_DIR)
+        }
+    }
+
+    override fun onLoaderReset(loader: Loader<Boolean>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

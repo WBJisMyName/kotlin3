@@ -15,22 +15,24 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.ViewModelProviders
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import com.transcend.otg.action.dialog.FileActionNewFolderDialog
 import com.transcend.otg.action.loader.LocalFolderCreateLoader
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.data.FileInfo
+import com.transcend.otg.databinding.ActivityFileLocateBinding
 import com.transcend.otg.permission.PermissionHandle
 import com.transcend.otg.permission.SdPermission
 import com.transcend.otg.sdcard.ExternalStorageController
+import com.transcend.otg.sdcard.ExternalStorageLollipop
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
 import com.transcend.otg.singleview.ViewPagerZoomFixed
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.LoaderID
-import com.transcend.otg.utilities.MainApplication
-import com.transcend.otg.utilities.SystemUtil
+import com.transcend.otg.utilities.*
+import com.transcend.otg.viewmodels.ActionLocateViewModel
 import java.io.File
 import java.util.*
 
@@ -45,18 +47,37 @@ class FileActionLocateActivity : AppCompatActivity(),
 
     private var mFragment: FileActionLocateFragment? = null
     private var confirmBtn: Button? = null
-    private lateinit var mPath: String
+    private var mPath: String
+    private var mActionID: Int
 
     private val mSDPermission = 1005
+    private val mSDQPermission = 1006
     private val mFileInfo: FileInfo? = null
     private var oneSecond = true
 
+    lateinit var mBinding: ActivityFileLocateBinding
+
+    init {
+        mPath = Constant.LOCAL_ROOT
+        mActionID = -1
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_file_locate)
 
-        mPath = Constant.LOCAL_ROOT
-        mPath = intent.getStringExtra("path")
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_file_locate)
+        val viewModel = ViewModelProviders.of(this).get(ActionLocateViewModel::class.java)
+        mBinding.viewModel = viewModel
+
+        val path = intent.getStringExtra("path")
+        if (path != null && !path.equals(""))
+            mPath = path
+
+        mActionID = intent.getIntExtra("action_id", -1)
+        when(mActionID){
+            R.id.action_copy -> Toast.makeText(this, R.string.title_copy_to, Toast.LENGTH_LONG).show()
+            R.id.action_move -> Toast.makeText(this, R.string.title_move_to, Toast.LENGTH_LONG).show()
+        }
 
         initFragment()
     }
@@ -80,31 +101,59 @@ class FileActionLocateActivity : AppCompatActivity(),
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        //        if (requestCode == mSDPermission){
-        //            if(resultCode == RESULT_OK) {
-        //                if (oneSecond && (data != null && data.getData() != null)) {
-        //                    Uri uriTree = data.getData();
-        //                    getContentResolver().takePersistableUriPermission(uriTree,
-        //                            Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        //
-        //                    AppPref.setSDKey(this, uriTree.toString());
-        //
-        //                    boolean isSelectedFolderValid = new ExternalStorageLollipop(this).checkSelectedFolder(data);
-        //                    if (isSelectedFolderValid) {
-        //                        if (mFileInfo != null) {
-        //                            mPath = mFileInfo.path;
-        //                            mFragment.doLoad(mPath);
-        //                        }
-        //                    }
-        //
-        //                    return;
-        //                }
-        //            } else {
-        //                mFragment.doLoad(AppConst.Storage_Root_Path);
-        //            }
-        //
-        //            requestPermissionDialog();
-        //        }
+        if (requestCode == mSDPermission) {
+            if (resultCode == RESULT_OK) {
+                if (oneSecond && data != null && data.data != null) {
+                    val uriTree = data.data
+                    contentResolver.takePersistableUriPermission(
+                        uriTree!!,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+
+                    AppPref.setSDKey(this, uriTree!!.toString())
+
+                    val isSelectedFolderValid =
+                        ExternalStorageLollipop(this).checkSelectedFolder(data)
+                    if (isSelectedFolderValid) {
+                        if (mFileInfo != null) {
+                            mPath = mFileInfo.path
+                            mFragment?.doLoad(mPath)
+                        }
+                    }
+
+                    return
+                }
+            } else {
+                mFragment?.doLoad(Constant.Storage_Root_Path)
+            }
+
+            requestPermissionDialog()
+        } else if (requestCode == mSDQPermission) {
+            if (resultCode == RESULT_OK) {
+                if (data != null && data.data != null) {
+                    val uriTree = data.data
+                    contentResolver.takePersistableUriPermission(
+                        uriTree!!,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+
+                    AppPref.setSDKey(this, uriTree!!.toString())
+
+                    val isSelectedFolderValid =
+                        ExternalStorageLollipop(this).checkSelectedFolder(data)
+                    if (isSelectedFolderValid) {
+                        if (mFileInfo != null) {
+                            mPath = mFileInfo.path
+                            mFragment?.doLoad(mPath)
+                        }
+                    }
+                    return
+                } else
+                    mFragment?.doLoad(Constant.Storage_Root_Path)
+
+                checkPermission()
+            }
+        }
     }
 
     private fun initFragment() {
@@ -201,11 +250,17 @@ class FileActionLocateActivity : AppCompatActivity(),
         if (mFragment == null)
             return
 
+        var title: String = getString(R.string.app_name)
+        when(mActionID){
+            R.id.action_copy -> title = getString(R.string.copyitemsto)
+            R.id.action_move -> title = getString(R.string.moveitemsto)
+        }
+
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Select")
-        //        builder.setMessage(mFragment.getPath());
-        builder.setNegativeButton("Cancel", null)
-        builder.setPositiveButton("Confirm", null)
+        builder.setTitle(title)
+        builder.setMessage(mFragment?.getPath())
+        builder.setNegativeButton(R.string.cancel, null)
+        builder.setPositiveButton(R.string.confirm, null)
         builder.setCancelable(true)
         val dialog = builder.show()
         val bnPos = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
@@ -216,7 +271,13 @@ class FileActionLocateActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-
+        if(mFragment is BackpressCallback){
+            (mFragment as? BackpressCallback)?.onBackPressed()?.let {
+                if(it) super.onBackPressed()
+            }
+        } else {
+            super.onBackPressed()
+        }
     }
 
     private fun requestPermissionDialog() {
@@ -285,7 +346,8 @@ class FileActionLocateActivity : AppCompatActivity(),
         object : FileActionNewFolderDialog(this, folderNames) {
             override fun onConfirm(newName: String) {
                 val storageController = ExternalStorageController(this@FileActionLocateActivity)
-                val id = if (mFragment?.getPath()?.startsWith(Constant.LOCAL_ROOT) ?: false)
+                val folderPath = mFragment?.getPath()
+                val id = if (folderPath?.startsWith(Constant.LOCAL_ROOT) ?: false || folderPath?.startsWith(SystemUtil().getSDLocation(this@FileActionLocateActivity)!!) ?: false)
                     LoaderID.LOCAL_NEW_FOLDER
                 else
                     LoaderID.OTG_LOCAL_NEW_FOLDER
@@ -299,24 +361,19 @@ class FileActionLocateActivity : AppCompatActivity(),
                 val path = builder.toString()
                 val args = Bundle()
                 args.putString("path", path)
-                args.putString("name", newName)
-                supportLoaderManager.restartLoader(id, args, this@FileActionLocateActivity).forceLoad()
+                LoaderManager.getInstance(this@FileActionLocateActivity).restartLoader(id, args, this@FileActionLocateActivity).forceLoad()
                 Log.w(TAG, "doNewFolder: $path")
             }
         }
     }
 
+
+
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
 //        mFragment.setLoadingProgressVisibility(View.VISIBLE)
         val path = args?.getString("path")
-        val name = args?.getString("name")
         when (id) {
             LoaderID.LOCAL_NEW_FOLDER -> return LocalFolderCreateLoader(this, path!!)
-//            LoaderID.OTG_LOCAL_NEW_FOLDER -> return OTGLocalFolderCreateLoader(
-//                this,
-//                ExternalStorageLollipop(this).getSDFileLocation(path),
-//                name
-//            )
         }
         return NullLoader(this)
     }

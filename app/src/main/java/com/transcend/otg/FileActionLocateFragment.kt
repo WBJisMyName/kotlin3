@@ -1,88 +1,26 @@
 package com.transcend.otg
 
-import android.content.Context
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.loader.app.LoaderManager.LoaderCallbacks
 import androidx.loader.content.Loader
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.textfield.TextInputLayout
-import com.transcend.otg.action.FileActionManager
 import com.transcend.otg.action.loader.LocalFolderCreateLoader
 import com.transcend.otg.action.loader.NullLoader
-import com.transcend.otg.adapter.FileInfoAdapter
+import com.transcend.otg.browser.DropDownAdapter
 import com.transcend.otg.data.FileInfo
-import com.transcend.otg.databinding.FragmentBrowserBinding
-import com.transcend.otg.utilities.BackpressCallback
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.LoaderID
-import com.transcend.otg.utilities.RecyclerViewClickCallback
+import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.ActionLocateViewModel
 import kotlinx.android.synthetic.main.dialog_folder_create.*
-import kotlinx.android.synthetic.main.fragment_browser.*
-import java.io.File
 
-class FileActionLocateFragment : Fragment(),
+class FileActionLocateFragment : BrowserFragment(Constant.LOCAL_ROOT),
     BackpressCallback,
     LoaderCallbacks<Boolean>{
-
-    lateinit var mContext: Context
-    lateinit var mFileActionManager: FileActionManager  //action manager
-    private var mRoot = Constant.LOCAL_ROOT //根目錄，本地 or SD
-
-    private lateinit var viewModel: ActionLocateViewModel
-    private lateinit var adapter: FileInfoAdapter
-    var mBinding: FragmentBrowserBinding? = null    //共用browser_fragment.xml
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        mContext = context
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?): View? {
-
-        if (mContext == null)   //避免未進入onAttach而造成的Null
-            mContext = activity as Context
-
-        setHasOptionsMenu(true)     //設定支援選單
-
-        mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
-
-        if (arguments != null) {
-            arguments!!.getString("root").let {
-                if (it != null) //設定根目錄路徑
-                    mRoot = it
-            }
-        }
-
-        mBinding = FragmentBrowserBinding.inflate(inflater, container, false)
-        return mBinding!!.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val lm = LinearLayoutManager(context)
-
-        viewModel = ViewModelProviders.of(activity as FileActionLocateActivity).get(ActionLocateViewModel::class.java)
-        viewModel.items.observe(this, Observer {    //觀察列表變化
-            fileInfo->
-                adapter.submitList(fileInfo)
-        })
-
-        viewModel.doLoadFiles(mRoot)    //讀取根目錄
-        mBinding?.viewModel = viewModel  //Bind view and view model
-
-        adapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
-        recyclerView.adapter = adapter
-        recyclerView.setLayoutManager(lm);
-        recyclerView.setHasFixedSize(true);
-    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.action_locate_menu, menu)
@@ -115,9 +53,44 @@ class FileActionLocateFragment : Fragment(),
         return super.onOptionsItemSelected(item)
     }
 
-    val mRecyclerViewClickCallback = object : RecyclerViewClickCallback {
+    override fun setDropdownList(path: String){
+        var path = path
+        val mainViewModel: ActionLocateViewModel = ViewModelProviders.of(activity as FileActionLocateActivity).get(
+            ActionLocateViewModel::class.java)   //取得activity的viewmodel
+        val localMainTitle = Constant.LocalBrowserMainPageTitle
+        val sdMainTitle = Constant.SDBrowserMainPageTitle
+        val sdcardRoot = SystemUtil().getSDLocation(mContext)
+        if (path.startsWith(Constant.LOCAL_ROOT))   //置換本地根目錄的名稱
+            path = path.replace(Constant.LOCAL_ROOT, localMainTitle)
+        else if (sdcardRoot != null && path.startsWith(sdcardRoot)) //置換SD根目錄名稱
+            path = path.replace(sdcardRoot, sdMainTitle)
+
+        val list = path.split("/").reversed().filter {
+            !it.equals("")  //過濾空字串
+        }
+
+        //根目錄時隱藏下拉箭頭
+        val arrowVisibility = if(list.size == 1) View.GONE else View.VISIBLE
+        mainViewModel.dropdownArrowVisibility.set(arrowVisibility)
+
+        mainViewModel.mDropdownList.set(list)
+
+        //監控Dropdown item click
+        MainApplication.getInstance()?.getDropdownAdapter()?.setOnDropdownItemSelectedListener(object: DropDownAdapter.OnDropdownItemSelectedListener{
+            override fun onDropdownItemSelected(path: String) {
+                var selected_path = path
+                if (viewModel.mPath.startsWith(Constant.LOCAL_ROOT))
+                    selected_path = selected_path.replace(Constant.LocalBrowserMainPageTitle, Constant.LOCAL_ROOT)
+                else if (sdcardRoot != null && viewModel.mPath.startsWith(sdcardRoot))
+                    selected_path = selected_path.replace(Constant.SDBrowserMainPageTitle, sdcardRoot)
+                doLoadFiles(selected_path)
+            }
+        })
+    }
+
+    override val mRecyclerViewClickCallback = object : RecyclerViewClickCallback {
         override fun onClick(fileInfo: FileInfo) {
-            viewModel.doLoadFiles(fileInfo.path)
+            doLoadFiles(fileInfo.path)
         }
 
         override fun onLongClick(fileInfo: FileInfo) {
@@ -138,24 +111,12 @@ class FileActionLocateFragment : Fragment(),
         }
     }
 
-    override fun onLoaderReset(loader: Loader<Boolean>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onBackPressed(): Boolean {
-        if(viewModel.mPath.equals(mRoot))   //到了根目錄，回傳true
-            return true
-        else
-            viewModel.doLoadFiles(File(viewModel.mPath).parent)  //讀取parent路徑
-        return false
-    }
-
-    fun getPath(): String{
-        return viewModel.mPath
+    fun doLoad(path: String){
+        viewModel.doLoadFiles(path)
     }
 
     fun getFileList(): List<FileInfo>?{
-        return  viewModel.items.value
+        return viewModel.items.value
     }
 
     fun doReload(){

@@ -42,9 +42,6 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         Toast.makeText(this, "按了EULA", Toast.LENGTH_SHORT).show()
     }
 
-    val eulaPath:String = "file:///android_asset/EULA.html"
-    val statementPath = "file:///android_asset/Statement.html"
-    val helpPath = "https://help.transcendcloud.com/Elite/Android/TW"
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration

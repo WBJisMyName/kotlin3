@@ -1,4 +1,4 @@
-package com.transcend.otg.action
+package com.transcend.otg.action.dialog
 
 import android.content.Context
 import android.content.DialogInterface

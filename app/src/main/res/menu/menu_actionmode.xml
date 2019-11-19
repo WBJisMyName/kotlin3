@@ -21,17 +21,18 @@
                 <!--android:icon="@drawable/ic_tab_share_grey"-->
                 <!--android:title="@string/share"-->
                 <!--app:showAsAction="never" />-->
-            <!--<item-->
-                <!--android:id="@+id/action_copy"-->
-                <!--android:icon="@drawable/ic_tab_copy_grey"-->
-                <!--android:title="@string/copy"-->
-                <!--app:showAsAction="never" />-->
 
-            <!--<item-->
-                <!--android:id="@+id/action_move"-->
-                <!--android:icon="@drawable/ic_tab_move_grey"-->
-                <!--android:title="@string/move"-->
-                <!--app:showAsAction="never" />-->
+            <item
+                android:id="@+id/action_copy"
+                android:icon="@drawable/ic_tab_copy_grey"
+                android:title="@string/copy"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_move"
+                android:icon="@drawable/ic_tab_move_grey"
+                android:title="@string/move"
+                app:showAsAction="never" />
 
             <item
                 android:id="@+id/action_rename"

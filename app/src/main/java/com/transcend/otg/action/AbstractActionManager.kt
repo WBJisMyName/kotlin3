@@ -17,7 +17,7 @@ abstract class AbstractActionManager(
             args = Bundle()
 
         if (id >= 0 && mContext != null && mCallbacks != null) {
-            (mContext as AppCompatActivity).supportLoaderManager.restartLoader(id, args, mCallbacks!!).forceLoad()
+            LoaderManager.getInstance(mContext as AppCompatActivity).restartLoader(id, args, mCallbacks!!).forceLoad()
             return true
         }
         return false

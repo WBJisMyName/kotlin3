@@ -13,12 +13,14 @@ class LocalRenameLoader(context: Context, private val mPath: String, private val
         val target = File(mPath)
         val parent = target.getParentFile()
         val rename = File(parent, mName)
-        var isSuccess =  if (target.exists()) target.renameTo(rename) else false
 
-        if (isSuccess){
-            repository.updateFileName(mPath, mName)
+        if (target.exists()){
+            if (target.renameTo(rename)) {
+                repository.updateFileName(mPath, mName)
+                return true
+            }
         }
 
-        return isSuccess
+        return false
     }
 }

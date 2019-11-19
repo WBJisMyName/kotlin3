@@ -1,5 +1,6 @@
 package com.transcend.otg.action.loader
 
+import android.app.Activity
 import android.content.Context
 import android.widget.RelativeLayout
 import androidx.documentfile.provider.DocumentFile
@@ -33,7 +34,7 @@ open class PhoneActionService : FileActionService() {
     }
 
     override fun copy(context: Context, list: List<String>, dest: String): AsyncTaskLoader<*>? {
-        return null
+        return LocalCopyLoader(context as Activity, list, dest)
     }
 
     override fun move(context: Context, list: List<String>, dest: String): AsyncTaskLoader<*>? {
@@ -45,7 +46,7 @@ open class PhoneActionService : FileActionService() {
     }
 
     override fun createFolder(context: Context, path: String): AsyncTaskLoader<*>? {
-        return LocalFolderCreateLoader(context, path!!)
+        return LocalFolderCreateLoader(context, path)
     }
 
     override fun share(context: Context, paths: ArrayList<String>, dest: String): AsyncTaskLoader<*>? {

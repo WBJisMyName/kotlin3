@@ -2,6 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable name="viewModel" type="com.transcend.otg.viewmodels.ActionLocateViewModel"/>
+        <import type="android.view.View"/>
     </data>
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
@@ -33,14 +34,19 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" app:srcCompat="@drawable/ic_navi_back_white"
                                 android:id="@+id/toggle" android:layout_weight="1" android:padding="8dp"/>
+
                         <androidx.appcompat.widget.AppCompatSpinner
                                 android:id="@+id/main_dropdown"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_marginStart="15dp"
                                 android:background="@null"
-                                android:dropDownVerticalOffset="20dp"
                                 android:dropDownHorizontalOffset="20dp"
-                                android:gravity="center"/>
+                                android:dropDownVerticalOffset="20dp"
+                                android:gravity="center"
+                                android:visibility="@{viewModel.dropdownVisibility}"
+                                app:dropdownList="@{viewModel.mDropdownList}"
+                                app:enable="@{viewModel.dropdownArrowVisibility == View.VISIBLE}" />
 
                         <ImageView
                                 android:id="@+id/dropdown_arrow"
@@ -49,7 +55,8 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="1dp"
                                 android:layout_marginTop="1dp"
-                                android:src="@drawable/ic_navi_historyarrow_solid_white"/>
+                                android:src="@drawable/ic_navi_historyarrow_solid_white"
+                                android:visibility="@{viewModel.dropdownArrowVisibility}"/>
                     </LinearLayout>
                 </androidx.appcompat.widget.Toolbar>
 

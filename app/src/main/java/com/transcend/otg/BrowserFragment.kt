@@ -19,8 +19,8 @@ import androidx.loader.content.Loader
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.textfield.TextInputLayout
 import com.transcend.otg.action.FileActionManager
+import com.transcend.otg.action.loader.LocalCopyLoader
 import com.transcend.otg.action.loader.LocalFileDeleteLoader
-import com.transcend.otg.action.loader.LocalFolderCreateLoader
 import com.transcend.otg.action.loader.LocalRenameLoader
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.FileInfoAdapter
@@ -68,7 +68,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         if (mContext == null)   //避免未進入onAttach而造成的Null
             mContext = activity as Context
 
-        setBottomSheetFragment()    //設定底部進度視窗
+//        setBottomSheetFragment()    //設定底部進度視窗
 
         mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
 
@@ -99,7 +99,17 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         recyclerView.setHasFixedSize(true)
     }
 
-    fun setDropdownList(path: String){
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == FileActionLocateActivity.REQUEST_CODE){
+            if (resultCode == AppCompatActivity.RESULT_OK){
+                val destPath = data?.getStringExtra("path")!!
+                mFileActionManager.copy(destPath, adapter.getSelectedFilesPath())
+            }
+        }
+    }
+
+    open fun setDropdownList(path: String){
         var path = path
         val mainViewModel: MainActivityViewModel = ViewModelProviders.of(activity as MainActivity).get(MainActivityViewModel::class.java)   //取得activity的viewmodel
         val localMainTitle = Constant.LocalBrowserMainPageTitle
@@ -124,18 +134,19 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         MainApplication.getInstance()?.getDropdownAdapter()?.setOnDropdownItemSelectedListener(object: DropDownAdapter.OnDropdownItemSelectedListener{
             override fun onDropdownItemSelected(path: String) {
                 var selected_path = path
-                if (viewModel.mPath.startsWith(Constant.LOCAL_ROOT))
+                if (getPath().startsWith(Constant.LOCAL_ROOT))
                     selected_path = selected_path.replace(Constant.LocalBrowserMainPageTitle, Constant.LOCAL_ROOT)
-                else if (sdcardRoot != null && viewModel.mPath.startsWith(sdcardRoot))
+                else if (sdcardRoot != null && getPath().startsWith(sdcardRoot))
                     selected_path = selected_path.replace(Constant.SDBrowserMainPageTitle, sdcardRoot)
                 doLoadFiles(selected_path)
             }
         })
     }
 
-    protected fun startLocateActivity() {
+    protected fun startLocateActivity(actionID: Int) {
         val args = Bundle()
-        args.putString("path", viewModel.mPath)
+        args.putString("path", getPath())
+        args.putInt("action_id", actionID)
         val intent = Intent()
         intent.setClass(activity as MainActivity, FileActionLocateActivity::class.java)
         intent.putExtras(args)
@@ -180,7 +191,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         }
     }
 
-    val mRecyclerViewClickCallback = object : RecyclerViewClickCallback {
+    open val mRecyclerViewClickCallback = object : RecyclerViewClickCallback {
         override fun onClick(fileInfo: FileInfo) {
             if (mActionMode != null) {
                 fileInfo.isSelected = fileInfo.isSelected.not()
@@ -190,7 +201,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 when(fileInfo.fileType){
                     Constant.TYPE_IMAGE -> {
                         val intent = Intent(activity, ImageActivity::class.java)
-                        intent.putExtra("folderPath", viewModel.mPath)
+                        intent.putExtra("folderPath", getPath())
                         intent.putExtra("title", fileInfo.title)
                         //TODO 須判斷是否顯示全部檔案
                         activity?.startActivity(intent)
@@ -250,6 +261,9 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
             R.id.action_selectAll -> {
                 adapter.selectAll()
             }
+            R.id.action_copy -> {
+                startLocateActivity(R.id.action_copy)
+            }
         }
         return false
     }
@@ -276,6 +290,10 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         mode?.finish()
     }
 
+    fun getPath(): String{
+        return viewModel.mPath
+    }
+
     fun updateActionTitle(){
         val count = adapter.getSelectedFiles().size
         val format = resources.getString(if (count <= 1) R.string.msg_file_selected else R.string.msg_files_selected)
@@ -293,8 +311,8 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
         when(id){
             LoaderID.LOCAL_FILE_DELETE -> return LocalFileDeleteLoader(mContext, args?.getStringArrayList("paths")!!)
-            LoaderID.LOCAL_NEW_FOLDER -> return LocalFolderCreateLoader(mContext, args?.getString("path")!!)
             LoaderID.LOCAL_FILE_RENAME -> return LocalRenameLoader(mContext, args?.getString("path")!!, args.getString("name")!!)
+            LoaderID.LOCAL_FILE_COPY -> return LocalCopyLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args?.getString("path")!!)
             else -> return NullLoader(mContext)
         }
     }
@@ -306,8 +324,6 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         if (loader is LocalFileDeleteLoader){
             viewModel.doRefresh()
             adapter.notifyDataSetChanged()
-        } else if (loader is LocalFolderCreateLoader){
-            viewModel.doRefresh()
         } else if (loader is LocalRenameLoader){
             viewModel.doRefresh()
         }
@@ -318,10 +334,10 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
     }
 
     override fun onBackPressed(): Boolean {
-        if(viewModel.mPath.equals(mRoot))   //到了根目錄，回傳true
+        if(getPath().equals(mRoot))   //到了根目錄，回傳true
             return true
         else
-            doLoadFiles(File(viewModel.mPath).parent)  //讀取parent路徑
+            doLoadFiles(File(getPath()).parent)  //讀取parent路徑
         return false
     }
 }

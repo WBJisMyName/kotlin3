@@ -18,7 +18,6 @@ import com.transcend.otg.utilities.MimeUtil
 import com.transcend.otg.utilities.SystemUtil
 import java.io.File
 
-
 open class BrowserViewModel(application: Application) : AndroidViewModel(application) {
 
     var mPath = Constant.LOCAL_ROOT //記錄當前路徑
@@ -135,6 +134,9 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
                     }
                     Constant.TYPE_VIDEO -> {
                         info.defaultIcon = R.drawable.ic_filelist_video_grey
+                    }
+                    else -> {
+                        info.defaultIcon = R.drawable.ic_filelist_others_grey
                     }
                 }
                 insert(info)

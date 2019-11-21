@@ -35,7 +35,7 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         startLoadingView()  //在這裡呼叫以避免tab切換中load到其他頁面
     }
 
-    fun startLoadingView() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
         viewModel.isLoading.set(true)
 
@@ -45,7 +45,9 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         recyclerView.adapter = adapter
         recyclerView.setLayoutManager(lm)
         recyclerView.setHasFixedSize(true)
+    }
 
+    fun startLoadingView() {
         when(mType){
             Constant.TYPE_IMAGE -> {
                 viewModel.imageItems.observe(this@MediaFragment, Observer { fileList ->

@@ -16,6 +16,7 @@
                 android:id="@+id/item_manage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="1dp"
                 android:background="@drawable/selector_griditem"
                 android:padding="0.1dp">
 
@@ -60,8 +61,7 @@
                     android:layout_above="@id/item_title"
                     android:layout_centerInParent="true"
                     android:layout_gravity="center"
-                    android:scaleType="centerInside"
-            />
+                    android:scaleType="centerInside" />
 
             <ImageView
                     android:id="@+id/item_icon_mask"
@@ -73,17 +73,17 @@
                     android:alpha="0.7"
                     android:scaleType="centerCrop"
                     android:src="@color/colorWhite"
-                    app:visible="@{recyclerModel.isSelected()}"/>
+                    app:visible="@{recyclerModel.isSelected()}" />
 
             <ImageView
                     android:id="@+id/item_mark"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
                     android:layout_gravity="top|right"
                     android:src="@{recyclerModel.selected ? @drawable/ic_page_select_selected : @drawable/ic_page_select_empty}"
-                    app:visible="@{recyclerViewModel.isOnSelectMode()}"/>
+                    app:visible="@{recyclerViewModel.isOnSelectMode()}" />
 
             <LinearLayout
                     android:id="@+id/item_title_layout"
@@ -91,36 +91,34 @@
                     android:layout_height="25dp"
                     android:layout_alignParentBottom="true"
                     android:layout_gravity="bottom"
+                    android:background="@{recyclerModel.smallMediaIconResId != 0 ? @color/colorBlack_transparency : @color/transparency}"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:background="@{recyclerModel.smallMediaIconResId != 0 ? @color/colorBlack_transparency : @color/transparency}"
-                    app:visible="@{recyclerModel.isShowTitleLayout}"
-            >
+                    app:visible="@{recyclerModel.isShowTitleLayout}">
 
                 <ImageView
                         android:id="@+id/item_title_icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:visible="@{recyclerModel.smallMediaIconResId != 0}"
                         app:imageResource="@{recyclerModel.smallMediaIconResId}"
-                />
+                        app:visible="@{recyclerModel.smallMediaIconResId != 0}" />
 
                 <TextView
                         android:id="@+id/item_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginRight="5dp"
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
                         android:gravity="@{recyclerModel.smallMediaIconResId == 0 ? Gravity.CENTER : Gravity.LEFT}"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:singleLine="true"
-                        android:textSize="12sp"
-                        android:textColor="@{recyclerModel.smallMediaIconResId != 0 ? @color/colorWhite : @color/c_02}"
                         android:text="@{recyclerModel.title}"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginRight="5dp"/>
+                        android:textColor="@{recyclerModel.smallMediaIconResId != 0 ? @color/colorWhite : @color/c_02}"
+                        android:textSize="12sp" />
 
             </LinearLayout>
 

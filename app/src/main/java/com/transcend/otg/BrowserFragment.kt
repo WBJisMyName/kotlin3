@@ -17,6 +17,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.loader.app.LoaderManager.LoaderCallbacks
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.google.android.material.textfield.TextInputLayout
 import com.transcend.otg.action.FileActionManager
 import com.transcend.otg.action.loader.LocalCopyLoader
@@ -37,6 +39,8 @@ import kotlinx.android.synthetic.main.fragment_browser.*
 import java.io.File
 import kotlin.concurrent.thread
 
+
+
 open class BrowserFragment(val mRoot: String) : Fragment(),
     BackpressCallback,
     ActionMode.Callback,
@@ -53,7 +57,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
     lateinit var mFloatingBtn: ProgressFloatingButton   //Custom floating btn
 
     lateinit var viewModel: BrowserViewModel
-    lateinit var adapter: FileInfoAdapter
+    var adapter: FileInfoAdapter? = null
     var mBinding: FragmentBrowserBinding? = null
 
     override fun onAttach(context: Context) {
@@ -79,6 +83,15 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         setDropdownList(mRoot)
 
         mBinding = FragmentBrowserBinding.inflate(inflater, container, false)
+        mBinding!!.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(1)) {
+                    if (newState == SCROLL_STATE_IDLE)
+                        adapter?.lazyLoad()
+                }
+            }
+        })
         return mBinding!!.root
     }
 
@@ -88,7 +101,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
         viewModel.items.observe(this, Observer {
                 fileList ->
-            adapter.submitList(fileList)
+            adapter?.submitList(fileList)
             viewModel.isLoading.set(false)
             viewModel.isEmpty.set(fileList.size == 0)
         })
@@ -108,7 +121,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         if (requestCode == FileActionLocateActivity.REQUEST_CODE){
             if (resultCode == AppCompatActivity.RESULT_OK){
                 val destPath = data?.getStringExtra("path")!!
-                mFileActionManager.copy(destPath, adapter.getSelectedFilesPath())
+                mFileActionManager.copy(destPath, adapter?.getSelectedFilesPath()!!)
             }
         }
     }
@@ -199,7 +212,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         override fun onClick(fileInfo: FileInfo) {
             if (mActionMode != null) {
                 fileInfo.isSelected = fileInfo.isSelected.not()
-                adapter.notifyItemChanged(adapter.currentList.indexOf(fileInfo))
+                adapter?.notifyItemChanged(adapter?.currentList?.indexOf(fileInfo)!!)
                 updateActionTitle()
             } else {
                 when(fileInfo.fileType){
@@ -220,7 +233,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 (activity as AppCompatActivity).startSupportActionMode(this@BrowserFragment)
             }
             fileInfo.isSelected = fileInfo.isSelected.not()
-            adapter.notifyItemChanged(adapter.currentList.indexOf(fileInfo))
+            adapter?.notifyItemChanged(adapter?.currentList?.indexOf(fileInfo)!!)
             updateActionTitle()
         }
     }
@@ -233,7 +246,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 AlertDialog.Builder(mContext)
                     .setTitle("Delete")
                     .setPositiveButton("Confirm",{ dialog, whichButton ->
-                        mFileActionManager.delete(adapter.getSelectedFilesPath())
+                        mFileActionManager.delete(adapter?.getSelectedFilesPath()!!)
                     })
                     .setNegativeButton("Cancel", { dialog, whichButton ->
                         println("cancel")
@@ -241,8 +254,8 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                     .show()
             }
             R.id.action_rename -> {
-                if (adapter.getSelectedFiles().size == 1) {
-                    val fileInfo = adapter.getSelectedFiles()[0]
+                if (adapter?.getSelectedFiles()?.size == 1) {
+                    val fileInfo = adapter?.getSelectedFiles()!![0]
 
                     val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
                     val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
@@ -263,7 +276,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 }
             }
             R.id.action_selectAll -> {
-                adapter.selectAll()
+                adapter?.selectAll()
             }
             R.id.action_copy -> {
                 startLocateActivity(R.id.action_copy)
@@ -290,7 +303,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
     override fun onDestroyActionMode(mode: ActionMode?) {
         mActionMode = null
         viewModel.isOnSelectMode.set(false)
-        adapter.deselectAll()
+        adapter?.deselectAll()
         mode?.finish()
     }
 
@@ -298,8 +311,14 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         return viewModel.mPath
     }
 
+    fun scrollToTop(){
+        activity?.runOnUiThread{
+            mBinding?.recyclerView?.scrollToPosition(0)
+        }
+    }
+
     fun updateActionTitle(){
-        val count = adapter.getSelectedFiles().size
+        val count = adapter?.getSelectedFiles()?.size!!
         val format = resources.getString(if (count <= 1) R.string.msg_file_selected else R.string.msg_files_selected)
         mActionModeTitle.setText(String.format(format, count))
     }
@@ -327,7 +346,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
         if (loader is LocalFileDeleteLoader){
             viewModel.doRefresh()
-            adapter.notifyDataSetChanged()
+            adapter?.notifyDataSetChanged()
         } else if (loader is LocalRenameLoader){
             viewModel.doRefresh()
         }

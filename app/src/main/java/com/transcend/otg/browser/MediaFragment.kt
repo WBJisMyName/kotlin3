@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.transcend.otg.BrowserFragment
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.utilities.ScanMediaFiles
 import com.transcend.otg.viewmodels.BrowserViewModel
 import kotlinx.android.synthetic.main.fragment_browser.*
 
@@ -28,11 +29,13 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
     override fun onResume() {
         super.onResume()
 
-        if (!Constant.hasLoadedTab[mType])  //初次讀取檔案
-            viewModel.scanFileList(mType)
+        if (activity != null && Constant.mediaScanState[mType] == Constant.ScanState.NONE)  //初次讀取檔案
+            ScanMediaFiles(activity!!.application).scanFileList(mType)
+
+        startLoadingView()  //在這裡呼叫以避免tab切換中load到其他頁面
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    fun startLoadingView() {
         viewModel = ViewModelProviders.of(this).get(BrowserViewModel::class.java)
         viewModel.isLoading.set(true)
 
@@ -46,25 +49,25 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         when(mType){
             Constant.TYPE_IMAGE -> {
                 viewModel.imageItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter.submitList(fileList)
+                    adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_MUSIC -> {
                 viewModel.musicItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter.submitList(fileList)
+                    adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_VIDEO -> {
                 viewModel.videoItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter.submitList(fileList)
+                    adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_DOC -> {
                 viewModel.docItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter.submitList(fileList)
+                    adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
@@ -83,9 +86,8 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
     fun doRefresh(type: Int){
         viewModel.isLoading.set(true)
         val thread = Thread(Runnable {
-            viewModel.deleteAll(type)
-            Thread.sleep(200)
-            viewModel.scanFileList(type)
+            if (activity != null)
+                ScanMediaFiles(activity!!.application).scanFileList(type)
             Thread.sleep(200)
         })
         thread.start()

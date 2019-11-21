@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.CenterInside
 import com.transcend.otg.data.FileInfo
+import com.transcend.otg.databinding.RecyclerviewFootitemBinding
 import com.transcend.otg.databinding.RecyclerviewGriditemBinding
 import com.transcend.otg.databinding.RecyclerviewListitemBinding
 import com.transcend.otg.task.ImageLoaderTask
@@ -28,6 +29,7 @@ import kotlin.collections.ArrayList
 class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val viewModel: BrowserViewModel) : ListAdapter<FileInfo, FileInfoAdapter.ViewHolder>(FileInfoDiffCallback()) {
 
     companion object {
+        val Footer = 0
         val List = 1
         val Grid = 2
     }
@@ -35,23 +37,74 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
     var mViewType: Int = List
     var mRecyclerViewClickCallback: RecyclerViewClickCallback? = recyclerViewClickCallback
 
+    var mLazyLoadCount = 30
+
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val viewType = getItemViewType(position)
         return when (viewType) {
             Grid -> ViewHolderGrid(RecyclerviewGriditemBinding.inflate(inflater))
-            else -> ViewHolderList(RecyclerviewListitemBinding.inflate(inflater))
+            List -> ViewHolderList(RecyclerviewListitemBinding.inflate(inflater))
+            else -> ViewHolderFooter(RecyclerviewFootitemBinding.inflate(inflater))
         }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        if (isFooter(position))
+            return
         if (holder is ViewHolderList)
             holder.bind(getItem(position))
         else if (holder is ViewHolderGrid)
             holder.bind(getItem(position))
     }
 
-    override fun getItemViewType(position: Int): Int = mViewType
+    fun isFooter(position: Int): Boolean {
+        if (hasFooter()) {
+            var count = 0
+            if (currentList.size > mLazyLoadCount)
+                count = mLazyLoadCount
+            else
+                count = currentList.size
+
+            return position == count
+        }
+        return false
+    }
+
+    fun hasFooter(): Boolean {
+        return currentList.size > 0
+    }
+
+    override fun getItemCount(): Int {
+        var count = 0
+        if (currentList.size > mLazyLoadCount)
+            count = mLazyLoadCount
+        else
+            count = currentList.size
+        if (hasFooter())
+            count++
+
+        return count
+    }
+
+    fun lazyLoad(){
+        val lastCount = mLazyLoadCount
+        mLazyLoadCount += 30
+        if (mLazyLoadCount > currentList.size)
+            mLazyLoadCount = currentList.size
+        if (lastCount != mLazyLoadCount)
+            notifyItemChanged(lastCount, mLazyLoadCount)
+    }
+
+    fun loadAll(){
+        notifyItemChanged(mLazyLoadCount, currentList.size)
+    }
+
+    override fun getItemViewType(position: Int): Int{
+        if (isFooter(position))
+            return Footer
+        return mViewType
+    }
 
     fun setViewType(viewType: Int){
         mViewType = viewType
@@ -72,6 +125,8 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
                 mRecyclerViewClickCallback?.onLongClick(item)
                 true
             }
+
+            itemView.isSelected = item.isSelected
 
             listItemBinding.itemIcon.setImageResource(item.defaultIcon) //載入預設圖片
             listItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE  //設定顯示格式
@@ -124,6 +179,10 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
                     .into(gridItemBinding.itemIcon)
             }
         }
+    }
+
+    inner class ViewHolderFooter(val itemBinding: RecyclerviewFootitemBinding): ViewHolder(itemBinding.root){
+
     }
 
     fun getTime(time: Long): String {

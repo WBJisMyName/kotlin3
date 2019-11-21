@@ -36,6 +36,8 @@
     <string name="lockdisk">Lock</string>
     <string name="unlockdisk">Unlock</string>
     <string name="homepermissionButton">Allow Permission</string>
+    <string name="view_by_list">View by List</string>
+    <string name="view_by_icons">View by Icons</string>
 
     <!-- Normal title -->
     <string name="nav_local">Local</string>

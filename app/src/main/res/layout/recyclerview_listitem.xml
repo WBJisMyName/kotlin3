@@ -15,6 +15,8 @@
                 android:id="@+id/item_manage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
                 android:background="@drawable/selector_listitem">
 
             <FrameLayout
@@ -28,8 +30,7 @@
                         android:id="@+id/item_icon"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:scaleType="centerInside"
-                />
+                        android:scaleType="centerInside" />
 
                 <ImageView
                         android:id="@+id/item_mark"
@@ -37,7 +38,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:src="@{recyclerModel.selected ? @drawable/ic_page_select_selected : @drawable/ic_page_select_empty}"
-                        app:visible="@{recyclerViewModel.isOnSelectMode()}"/>
+                        app:visible="@{recyclerViewModel.isOnSelectMode()}" />
 
             </FrameLayout>
 
@@ -52,12 +53,12 @@
                         android:id="@+id/item_info"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_marginEnd="10dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:padding="5dp"
-                        android:layout_marginEnd="10dp"
-                        app:visible="@{recyclerModel.infoIcon != 0}"
-                        app:imageResource="@{recyclerModel.infoIcon}"/>
+                        app:imageResource="@{recyclerModel.infoIcon}"
+                        app:visible="@{recyclerModel.infoIcon != 0}" />
 
             </FrameLayout>
 
@@ -72,8 +73,8 @@
                         android:id="@+id/item_title_layout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:layout_marginStart="15dp">
+                        android:layout_marginStart="15dp"
+                        android:orientation="vertical">
 
                     <TextView
                             android:id="@+id/item_title"
@@ -84,9 +85,9 @@
                             android:gravity="@{recyclerModel.subtitle == null ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM}"
                             android:marqueeRepeatLimit="marquee_forever"
                             android:singleLine="true"
-                            android:textSize="16sp"
                             android:text="@{recyclerModel.title}"
-                            android:textColorLink="@color/c_02"/>
+                            android:textColorLink="@color/c_02"
+                            android:textSize="16sp" />
 
                     <TextView
                             android:id="@+id/item_subtitle"
@@ -97,10 +98,10 @@
                             android:gravity="top"
                             android:marqueeRepeatLimit="marquee_forever"
                             android:singleLine="true"
-                            android:textSize="12sp"
                             android:text="@{recyclerModel.subtitle}"
-                            app:visible="@{recyclerModel.subtitle != null}"
-                            android:textColorLink="@color/c_03"/>
+                            android:textColorLink="@color/c_03"
+                            android:textSize="12sp"
+                            app:visible="@{recyclerModel.subtitle != null}" />
 
                 </LinearLayout>
 

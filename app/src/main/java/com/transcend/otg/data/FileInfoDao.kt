@@ -6,7 +6,7 @@ import androidx.room.*
 @Dao
 interface FileInfoDao {//data access object
 
-    @Query("SELECT * FROM files WHERE fileType = :type")
+    @Query("SELECT * FROM files WHERE fileType = :type ORDER BY title ASC, lastModifyTime ASC")
     fun getAllFilesByType(type: Int): LiveData<List<FileInfo>>
 
     @Query("SELECT * FROM files WHERE fileType = :type AND title LIKE :searchText")
@@ -22,7 +22,7 @@ interface FileInfoDao {//data access object
     fun getFiles(parent: String, type: Int): List<FileInfo>
 
     @Query("SELECT * FROM files WHERE path = :path")
-    fun getFile(path: String): FileInfo
+    fun getFile(path: String): FileInfo?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(file: FileInfo)
@@ -44,6 +44,9 @@ interface FileInfoDao {//data access object
 
     @Query("UPDATE files SET title = :newName AND path = :newPath WHERE path = :oldPath")
     fun updateFileName(oldPath: String, newPath: String, newName: String)
+
+    @Query("UPDATE files SET hasScanned = :scanned WHERE path = :path")
+    fun setFolderScanned(path: String, scanned: Boolean)
 
     @Update
     fun updateFile(fileInfo:FileInfo)

@@ -6,6 +6,8 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.databinding.BindingAdapter
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.transcend.otg.utilities.MainApplication
 
 object BindingAdapter {
@@ -51,10 +53,10 @@ object BindingAdapter {
     @BindingAdapter("imageResource")
     @JvmStatic
     fun setImageResource(imageView : ImageView, resId : Int){
-//        Glide.with(imageView.context)
-//            .load(resId)
-//            .into(imageView)
-        imageView.setImageResource(resId)
+        Glide.with(imageView.context)
+            .load(resId)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(imageView)
     }
 
     @JvmStatic

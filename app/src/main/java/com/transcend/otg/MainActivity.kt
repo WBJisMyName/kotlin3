@@ -28,10 +28,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.transcend.otg.databinding.ActivityMainBinding
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
 import com.transcend.otg.singleview.ViewPagerZoomFixed
-import com.transcend.otg.utilities.BackpressCallback
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.MainApplication
-import com.transcend.otg.utilities.SystemUtil
+import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel
 import java.io.File
 
@@ -59,6 +56,12 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
         binding.viewModel = viewModel
 
         EULAFragment.setOnEulaClickListener(this)
+
+        //掃描媒體檔案
+        ScanMediaFiles(application).scanFileList(Constant.TYPE_IMAGE)
+        ScanMediaFiles(application).scanFileList(Constant.TYPE_MUSIC)
+        ScanMediaFiles(application).scanFileList(Constant.TYPE_VIDEO)
+        ScanMediaFiles(application).scanFileList(Constant.TYPE_DOC)
 
         drawerLayout = binding.drawerLayout
         navController = findNavController(R.id.container)

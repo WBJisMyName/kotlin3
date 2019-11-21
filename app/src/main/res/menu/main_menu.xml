@@ -21,34 +21,20 @@
                     android:id="@+id/action_view_type"
                     android:enabled="true"
                     android:icon="@drawable/ic_drawer_backup_grey"
-                    android:title="切換顯示"
+                    android:title="@string/view_by_list"
                     app:showAsAction="never"/>
             <item
                     android:id="@+id/action_select_mode"
                     android:enabled="true"
                     android:icon="@drawable/ic_tab_select_grey"
-                    android:title="選取模式"
+                    android:title="@string/select"
                     app:showAsAction="never"/>
 
             <item
                     android:id="@+id/action_new_folder"
                     android:icon="@drawable/ic_tab_newfolder_grey"
-                    android:title="新增資料夾"
+                    android:title="@string/newFolder"
                     app:showAsAction="never" />
-
-            <item
-                    android:id="@+id/action_progress_test"
-                    android:enabled="true"
-                    android:icon="@drawable/ic_tab_copy_grey"
-                    android:title="讀取測試"
-                    app:showAsAction="never"/>
-
-            <item
-                    android:id="@+id/action_locate_test"
-                    android:enabled="true"
-                    android:icon="@drawable/ic_tab_folder_solid_grey"
-                    android:title="目的地頁面測試"
-                    app:showAsAction="never"/>
         </menu>
     </item>
 </menu>

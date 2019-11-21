@@ -12,6 +12,7 @@ import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -177,6 +178,21 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             }
         })
 
+        //設定顯示模式 list or grid
+        var adapter: FileInfoAdapter?
+        when(mBinding.viewPager.currentItem){
+            Constant.TYPE_IMAGE -> adapter = mAdapter.imagePage.adapter
+            Constant.TYPE_MUSIC -> adapter = mAdapter.musicPage.adapter
+            Constant.TYPE_VIDEO -> adapter = mAdapter.videoPage.adapter
+            Constant.TYPE_DOC -> adapter = mAdapter.docPage.adapter
+            else -> adapter = mAdapter.allFilePage.adapter
+        }
+        if (adapter?.mViewType == FileInfoAdapter.List)
+            menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
+        else
+            menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
+
+
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -227,6 +243,9 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                     .setCancelable(true)
                     .show()
             }
+            R.id.action_selectAll -> {
+
+            }
 //            R.id.action_progress_test -> {
 //                count = 0
 //                mFloatingBtn.visibility = View.VISIBLE
@@ -243,27 +262,45 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
     fun changeViewType(){
         var adapter: FileInfoAdapter? = null
-
+        var recyclerview: RecyclerView? = null
         when(mBinding.viewPager.currentItem){
-            Constant.TYPE_IMAGE -> adapter = mAdapter.imagePage.adapter
-            Constant.TYPE_MUSIC -> adapter = mAdapter.musicPage.adapter
-            Constant.TYPE_VIDEO -> adapter = mAdapter.videoPage.adapter
-            Constant.TYPE_DOC -> adapter = mAdapter.docPage.adapter
-            else -> adapter = mAdapter.allFilePage.adapter
+            Constant.TYPE_IMAGE -> {
+                adapter = mAdapter.imagePage.adapter
+                recyclerview = mAdapter.imagePage.recyclerView
+            }
+            Constant.TYPE_MUSIC ->{
+                adapter = mAdapter.musicPage.adapter
+                recyclerview = mAdapter.musicPage.recyclerView
+            }
+
+            Constant.TYPE_VIDEO ->{
+                adapter = mAdapter.videoPage.adapter
+                recyclerview = mAdapter.videoPage.recyclerView
+            }
+            Constant.TYPE_DOC ->{
+                adapter = mAdapter.docPage.adapter
+                recyclerview = mAdapter.docPage.recyclerView
+            }
+            else ->{
+                adapter = mAdapter.allFilePage.adapter
+                recyclerview = mAdapter.allFilePage.recyclerView
+            }
         }
 
-        if (adapter.itemCount > 0){
-            val currentItemType = adapter.getItemViewType(0)
+        if (adapter?.itemCount ?: 0 > 0){
+            val currentItemType = adapter?.getItemViewType(0)
             when(currentItemType){
                 FileInfoAdapter.Grid -> {
                     val listLayoutManager = LinearLayoutManager(context)
-                    recyclerView.layoutManager = listLayoutManager
-                    adapter.setViewType(FileInfoAdapter.List)
+                    recyclerview?.layoutManager = listLayoutManager
+                    adapter?.setViewType(FileInfoAdapter.List)
+                    mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
                 }
                 FileInfoAdapter.List -> {
                     val gridLayoutManager = GridLayoutManager(context, 3)
-                    recyclerView.layoutManager = gridLayoutManager
-                    adapter.setViewType(FileInfoAdapter.Grid)
+                    recyclerview?.layoutManager = gridLayoutManager
+                    adapter?.setViewType(FileInfoAdapter.Grid)
+                    mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
                 }
             }
         }

@@ -30,6 +30,10 @@ class FileRepository(application: Application) {
         return fileInfoDao.getFiles(parent, type)
     }
 
+    fun getFileInfo(path: String): FileInfo?{
+        return fileInfoDao.getFile(path)
+    }
+
     fun insert(fileInfo: FileInfo) {
         try {
             val thread = Thread(Runnable {
@@ -86,15 +90,26 @@ class FileRepository(application: Application) {
         } catch (e: Exception) { }
     }
 
+    fun setFolderScanned(path: String){
+        try {
+            val thread = Thread(Runnable {
+                fileInfoDao.setFolderScanned(path, true)
+            })
+            thread.start()
+        } catch (e: Exception) { }
+    }
+
     fun updateFileName(oldPath: String, newName: String){
         try {
             val thread = Thread(Runnable {
-                var fileInfo = fileInfoDao.getFile(oldPath)
-                val newPath = File(oldPath).parent + "/" + newName
-                fileInfo.title = newName
-                fileInfo.path = newPath
-                fileInfoDao.delete(oldPath)
-                fileInfoDao.insert(fileInfo)
+                var fileInfo = getFileInfo(oldPath)
+                if (fileInfo != null) {
+                    val newPath = File(oldPath).parent + "/" + newName
+                    fileInfo.title = newName
+                    fileInfo.path = newPath
+                    fileInfoDao.delete(oldPath)
+                    fileInfoDao.insert(fileInfo)
+                }
             })
             thread.start()
         } catch (e: Exception) { }

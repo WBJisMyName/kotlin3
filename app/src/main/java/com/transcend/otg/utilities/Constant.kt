@@ -18,7 +18,14 @@ object Constant{
     val TYPE_OTHERS = 5
 
     //用以判斷是否已讀取過，因為有件資料庫不須重新讀取
-    var hasLoadedTab: MutableList<Boolean> = mutableListOf(true, false, false, false, false)   //對應TYPE，分別為全部(此處理論上不會用到)、圖片、音樂、影片、文件
+    var mediaScanState: MutableList<ScanState> = mutableListOf(ScanState.SCANNED,   //全部(此處理論上不會用到)
+        ScanState.NONE, //圖片
+        ScanState.NONE, //音樂
+        ScanState.NONE, //影片
+        ScanState.NONE) //文件
+    enum class ScanState{
+        NONE, SCANNING, SCANNED
+    }
 
     val SORT_BY_DATE = 0
     val SORT_BY_NAME = 1

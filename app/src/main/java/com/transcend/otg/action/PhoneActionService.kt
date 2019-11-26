@@ -38,7 +38,7 @@ open class PhoneActionService : FileActionService() {
     }
 
     override fun move(context: Context, list: List<String>, dest: String): AsyncTaskLoader<*>? {
-        return null
+        return LocalMoveLoader(context as Activity, list, dest)
     }
 
     override fun delete(context: Context, list: List<String>): AsyncTaskLoader<*>? {

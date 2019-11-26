@@ -31,7 +31,10 @@ interface FileInfoDao {//data access object
     fun delete(files: FileInfo)
 
     @Query("DELETE FROM files WHERE parent LIKE :folderPath")
-    fun deleteFilesUnderFolderPath(folderPath: String)
+    fun deleteAllFilesUnderFolderPath(folderPath: String)
+
+    @Query("DELETE FROM files WHERE parent = :parentPath")
+    fun deleteFilesFromParentPath(parentPath: String)
 
     @Query("DELETE FROM files WHERE path = :path")
     fun delete(path: String)

@@ -26,7 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val viewModel: BrowserViewModel) : ListAdapter<FileInfo, FileInfoAdapter.ViewHolder>(FileInfoDiffCallback()) {
+open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val viewModel: BrowserViewModel) : ListAdapter<FileInfo, FileInfoAdapter.ViewHolder>(FileInfoDiffCallback()) {
 
     companion object {
         val Footer = 0
@@ -72,28 +72,32 @@ class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val 
     }
 
     fun hasFooter(): Boolean {
-        return currentList.size > 0
+//        if (viewModel.mMediaType == -1)  //全瀏覽時不使用lazy load
+            return false
+//        return currentList.size > 0
     }
 
     override fun getItemCount(): Int {
-        var count = 0
-        if (currentList.size > mLazyLoadCount)
-            count = mLazyLoadCount
-        else
-            count = currentList.size
-        if (hasFooter())
-            count++
+        var count = currentList.size
+        if (hasFooter()) {
+            if (currentList.size > mLazyLoadCount)  //總檔案數大於懶加載數，則顯示懶加載數
+                count = mLazyLoadCount + 1  //footer
+            else    //否則顯示總檔案數
+                count = currentList.size + 1    //footer
+        }
 
         return count
     }
 
     fun lazyLoad(){
-        val lastCount = mLazyLoadCount
-        mLazyLoadCount += 30
-        if (mLazyLoadCount > currentList.size)
-            mLazyLoadCount = currentList.size
-        if (lastCount != mLazyLoadCount)
-            notifyItemChanged(lastCount, mLazyLoadCount)
+        if (hasFooter()) {
+            val lastCount = mLazyLoadCount
+            mLazyLoadCount += 30
+            if (mLazyLoadCount > currentList.size)
+                mLazyLoadCount = currentList.size
+            if (lastCount != mLazyLoadCount)    //懶加載數有變才作更新
+                notifyItemChanged(lastCount, mLazyLoadCount)
+        }
     }
 
     fun loadAll(){

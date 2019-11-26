@@ -53,6 +53,7 @@ class SystemUtil {
                             file = getPath.invoke(mListVolumeinfo[i]) as File
                             if (file != null) {
                                 sdPath = file.absolutePath
+                                Constant.SD_ROOT = sdPath
                                 return sdPath
                             }
                         }
@@ -109,26 +110,30 @@ class SystemUtil {
                     if (removable && path != null && mState == "mounted") {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             if (Build.BRAND == context.resources.getString(R.string.samsung)) {
-                                return if (subSystem != null && subSystem.contains("sd"))
-                                    path
-                                else
+                                if (subSystem != null && subSystem.contains("sd")) {
+                                    Constant.SD_ROOT = path
+                                    return path
+                                } else
                                     continue
                             } else {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                     val description =
                                         (storageVolumeElement as StorageVolume).getDescription(context).toLowerCase()
-                                    return if (description.contains("sd") && !description.contains("usb")) {
-                                        path
+                                    if (description.contains("sd") && !description.contains("usb")) {
+                                        Constant.SD_ROOT = path
+                                        return path
                                     } else if (description.contains("usb") && !description.contains("sd")) {
                                         continue
                                     } else {
                                         path
                                     }
                                 } else {
+                                    Constant.SD_ROOT = path
                                     return path
                                 }
                             }
                         } else if (path.toLowerCase().contains("sd")) {
+                            Constant.SD_ROOT = path
                             return path
                         }
                     }

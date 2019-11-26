@@ -90,6 +90,25 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             //TODO
             (mBinding.viewPager.adapter as TabPagerAdapter).doRefresh(mBinding.viewPager.currentItem)
         }
+
+        mBinding.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val pos = tab?.position
+                when(pos){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.refreshView()
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.refreshView()
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.refreshView()
+                    Constant.TYPE_DOC -> mAdapter.docPage.refreshView()
+                    else -> return mAdapter.allFilePage.refreshView()
+                }
+            }
+        })
     }
 
     class TabPagerAdapter(fragmentActivity: FragmentActivity, root: String): FragmentStateAdapter(fragmentActivity) {
@@ -126,7 +145,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                 Constant.TYPE_MUSIC -> musicPage.doRefresh(Constant.TYPE_MUSIC)
                 Constant.TYPE_VIDEO -> videoPage.doRefresh(Constant.TYPE_VIDEO)
                 Constant.TYPE_DOC -> docPage.doRefresh(Constant.TYPE_DOC)
-                else -> allFilePage.viewModel.doRefresh()
+                else -> allFilePage.doRefresh()
             }
         }
     }
@@ -211,7 +230,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.adapter
             Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.adapter
             Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.adapter
-            else -> mAdapter.allFilePage.viewModel.doRefresh()
+            else -> mAdapter.allFilePage.doRefresh()
         }
     }
 

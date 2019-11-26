@@ -103,7 +103,7 @@ class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNED)
+            Constant.mediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.NONE)
         }
     }
 
@@ -174,7 +174,7 @@ class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNED)
+            Constant.mediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.NONE)
         }
     }
 
@@ -243,7 +243,7 @@ class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception){
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNED)
+            Constant.mediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.NONE)
         }
     }
 
@@ -310,7 +310,7 @@ class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNED)
+            Constant.mediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.NONE)
         }
     }
 }

@@ -23,7 +23,7 @@ class LocalFileDeleteLoader(context: Context, private val mPaths: List<String>) 
             if (target.isDirectory) {
                 isSuccess = deleteDirectory(target)
                 if (isSuccess)  //資料夾刪除完成，呼叫DB刪除該路徑底下所有資料
-                    repository.deleteFilesUnderFolderPath(path)
+                    repository.deleteAllFilesUnderFolder(path)
             } else
                 isSuccess = target.delete()
 

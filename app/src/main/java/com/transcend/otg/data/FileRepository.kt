@@ -63,10 +63,19 @@ class FileRepository(application: Application) {
         } catch (e: Exception) { }
     }
 
-    fun deleteFilesUnderFolderPath(path: String) {
+    fun deleteAllFilesUnderFolder(path: String) {
         try {
             val thread = Thread(Runnable {
-                fileInfoDao.deleteFilesUnderFolderPath(path+"%")    //尾端加%表示後面無論為何多長都算進去
+                fileInfoDao.deleteAllFilesUnderFolderPath(path+"%")    //尾端加%表示後面無論為何多長都算進去
+            })
+            thread.start()
+        } catch (e: Exception) { }
+    }
+
+    fun deleteFilesFromParentPath(parent: String){
+        try {
+            val thread = Thread(Runnable {
+                fileInfoDao.deleteAllFilesUnderFolderPath(parent)    //只刪除該資料夾下的檔案，重load用
             })
             thread.start()
         } catch (e: Exception) { }
@@ -90,10 +99,10 @@ class FileRepository(application: Application) {
         } catch (e: Exception) { }
     }
 
-    fun setFolderScanned(path: String){
+    fun setFolderScanned(path: String, scanned: Boolean){
         try {
             val thread = Thread(Runnable {
-                fileInfoDao.setFolderScanned(path, true)
+                fileInfoDao.setFolderScanned(path, scanned)
             })
             thread.start()
         } catch (e: Exception) { }

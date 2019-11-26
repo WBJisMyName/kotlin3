@@ -31,9 +31,12 @@
                             android:layout_centerVertical="true">
 
                         <ImageView
+                                android:id="@+id/toggle"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" app:srcCompat="@drawable/ic_navi_back_white"
-                                android:id="@+id/toggle" android:layout_weight="1" android:padding="8dp"/>
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:padding="8dp"
+                                app:srcCompat="@drawable/ic_navi_cancel_white" />
 
                         <androidx.appcompat.widget.AppCompatSpinner
                                 android:id="@+id/main_dropdown"

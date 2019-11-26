@@ -21,10 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.google.android.material.textfield.TextInputLayout
 import com.transcend.otg.action.FileActionManager
-import com.transcend.otg.action.loader.LocalCopyLoader
-import com.transcend.otg.action.loader.LocalFileDeleteLoader
-import com.transcend.otg.action.loader.LocalRenameLoader
-import com.transcend.otg.action.loader.NullLoader
+import com.transcend.otg.action.loader.*
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.browser.DropDownAdapter
 import com.transcend.otg.data.FileInfo
@@ -67,6 +64,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
     override fun onResume() {
         super.onResume()
+        refreshView()   //切換tab時更新dropdown list，全檔案瀏覽時更新目前路徑；媒體瀏覽則顯示手機名稱
     }
 
     override fun onCreateView(
@@ -92,6 +90,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 }
             }
         })
+
         return mBinding!!.root
     }
 
@@ -121,12 +120,25 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         if (requestCode == FileActionLocateActivity.REQUEST_CODE){
             if (resultCode == AppCompatActivity.RESULT_OK){
                 val destPath = data?.getStringExtra("path")!!
-                mFileActionManager.copy(destPath, adapter?.getSelectedFilesPath()!!)
+                val action_id = data?.getIntExtra("action_id", -1)
+                when(action_id){
+                    R.id.action_copy -> mFileActionManager.copy(destPath, adapter?.getSelectedFilesPath()!!)
+                    R.id.action_move -> mFileActionManager.move(destPath, adapter?.getSelectedFilesPath()!!)
+                }
             }
         }
     }
 
+    open fun refreshView(){
+        setDropdownList(viewModel.mPath)
+        if (mActionMode != null)
+            onDestroyActionMode(mActionMode)
+//        doRefresh()
+    }
+
     open fun setDropdownList(path: String){
+        if (activity == null)
+            return
         var path = path
         val mainViewModel: MainActivityViewModel = ViewModelProviders.of(activity as MainActivity).get(MainActivityViewModel::class.java)   //取得activity的viewmodel
         val localMainTitle = Constant.LocalBrowserMainPageTitle
@@ -158,6 +170,12 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 doLoadFiles(selected_path)
             }
         })
+    }
+
+    open fun doRefresh(){
+        viewModel.isLoading.set(true)
+        destroyActionMode()
+        viewModel.doRefresh()
     }
 
     protected fun startLocateActivity(actionID: Int) {
@@ -278,11 +296,19 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
             R.id.action_selectAll -> {
                 adapter?.selectAll()
             }
-            R.id.action_copy -> {
-                startLocateActivity(R.id.action_copy)
+            R.id.action_copy, R.id.action_move -> {
+                startLocateActivity(id)
+                if (mActionMode != null)
+                    onDestroyActionMode(mActionMode)
             }
+
         }
         return false
+    }
+
+    fun destroyActionMode(){
+        if (mActionMode != null)
+            onDestroyActionMode(mActionMode)
     }
 
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
@@ -336,6 +362,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
             LoaderID.LOCAL_FILE_DELETE -> return LocalFileDeleteLoader(mContext, args?.getStringArrayList("paths")!!)
             LoaderID.LOCAL_FILE_RENAME -> return LocalRenameLoader(mContext, args?.getString("path")!!, args.getString("name")!!)
             LoaderID.LOCAL_FILE_COPY -> return LocalCopyLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args?.getString("path")!!)
+            LoaderID.LOCAL_FILE_MOVE -> return LocalMoveLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args?.getString("path")!!)
             else -> return NullLoader(mContext)
         }
     }
@@ -347,7 +374,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         if (loader is LocalFileDeleteLoader){
             viewModel.doRefresh()
             adapter?.notifyDataSetChanged()
-        } else if (loader is LocalRenameLoader){
+        } else if (loader is LocalRenameLoader || loader is LocalCopyLoader || loader is LocalMoveLoader){
             viewModel.doRefresh()
         }
     }

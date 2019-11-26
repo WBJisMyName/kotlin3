@@ -16,6 +16,7 @@ import java.io.File
 open class BrowserViewModel(application: Application) : AndroidViewModel(application) {
 
     var mPath = Constant.LOCAL_ROOT //記錄當前路徑
+    var mMediaType = -1
     var isLoading = ObservableBoolean(false)
     var isEmpty = ObservableBoolean(false)
     var isOnSelectMode = ObservableBoolean(false)
@@ -39,8 +40,8 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         repository.delete(fileInfo)
     }
 
-    fun deleteFilesUnderFolderPath(folderPath: String) {
-        repository.deleteFilesUnderFolderPath(folderPath)
+    fun deleteFilesFromParentPath(parent: String) {
+        repository.deleteFilesFromParentPath(parent)
     }
 
     fun deleteAll(){
@@ -56,7 +57,7 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun setFolderScanned(path: String){
-        repository.setFolderScanned(path)
+        repository.setFolderScanned(path, true)
     }
 
     fun getFileInfo(path: String): FileInfo{
@@ -79,7 +80,7 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
 
     fun doRefresh(){
         val thread = Thread(Runnable {
-            deleteFilesUnderFolderPath(mPath)
+            deleteFilesFromParentPath(mPath)
             scanFolderFiles(mPath)
         })
         thread.start()
@@ -106,6 +107,18 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     //撈資料夾擋按列表，撈完會post給liveData
     fun scanFolderFiles(parent: String){
         isLoading.set(true)
+
+        if (parent.equals(Constant.LOCAL_ROOT) || parent.equals(Constant.SD_ROOT)){
+            val fileInfo = FileInfo()
+            fileInfo.path = parent
+            fileInfo.title = if (parent.equals(Constant.LOCAL_ROOT)) Constant.LocalBrowserMainPageTitle else Constant.SDBrowserMainPageTitle
+            fileInfo.hasScanned = true
+            fileInfo.fileType = Constant.TYPE_DIR
+            fileInfo.defaultIcon = R.drawable.ic_filelist_folder_grey
+            fileInfo.infoIcon = R.drawable.ic_brower_listview_filearrow
+            insert(fileInfo)
+        }
+
         val localFile = File(parent)
         var insert_count = 0
         if (localFile.exists()) {
@@ -148,6 +161,7 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
                 insert_count++
             }
         }
+
         //scan完直接撈資料，可能造成檔案不完全
         var list = repository.getAllFileInfos(parent)
         var count = 0 //count表示撈幾次才正確

@@ -79,6 +79,10 @@ class FileActionLocateActivity : AppCompatActivity(),
             R.id.action_move -> Toast.makeText(this, R.string.title_move_to, Toast.LENGTH_LONG).show()
         }
 
+        mBinding.toggle.setOnClickListener {
+            this@FileActionLocateActivity.finish()
+        }
+
         initFragment()
     }
 
@@ -187,6 +191,7 @@ class FileActionLocateActivity : AppCompatActivity(),
         } else {
             val bundle = Bundle()
             bundle.putString("path", mPath)
+            bundle.putInt("action_id", mActionID)
             val intent = Intent()
             intent.putExtras(bundle)
             setResult(RESULT_OK, intent)

@@ -47,7 +47,12 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         recyclerView.setHasFixedSize(true)
     }
 
+    override fun refreshView(){
+        super.setDropdownList(Constant.LOCAL_ROOT)
+    }
+
     fun startLoadingView() {
+        viewModel.mMediaType = mType
         when(mType){
             Constant.TYPE_IMAGE -> {
                 viewModel.imageItems.observe(this@MediaFragment, Observer { fileList ->
@@ -85,8 +90,13 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         mBinding?.viewModel = viewModel  //Bind view and view model
     }
 
+    override fun doRefresh() {
+        doRefresh(mType)
+    }
+
     fun doRefresh(type: Int){
         viewModel.isLoading.set(true)
+        destroyActionMode()
         val thread = Thread(Runnable {
             if (activity != null)
                 ScanMediaFiles(activity!!.application).scanFileList(type)

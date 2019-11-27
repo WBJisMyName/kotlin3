@@ -15,6 +15,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.transcend.otg.R
 import com.transcend.otg.permission.PermissionHandle
 import com.transcend.otg.singleview.ViewPagerZoomFixed
+import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.SystemUtil
 import java.io.File
 import java.util.*
@@ -42,7 +43,7 @@ class ExternalStorageLollipop(context: Context) : AbstractExternalStorage(contex
         get() {
             var uriTree = PreferenceManager.getDefaultSharedPreferences(mContext).all[PREF_DEFAULT_URISD] as String?
             if (uriTree == null)
-                uriTree = SystemUtil().getSDLocation(mContext)
+                uriTree = Constant.SD_ROOT
             mContext.contentResolver.takePersistableUriPermission(
                 Uri.parse(uriTree),
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION

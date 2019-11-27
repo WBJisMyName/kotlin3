@@ -1,5 +1,7 @@
 package com.transcend.otg.utilities
 
+import android.os.StatFs
+
 class FileFactory{
     private var mFileFactory: FileFactory? = null
     private val mMute = Any()
@@ -32,5 +34,26 @@ class FileFactory{
     fun releaseNotificationID(id: Int) {
         val value = "" + id
         mNotificationList.remove(value)
+    }
+
+    fun getUsedStorageSize(filePath: String): Long {
+        try {
+            val stat = StatFs(filePath)
+            val bytesAvailable = stat.blockSizeLong * stat.blockCountLong
+            val bytesLeftAvailable = stat.blockSizeLong * stat.availableBlocksLong
+            return bytesAvailable - bytesLeftAvailable
+        } catch (e: Exception) {
+            return 0
+        }
+    }
+
+    fun getStorageAllSizeLong(filePath: String): Long {
+        try {
+            val stat = StatFs(filePath)
+            return stat.blockSizeLong * stat.blockCountLong
+        } catch (e: Exception) {
+            return 0
+        }
+
     }
 }

@@ -17,8 +17,9 @@ import com.transcend.otg.data.FileInfo
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.ActionLocateViewModel
 import kotlinx.android.synthetic.main.dialog_folder_create.*
+import java.io.File
 
-class FileActionLocateFragment : BrowserFragment(Constant.LOCAL_ROOT),
+class FileActionLocateFragment : BrowserFragment(Constant.Storage_Device_Root),
     BackpressCallback,
     LoaderCallbacks<Boolean>{
 
@@ -59,7 +60,7 @@ class FileActionLocateFragment : BrowserFragment(Constant.LOCAL_ROOT),
             ActionLocateViewModel::class.java)   //取得activity的viewmodel
         val localMainTitle = Constant.LocalBrowserMainPageTitle
         val sdMainTitle = Constant.SDBrowserMainPageTitle
-        val sdcardRoot = SystemUtil().getSDLocation(mContext)
+        val sdcardRoot = Constant.SD_ROOT
         if (path.startsWith(Constant.LOCAL_ROOT))   //置換本地根目錄的名稱
             path = path.replace(Constant.LOCAL_ROOT, localMainTitle)
         else if (sdcardRoot != null && path.startsWith(sdcardRoot)) //置換SD根目錄名稱
@@ -111,8 +112,37 @@ class FileActionLocateFragment : BrowserFragment(Constant.LOCAL_ROOT),
         }
     }
 
-    fun doLoad(path: String){
-        viewModel.doLoadFiles(path)
+    fun buildStorageDeviceRoot(): ArrayList<FileInfo>{
+        val list = ArrayList<FileInfo>()
+        val localInfo = FileInfo()
+        localInfo.path = Constant.LOCAL_ROOT
+        localInfo.title = SystemUtil().getDeviceName()
+        localInfo.fileType = Constant.TYPE_DIR
+        localInfo.defaultIcon = R.drawable.ic_drawer_myphone_grey
+        localInfo.infoIcon = R.drawable.ic_brower_listview_filearrow
+        list.add(localInfo)
+        val sdPath = Constant.SD_ROOT
+        if (sdPath != null){
+            val sdInfo = FileInfo()
+            sdInfo.path = sdPath
+            sdInfo.title = getString(R.string.nav_sd)
+            sdInfo.fileType = Constant.TYPE_DIR
+            sdInfo.defaultIcon = R.drawable.ic_drawer_microsd_grey
+            sdInfo.infoIcon = R.drawable.ic_brower_listview_filearrow
+            list.add(sdInfo)
+        }
+        return list
+    }
+
+    override fun doLoadFiles(path: String){
+        if (path.equals(Constant.Storage_Device_Root)){
+            val list = buildStorageDeviceRoot()
+            if (list.size > 1) {    //超過一個才顯示，否則加載本地資料
+                viewModel.items.postValue(list)
+                return
+            }
+        }
+        super.doLoadFiles(path)
     }
 
     fun getFileList(): List<FileInfo>?{
@@ -121,5 +151,13 @@ class FileActionLocateFragment : BrowserFragment(Constant.LOCAL_ROOT),
 
     fun doReload(){
         viewModel.doRefresh()
+    }
+
+    override fun onBackPressed(): Boolean {
+        if(getPath().equals(mRoot))   //到了根目錄，回傳true
+            return true
+        else
+            doLoadFiles(File(getPath()).parent)  //讀取parent路徑
+        return false
     }
 }

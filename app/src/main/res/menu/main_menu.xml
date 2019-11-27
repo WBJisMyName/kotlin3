@@ -10,7 +10,7 @@
             app:showAsAction="always|collapseActionView" />
 
     <item
-            android:id="@+id/more"
+            android:id="@+id/action_more"
             android:icon="@drawable/ic_navi_more_android_white"
             android:title="more"
             app:showAsAction="always">

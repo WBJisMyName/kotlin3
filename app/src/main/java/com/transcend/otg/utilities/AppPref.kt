@@ -1,8 +1,6 @@
-package com.transcend.otg
+package com.transcend.otg.utilities
 
 import android.content.Context
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.PrefUtil
 
 object AppPref {
 
@@ -11,11 +9,13 @@ object AppPref {
     val SORT_ORDER = "Int sortOrder key"
 
     fun setSDKey(context: Context, value: String) {
-        PrefUtil.write(context, SD_KEY, PrefUtil.KEY_STRING, value)
+        PrefUtil.write(context,
+            SD_KEY, PrefUtil.KEY_STRING, value)
     }
 
     fun getSdKey(context: Context): String {
-        return PrefUtil.read(context, SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
+        return PrefUtil.read(context,
+            SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
     }
 
     fun setSortBy(context: Context, type: Int, value: Int){

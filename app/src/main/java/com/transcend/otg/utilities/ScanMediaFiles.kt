@@ -11,6 +11,7 @@ import java.io.File
 
 class ScanMediaFiles(application: Application){
     val repository = FileRepository(application)
+    val sleepTime = 300L
 
     fun scanFileList(type: Int){
         if (Constant.mediaScanState.get(type) == Constant.ScanState.SCANNING)   //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
@@ -99,7 +100,7 @@ class ScanMediaFiles(application: Application){
                 }
                 imagecursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNED)
-                Thread.sleep(200)
+                Thread.sleep(sleepTime)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -170,7 +171,7 @@ class ScanMediaFiles(application: Application){
                 }
                 musiccursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNED)
-                Thread.sleep(200)
+                Thread.sleep(sleepTime)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -239,7 +240,7 @@ class ScanMediaFiles(application: Application){
                 }
                 videocursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNED)
-                Thread.sleep(200)
+                Thread.sleep(sleepTime)
             }
         } catch (e: Exception){
             e.printStackTrace()
@@ -306,7 +307,7 @@ class ScanMediaFiles(application: Application){
                 }
                 docscursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNED)
-                Thread.sleep(200)
+                Thread.sleep(sleepTime)
             }
         } catch (e: Exception) {
             e.printStackTrace()

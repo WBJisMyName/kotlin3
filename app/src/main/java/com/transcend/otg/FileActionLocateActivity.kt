@@ -121,14 +121,14 @@ class FileActionLocateActivity : AppCompatActivity(),
                     if (isSelectedFolderValid) {
                         if (mFileInfo != null) {
                             mPath = mFileInfo.path
-                            mFragment?.doLoad(mPath)
+                            mFragment?.doLoadFiles(mPath)
                         }
                     }
 
                     return
                 }
             } else {
-                mFragment?.doLoad(Constant.Storage_Root_Path)
+                mFragment?.doLoadFiles(Constant.Storage_Device_Root)
             }
 
             requestPermissionDialog()
@@ -148,12 +148,12 @@ class FileActionLocateActivity : AppCompatActivity(),
                     if (isSelectedFolderValid) {
                         if (mFileInfo != null) {
                             mPath = mFileInfo.path
-                            mFragment?.doLoad(mPath)
+                            mFragment?.doLoadFiles(mPath)
                         }
                     }
                     return
                 } else
-                    mFragment?.doLoad(Constant.Storage_Root_Path)
+                    mFragment?.doLoadFiles(Constant.Storage_Device_Root)
 
                 checkPermission()
             }
@@ -232,7 +232,7 @@ class FileActionLocateActivity : AppCompatActivity(),
 
     private fun requestSDCardPermission() {
         if (MainApplication().OSisAfterNougat()) {
-            val sdPath = SystemUtil().getSDLocation(this)
+            val sdPath = Constant.SD_ROOT
             if (sdPath == null) {
                 Log.d(TAG, "sdPath is null")
                 return

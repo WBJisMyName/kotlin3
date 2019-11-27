@@ -27,10 +27,8 @@ import com.transcend.otg.databinding.FragmentTabBinding
 import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.LoaderID
-import com.transcend.otg.utilities.SystemUtil
 import kotlinx.android.synthetic.main.dialog_folder_create.*
 import kotlinx.android.synthetic.main.fragment_browser.*
-
 
 class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<Boolean> {
 
@@ -46,6 +44,8 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
     private var mRoot = Constant.LOCAL_ROOT
     lateinit var mFileActionManager: FileActionManager  //action manager
 
+    var mStartTab = 0
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,11 +54,15 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
         setHasOptionsMenu(true)     //設定支援選單
 
-        if (arguments != null && arguments!!.getString("root") != null)
-            mRoot = arguments!!.getString("root")    //設定根目錄路徑
+        if (arguments != null) {
+            if (arguments!!.getString("root") != null)
+                mRoot = arguments!!.getString("root")    //設定根目錄路徑
+            if (arguments!!.getInt("media_type") != 0)
+                mStartTab = arguments!!.getInt("media_type")
+        }
 
 
-        if (mRoot.startsWith(SystemUtil().getSDLocation(context!!) ?: "Sdcard")){
+        if (mRoot.startsWith(Constant.SD_ROOT ?: "Sdcard")){
             mFileActionManager = FileActionManager(context!!, FileActionManager.FileActionServiceType.SD, this)   //action manager
         } else if (mRoot.startsWith(Constant.LOCAL_ROOT)){
             mFileActionManager = FileActionManager(context!!, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
@@ -74,7 +78,8 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
         mAdapter = TabPagerAdapter(activity!!, mRoot)
         mBinding.viewPager.adapter = mAdapter
-        mBinding.viewPager.setCurrentItem(0)
+//        mBinding.viewPager.setCurrentItem(mStartTab, false)
+        mBinding.viewPager.post(Runnable { mBinding.viewPager.setCurrentItem(mStartTab, false) })
         mBinding.viewPager.offscreenPageLimit = 1
 
         TabLayoutMediator(mBinding.tabLayout, mBinding.viewPager, object : TabLayoutMediator.OnConfigureTabCallback {
@@ -96,6 +101,14 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
+                val pos = tab?.position
+                when(pos){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.destroyActionMode()
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.destroyActionMode()
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.destroyActionMode()
+                    Constant.TYPE_DOC -> mAdapter.docPage.destroyActionMode()
+                    else -> mAdapter.allFilePage.destroyActionMode()
+                }
             }
 
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -185,32 +198,36 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
         menu.findItem(R.id.action_search).setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                menu.findItem(R.id.more).setVisible(false)
+                menu.findItem(R.id.action_more).setVisible(false)
                 setSearchAdapter()
                 return true
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                menu.findItem(R.id.more).setVisible(true)
+                menu.findItem(R.id.action_more).setVisible(true)
                 setBrowserAdapter()
                 return true
             }
         })
 
-        //設定顯示模式 list or grid
-        var adapter: FileInfoAdapter?
-        when(mBinding.viewPager.currentItem){
-            Constant.TYPE_IMAGE -> adapter = mAdapter.imagePage.adapter
-            Constant.TYPE_MUSIC -> adapter = mAdapter.musicPage.adapter
-            Constant.TYPE_VIDEO -> adapter = mAdapter.videoPage.adapter
-            Constant.TYPE_DOC -> adapter = mAdapter.docPage.adapter
-            else -> adapter = mAdapter.allFilePage.adapter
-        }
-        if (adapter?.mViewType == FileInfoAdapter.List)
-            menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
-        else
-            menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
-
+        menu.findItem(R.id.action_more).setOnMenuItemClickListener(object : MenuItem.OnMenuItemClickListener {
+            override fun onMenuItemClick(p0: MenuItem?): Boolean {
+                //設定顯示模式 list or grid
+                var adapter: FileInfoAdapter?
+                when(mBinding.viewPager.currentItem){
+                    Constant.TYPE_IMAGE -> adapter = mAdapter.imagePage.adapter
+                    Constant.TYPE_MUSIC -> adapter = mAdapter.musicPage.adapter
+                    Constant.TYPE_VIDEO -> adapter = mAdapter.videoPage.adapter
+                    Constant.TYPE_DOC -> adapter = mAdapter.docPage.adapter
+                    else -> adapter = mAdapter.allFilePage.adapter
+                }
+                if (adapter?.mViewType == FileInfoAdapter.List)
+                    menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
+                else
+                    menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
+                return true
+            }
+        })
 
         super.onCreateOptionsMenu(menu, inflater)
     }

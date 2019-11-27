@@ -32,6 +32,15 @@
                 android:launchMode="singleTask">
         </activity>
         <activity android:name=".singleview.ImageActivity"/>
+
+        <receiver android:name=".receiver.SDCardReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
+                <action android:name="android.intent.action.MEDIA_UNMOUNTED" />
+
+                <data android:scheme="file" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

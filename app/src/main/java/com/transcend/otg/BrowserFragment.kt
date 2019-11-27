@@ -64,6 +64,8 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
     override fun onResume() {
         super.onResume()
+        if (activity is MainActivity)
+            (activity as MainActivity).setToolbarMode(MainActivityViewModel.TabMode.Browser)
         refreshView()   //切換tab時更新dropdown list，全檔案瀏覽時更新目前路徑；媒體瀏覽則顯示手機名稱
     }
 
@@ -100,6 +102,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
         viewModel.items.observe(this, Observer {
                 fileList ->
+            adapter?.submitList(null)
             adapter?.submitList(fileList)
             viewModel.isLoading.set(false)
             viewModel.isEmpty.set(fileList.size == 0)
@@ -131,9 +134,6 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
     open fun refreshView(){
         setDropdownList(viewModel.mPath)
-        if (mActionMode != null)
-            onDestroyActionMode(mActionMode)
-//        doRefresh()
     }
 
     open fun setDropdownList(path: String){
@@ -143,7 +143,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         val mainViewModel: MainActivityViewModel = ViewModelProviders.of(activity as MainActivity).get(MainActivityViewModel::class.java)   //取得activity的viewmodel
         val localMainTitle = Constant.LocalBrowserMainPageTitle
         val sdMainTitle = Constant.SDBrowserMainPageTitle
-        val sdcardRoot = SystemUtil().getSDLocation(mContext)
+        val sdcardRoot = Constant.SD_ROOT
         if (path.startsWith(Constant.LOCAL_ROOT))   //置換本地根目錄的名稱
             path = path.replace(Constant.LOCAL_ROOT, localMainTitle)
         else if (sdcardRoot != null && path.startsWith(sdcardRoot)) //置換SD根目錄名稱
@@ -298,8 +298,6 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
             }
             R.id.action_copy, R.id.action_move -> {
                 startLocateActivity(id)
-                if (mActionMode != null)
-                    onDestroyActionMode(mActionMode)
             }
 
         }
@@ -349,7 +347,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         mActionModeTitle.setText(String.format(format, count))
     }
 
-    fun doLoadFiles(path: String){
+    open fun doLoadFiles(path: String){
         viewModel.doLoadFiles(path)
         thread {
             Thread.sleep(100)   //睡0.1秒，避免黑畫面發生
@@ -384,6 +382,11 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
     }
 
     override fun onBackPressed(): Boolean {
+        if (viewModel.isLoading.get()) {    //如果檔案讀取中，則中斷讀取檔案
+            viewModel.isCancelScanTask = true
+            return false
+        }
+
         if(getPath().equals(mRoot))   //到了根目錄，回傳true
             return true
         else

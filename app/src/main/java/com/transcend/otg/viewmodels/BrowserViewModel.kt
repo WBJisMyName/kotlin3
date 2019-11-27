@@ -21,6 +21,8 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     var isEmpty = ObservableBoolean(false)
     var isOnSelectMode = ObservableBoolean(false)
 
+    var isCancelScanTask = false
+
     val repository = FileRepository(application)
     var progress = ObservableInt(View.GONE)
 
@@ -65,17 +67,19 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         return file ?: FileInfo()
     }
 
-    open fun doLoadFiles(path: String){
+    fun doLoadFiles(path: String){
         mPath = path
         isLoading.set(true)
 
-        val thread = Thread(Runnable {
-            if (!getFileInfo(mPath).hasScanned)
-                scanFolderFiles(path)
-            else
-                items.postValue(sort(repository.getAllFileInfos(path)))
-        })
-        thread.start()
+        if (!mPath.equals(Constant.Storage_Device_Root)){   //選擇本地或SD卡路徑的根頁面
+            val thread = Thread(Runnable {
+                if (!getFileInfo(mPath).hasScanned)
+                    scanFolderFiles(path)
+                else
+                    items.postValue(sort(repository.getAllFileInfos(path)))
+            })
+            thread.start()
+        }
     }
 
     fun doRefresh(){
@@ -126,6 +130,20 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
             if (list==null)
                 return
             for (file in list) {
+                if (isCancelScanTask){
+                    isCancelScanTask = false
+                    //直接撈資料可能造成檔案不完全
+                    var list = repository.getAllFileInfos(parent)
+                    var count = 0 //count表示撈幾次才正確(微秒)
+                    while (insert_count != list.size && count < 30) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或3秒後跳出
+                        list = repository.getAllFileInfos(parent)
+                        Thread.sleep(100)
+                        count++
+                    }
+                    items.postValue(sort(list))
+                    setFolderScanned(parent)
+                }
+
                 if (file.name.toString().startsWith("."))
                     continue
                 val info = FileInfo()
@@ -164,8 +182,8 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
 
         //scan完直接撈資料，可能造成檔案不完全
         var list = repository.getAllFileInfos(parent)
-        var count = 0 //count表示撈幾次才正確
-        while (insert_count != list.size) {    //此處檢查撈到的資料跟insert的資料數量是否有一致
+        var count = 0 //count表示撈幾次才正確(微秒)
+        while (insert_count != list.size && count < 30) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或3秒後跳出
             list = repository.getAllFileInfos(parent)
             Thread.sleep(100)
             count++

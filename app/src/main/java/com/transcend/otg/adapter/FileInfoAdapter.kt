@@ -72,9 +72,9 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
     }
 
     fun hasFooter(): Boolean {
-//        if (viewModel.mMediaType == -1)  //全瀏覽時不使用lazy load
+        if (viewModel.mMediaType == -1)  //全瀏覽時不使用lazy load
             return false
-//        return currentList.size > 0
+        return currentList.size > 0
     }
 
     override fun getItemCount(): Int {

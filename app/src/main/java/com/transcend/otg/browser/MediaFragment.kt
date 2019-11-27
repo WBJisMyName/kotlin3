@@ -56,24 +56,28 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         when(mType){
             Constant.TYPE_IMAGE -> {
                 viewModel.imageItems.observe(this@MediaFragment, Observer { fileList ->
+                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_MUSIC -> {
                 viewModel.musicItems.observe(this@MediaFragment, Observer { fileList ->
+                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_VIDEO -> {
                 viewModel.videoItems.observe(this@MediaFragment, Observer { fileList ->
+                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })
             }
             Constant.TYPE_DOC -> {
                 viewModel.docItems.observe(this@MediaFragment, Observer { fileList ->
+                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                 })

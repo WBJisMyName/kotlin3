@@ -5,8 +5,8 @@ import android.os.Environment
 object Constant{
     var DropDownMainTitle = ""
     val LOCAL_ROOT = Environment.getExternalStorageDirectory().absolutePath
-    var SD_ROOT = ""
-    var Storage_Root_Path = "Storage/"
+    var SD_ROOT: String? = null
+    var Storage_Device_Root = "Storage/"
     var LocalBrowserMainPageTitle = SystemUtil().getDeviceName()
     var SDBrowserMainPageTitle = "SD Card"
 

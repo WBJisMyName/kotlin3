@@ -26,16 +26,14 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.transcend.otg.databinding.ActivityMainBinding
+import com.transcend.otg.receiver.SDCardReceiver
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
 import com.transcend.otg.singleview.ViewPagerZoomFixed
-import com.transcend.otg.utilities.BackpressCallback
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.MainApplication
-import com.transcend.otg.utilities.SystemUtil
+import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel
 import java.io.File
 
-class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
+class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFragment.OnEulaClickListener {
     private val TAG = MainActivity::class.java.simpleName
 
     override fun onEulaAgreeClick(v: View) {
@@ -52,6 +50,20 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
     private var oneSecond = true    //Permission 等待時間
     private val mSDPermission = 1009
 
+    override fun onResume() {
+        super.onResume()
+        SDCardReceiver.instance.registerObserver(this) //監測SD卡插拔
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            SDCardReceiver.instance.unregisterObserver(this)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -60,32 +72,28 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
 
         EULAFragment.setOnEulaClickListener(this)
 
-        //掃描媒體檔案
-//        ScanMediaFiles(application).scanFileList(Constant.TYPE_IMAGE)
-//        ScanMediaFiles(application).scanFileList(Constant.TYPE_MUSIC)
-//        ScanMediaFiles(application).scanFileList(Constant.TYPE_VIDEO)
-//        ScanMediaFiles(application).scanFileList(Constant.TYPE_DOC)
-
-        drawerLayout = binding.drawerLayout
-        navController = findNavController(R.id.container)
-        appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
-
+        //設置Toolbar
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.setDisplayShowCustomEnabled(true)    // enable overriding the default toolbar layout
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
         supportActionBar?.setDisplayShowHomeEnabled(false)  // show or hide the default home button
 
+        //設置Drawer
+        drawerLayout = binding.drawerLayout
+        navController = findNavController(R.id.container)
+        appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navigationView.setupWithNavController(navController)
 
+        //設置下拉式選單箭頭行為
         binding.dropdownArrow.setOnClickListener {
             view ->
             binding.mainDropdown.performClick()
         }
 
+        //點選Drawer物件後，切換畫面後的UI設置
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-
             binding.toolbar.setNavigationIcon(R.drawable.ic_toggle_menu)    //TODO toggle 圖示暫時固定為menu樣式，待修改
             binding.toolbar.setNavigationOnClickListener {
                     v: View? ->
@@ -105,29 +113,67 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
                 }
                 R.id.browserFragment -> {
                     arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
-                    setToolbarMode(MainActivityViewModel.TabMode.Browser)
                 }
                 R.id.sdFragment -> {
                     arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
-                    setToolbarMode(MainActivityViewModel.TabMode.Browser)
                 }
             }
         }
 
         checkLocalPermission()
+
+        //確認SD卡狀態
+        val sdPath = SystemUtil().getSDLocation(this)
+        if (sdPath != null) {
+            Constant.SD_ROOT = sdPath
+            binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(true)
+        } else
+            binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(false)
+    }
+
+    fun goToBrowser(browser_id: Int){
+        binding.toolbar.setNavigationIcon(R.drawable.ic_toggle_menu)    //TODO toggle 圖示暫時固定為menu樣式，待修改
+        binding.toolbar.setNavigationOnClickListener {
+                v: View? ->
+            drawerLayout.openDrawer(Gravity.LEFT)
+        }
+
+        val arguments: Bundle? = Bundle()
+        when(browser_id) {
+            R.id.browserFragment -> {
+                arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
+            }
+            R.id.sdFragment -> {
+                arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
+            }
+        }
+        navController.navigate(browser_id, arguments)
+    }
+
+    fun goToMediaTab(mediaType: Int){
+        binding.toolbar.setNavigationIcon(R.drawable.ic_toggle_menu)    //TODO toggle 圖示暫時固定為menu樣式，待修改
+        binding.toolbar.setNavigationOnClickListener {
+                v: View? ->
+            drawerLayout.openDrawer(Gravity.LEFT)
+        }
+
+        val arguments: Bundle? = Bundle()
+        arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
+        arguments?.putInt("media_type", mediaType)
+        navController.navigate(R.id.browserFragment, arguments)
     }
 
     fun setMidTitle(title: String){
         viewModel.setMidTitleText(title)
     }
 
-    private fun setToolbarMode(mode: MainActivityViewModel.TabMode, menuCount: Int, mid_title: String){
+    fun setToolbarMode(mode: MainActivityViewModel.TabMode, menuCount: Int, mid_title: String){
         viewModel.updateTabMode(mode)
         viewModel.updateSystemMenuIconCount(menuCount)
         setMidTitle(mid_title)
     }
 
-    private fun setToolbarMode(mode: MainActivityViewModel.TabMode){
+    fun setToolbarMode(mode: MainActivityViewModel.TabMode){
         viewModel.updateTabMode(mode)
     }
 
@@ -207,6 +253,26 @@ class MainActivity : AppCompatActivity(), EULAFragment.OnEulaClickListener {
             navController.navigate(R.id.startPermissionFragment)
             supportActionBar?.hide()
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)    //鎖住滑出Drawer手勢
+        }
+    }
+
+    override fun notifyMounted() {  //sd card mount event
+        Constant.SD_ROOT = SystemUtil().getSDLocation(this)
+        binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(true)
+        initHome()
+    }
+
+    override fun notifyUnmounted() {    //sd card unmount event
+        Constant.SD_ROOT = null
+        binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(false)
+        initHome()
+    }
+
+    fun initHome(){
+        val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
+
+        if(fragment?.childFragmentManager?.fragments?.get(0) is HomeFragment){
+            (fragment.childFragmentManager.fragments.get(0) as? HomeFragment)?.initHome()
         }
     }
 

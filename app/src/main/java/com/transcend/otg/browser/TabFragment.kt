@@ -255,7 +255,15 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         val id = item.itemId
         when(id){
             R.id.action_view_type -> changeViewType()   //List or Grid
-//            R.id.action_select_mode -> (activity as AppCompatActivity).startSupportActionMode(this) //啟動action mode
+            R.id.action_select_mode -> {
+                when(mBinding.viewPager.currentItem){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.startActionMode()
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.startActionMode()
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.startActionMode()
+                    Constant.TYPE_DOC -> mAdapter.docPage.startActionMode()
+                    else -> mAdapter.allFilePage.startActionMode()
+                }
+            }
             R.id.action_new_folder -> {
                 val view = View.inflate(context, R.layout.dialog_folder_create, null)
                 val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
@@ -280,7 +288,13 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                     .show()
             }
             R.id.action_selectAll -> {
-
+                when(mBinding.viewPager.currentItem){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.selectAll()
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.selectAll()
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.selectAll()
+                    Constant.TYPE_DOC -> mAdapter.docPage.selectAll()
+                    else -> mAdapter.allFilePage.selectAll()
+                }
             }
 //            R.id.action_progress_test -> {
 //                count = 0

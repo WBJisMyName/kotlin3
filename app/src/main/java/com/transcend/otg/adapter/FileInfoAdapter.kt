@@ -83,7 +83,7 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
             if (currentList.size > mLazyLoadCount)  //總檔案數大於懶加載數，則顯示懶加載數
                 count = mLazyLoadCount + 1  //footer
             else    //否則顯示總檔案數
-                count = currentList.size + 1    //footer
+                count = currentList.size     //footer
         }
 
         return count
@@ -95,13 +95,15 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
             mLazyLoadCount += 30
             if (mLazyLoadCount > currentList.size)
                 mLazyLoadCount = currentList.size
-            if (lastCount != mLazyLoadCount)    //懶加載數有變才作更新
+            if (lastCount != mLazyLoadCount && mLazyLoadCount > lastCount)    //懶加載數有變才作更新
                 notifyItemChanged(lastCount, mLazyLoadCount)
         }
     }
 
-    fun loadAll(){
-        notifyItemChanged(mLazyLoadCount, currentList.size)
+    fun loadAllFiles(){
+        val lastCount = mLazyLoadCount
+        mLazyLoadCount = currentList.size
+        notifyItemChanged(lastCount, mLazyLoadCount)
     }
 
     override fun getItemViewType(position: Int): Int{
@@ -256,6 +258,7 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
 
     fun selectAll(){
         if (itemCount > 0){
+            loadAllFiles()
             for (file: FileInfo in currentList){
                 if (file.isSelected.not()) {
                     file.isSelected = true

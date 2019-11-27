@@ -1,13 +1,12 @@
 package com.transcend.otg.data
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
 interface FileInfoDao {//data access object
 
     @Query("SELECT * FROM files WHERE fileType = :type ORDER BY title ASC, lastModifyTime ASC")
-    fun getAllFilesByType(type: Int): LiveData<List<FileInfo>>
+    fun getAllFilesByType(type: Int): List<FileInfo>
 
     @Query("SELECT * FROM files WHERE fileType = :type AND title LIKE :searchText")
     fun getSearchFilesByType(searchText: String, type: Int): List<FileInfo>

@@ -247,9 +247,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         }
 
         override fun onLongClick(fileInfo: FileInfo) {
-            if (mActionMode == null) {
-                (activity as AppCompatActivity).startSupportActionMode(this@BrowserFragment)
-            }
+            startActionMode()
             fileInfo.isSelected = fileInfo.isSelected.not()
             adapter?.notifyItemChanged(adapter?.currentList?.indexOf(fileInfo)!!)
             updateActionTitle()
@@ -294,7 +292,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 }
             }
             R.id.action_selectAll -> {
-                adapter?.selectAll()
+                selectAll()
             }
             R.id.action_copy, R.id.action_move -> {
                 startLocateActivity(id)
@@ -302,6 +300,12 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
         }
         return false
+    }
+
+    fun startActionMode(){
+        if (mActionMode == null) {
+            (activity as AppCompatActivity).startSupportActionMode(this@BrowserFragment)
+        }
     }
 
     fun destroyActionMode(){
@@ -339,6 +343,12 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         activity?.runOnUiThread{
             mBinding?.recyclerView?.scrollToPosition(0)
         }
+    }
+
+    fun selectAll(){
+        startActionMode()
+        adapter?.selectAll()
+        updateActionTitle()
     }
 
     fun updateActionTitle(){

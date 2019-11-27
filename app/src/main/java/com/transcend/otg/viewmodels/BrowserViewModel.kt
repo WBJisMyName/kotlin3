@@ -29,10 +29,10 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     var items = MutableLiveData<List<FileInfo>>()
     var searchItems = MutableLiveData<List<FileInfo>>()
 
-    var imageItems = repository.getAllFilesByType(Constant.TYPE_IMAGE)
-    var musicItems = repository.getAllFilesByType(Constant.TYPE_MUSIC)
-    var videoItems = repository.getAllFilesByType(Constant.TYPE_VIDEO)
-    var docItems = repository.getAllFilesByType(Constant.TYPE_DOC)
+    var imageItems =  MutableLiveData<List<FileInfo>>()
+    var musicItems =  MutableLiveData<List<FileInfo>>()
+    var videoItems =  MutableLiveData<List<FileInfo>>()
+    var docItems =  MutableLiveData<List<FileInfo>>()
 
     fun insert(fileInfo: FileInfo) {
         repository.insert(fileInfo)

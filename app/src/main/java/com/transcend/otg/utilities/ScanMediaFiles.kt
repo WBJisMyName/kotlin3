@@ -9,13 +9,18 @@ import com.transcend.otg.data.FileInfo
 import com.transcend.otg.data.FileRepository
 import java.io.File
 
-class ScanMediaFiles(application: Application){
+abstract class ScanMediaFiles(application: Application){
     val repository = FileRepository(application)
     val sleepTime = 300L
+    val maxWaitingTime = 60
+
+    abstract fun onFinished(list: List<FileInfo>)
 
     fun scanFileList(type: Int){
         if (Constant.mediaScanState.get(type) == Constant.ScanState.SCANNING)   //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
             return
+
+        repository.deleteAll(type)
 
         val thread = Thread(Runnable {
             when (type) {
@@ -101,6 +106,15 @@ class ScanMediaFiles(application: Application){
                 imagecursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
+                //scan完直接撈資料，可能造成檔案不完全
+                var list = repository.getAllFilesByType(Constant.TYPE_IMAGE)
+                var loading_count = 0 //count表示撈幾次才正確(微秒)
+                while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或數秒後跳出
+                    list = repository.getAllFilesByType(Constant.TYPE_IMAGE)
+                    Thread.sleep(500)
+                    loading_count++
+                }
+                onFinished(list)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -172,6 +186,15 @@ class ScanMediaFiles(application: Application){
                 musiccursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
+                //scan完直接撈資料，可能造成檔案不完全
+                var list = repository.getAllFilesByType(Constant.TYPE_MUSIC)
+                var loading_count = 0 //count表示撈幾次才正確(微秒)
+                while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或數秒後跳出
+                    list = repository.getAllFilesByType(Constant.TYPE_MUSIC)
+                    Thread.sleep(100)
+                    loading_count++
+                }
+                onFinished(list)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -241,6 +264,15 @@ class ScanMediaFiles(application: Application){
                 videocursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
+                //scan完直接撈資料，可能造成檔案不完全
+                var list = repository.getAllFilesByType(Constant.TYPE_VIDEO)
+                var loading_count = 0 //count表示撈幾次才正確(微秒)
+                while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或3秒後跳出
+                    list = repository.getAllFilesByType(Constant.TYPE_VIDEO)
+                    Thread.sleep(100)
+                    loading_count++
+                }
+                onFinished(list)
             }
         } catch (e: Exception){
             e.printStackTrace()
@@ -308,6 +340,15 @@ class ScanMediaFiles(application: Application){
                 docscursor.close()
                 Constant.mediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
+                //scan完直接撈資料，可能造成檔案不完全
+                var list = repository.getAllFilesByType(Constant.TYPE_DOC)
+                var loading_count = 0 //count表示撈幾次才正確(微秒)
+                while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或3秒後跳出
+                    list = repository.getAllFilesByType(Constant.TYPE_DOC)
+                    Thread.sleep(100)
+                    loading_count++
+                }
+                onFinished(list)
             }
         } catch (e: Exception) {
             e.printStackTrace()

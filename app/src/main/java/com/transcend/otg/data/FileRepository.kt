@@ -2,7 +2,6 @@ package com.transcend.otg.data
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
 import java.io.File
 
 class FileRepository(application: Application) {
@@ -10,7 +9,7 @@ class FileRepository(application: Application) {
     private val fileInfoDatabase = FileInfoDatabase.getInstance(application)!!
     private val fileInfoDao: FileInfoDao = fileInfoDatabase.fileInfoDao()
 
-    fun getAllFilesByType(type: Int): LiveData<List<FileInfo>> {
+    fun getAllFilesByType(type: Int): List<FileInfo> {
         return fileInfoDao.getAllFilesByType(type)
     }
 

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.transcend.otg.BrowserFragment
 import com.transcend.otg.adapter.FileInfoAdapter
+import com.transcend.otg.data.FileInfo
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.ScanMediaFiles
 import com.transcend.otg.viewmodels.BrowserViewModel
@@ -29,10 +30,26 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
     override fun onResume() {
         super.onResume()
 
-        if (activity != null && Constant.mediaScanState[mType] == Constant.ScanState.NONE)  //初次讀取檔案
-            ScanMediaFiles(activity!!.application).scanFileList(mType)
+        if (activity != null && Constant.mediaScanState[mType] == Constant.ScanState.NONE) {  //初次讀取檔案，或需重讀檔案
+            createScanTask(mType)
+        }
 
         startLoadingView()  //在這裡呼叫以避免tab切換中load到其他頁面
+    }
+
+    fun createScanTask(type: Int){
+        val scanTask = object:ScanMediaFiles(activity!!.application){
+            override fun onFinished(list: List<FileInfo>) {
+                val finalList = viewModel.sort(list)
+                when(type){
+                    Constant.TYPE_IMAGE -> viewModel.imageItems.postValue(finalList)
+                    Constant.TYPE_MUSIC -> viewModel.musicItems.postValue(finalList)
+                    Constant.TYPE_VIDEO -> viewModel.videoItems.postValue(finalList)
+                    Constant.TYPE_DOC -> viewModel.docItems.postValue(finalList)
+                }
+            }
+        }
+        scanTask.scanFileList(type)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -103,7 +120,7 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         destroyActionMode()
         val thread = Thread(Runnable {
             if (activity != null)
-                ScanMediaFiles(activity!!.application).scanFileList(type)
+                createScanTask(type)
             Thread.sleep(200)
         })
         thread.start()

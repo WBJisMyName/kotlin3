@@ -27,8 +27,6 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
     var progress = ObservableInt(View.GONE)
 
     var items = MutableLiveData<List<FileInfo>>()
-    var searchItems = MutableLiveData<List<FileInfo>>()
-
     var imageItems =  MutableLiveData<List<FileInfo>>()
     var musicItems =  MutableLiveData<List<FileInfo>>()
     var videoItems =  MutableLiveData<List<FileInfo>>()
@@ -82,10 +80,43 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun doLoadMediaFiles(type: Int){
+        val thread = Thread(Runnable {
+            val finalList = sort(repository.getAllFilesByType(type))
+            when(type){
+                Constant.TYPE_IMAGE -> imageItems.postValue(finalList)
+                Constant.TYPE_MUSIC -> musicItems.postValue(finalList)
+                Constant.TYPE_VIDEO -> videoItems.postValue(finalList)
+                Constant.TYPE_DOC -> docItems.postValue(finalList)
+            }
+        })
+        thread.start()
+    }
+
+    fun doReload(){
+        val thread = Thread(Runnable {
+            doLoadFiles(mPath)
+        })
+        thread.start()
+    }
+
     fun doRefresh(){
         val thread = Thread(Runnable {
             deleteFilesFromParentPath(mPath)
             scanFolderFiles(mPath)
+        })
+        thread.start()
+    }
+
+    fun doRefresh(type: Int){
+        val thread = Thread(Runnable {
+            val list = repository.getAllFilesByType(type)
+            when(type){
+                Constant.TYPE_IMAGE -> imageItems.postValue(list)
+                Constant.TYPE_MUSIC -> musicItems.postValue(list)
+                Constant.TYPE_VIDEO -> videoItems.postValue(list)
+                Constant.TYPE_DOC -> docItems.postValue(list)
+            }
         })
         thread.start()
     }
@@ -95,7 +126,12 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
         val thread = Thread(Runnable {
             if (type == Constant.TYPE_IMAGE || type == Constant.TYPE_MUSIC || type == Constant.TYPE_VIDEO || type == Constant.TYPE_DOC) {
                 val list = sort(repository.getSearchFiles(searchText, type))
-                searchItems.postValue(list)
+                when(type){
+                    Constant.TYPE_IMAGE -> imageItems.postValue(list)
+                    Constant.TYPE_MUSIC -> musicItems.postValue(list)
+                    Constant.TYPE_VIDEO -> videoItems.postValue(list)
+                    Constant.TYPE_DOC -> docItems.postValue(list)
+                }
             } else {
                 val list = sort(repository.getSearchFiles(searchText, mPath))
                 items.postValue(list)

@@ -17,8 +17,6 @@ import kotlinx.android.synthetic.main.fragment_browser.*
 
 class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
 
-    lateinit var searchAdapter: FileInfoAdapter
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -32,7 +30,9 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
 
         if (activity != null && Constant.mediaScanState[mType] == Constant.ScanState.NONE) {  //初次讀取檔案，或需重讀檔案
             createScanTask(mType)
-        }
+        } else
+            viewModel.doLoadMediaFiles(mType)
+
 
         startLoadingView()  //在這裡呼叫以避免tab切換中load到其他頁面
     }
@@ -58,7 +58,6 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
 
         val lm = LinearLayoutManager(context)
         adapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
-        searchAdapter = FileInfoAdapter(mRecyclerViewClickCallback, viewModel)
         recyclerView.adapter = adapter
         recyclerView.setLayoutManager(lm)
         recyclerView.setHasFixedSize(true)
@@ -76,6 +75,7 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
                     adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
+                    viewModel.isEmpty.set(fileList.size == 0)
                 })
             }
             Constant.TYPE_MUSIC -> {
@@ -83,6 +83,7 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
                     adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
+                    viewModel.isEmpty.set(fileList.size == 0)
                 })
             }
             Constant.TYPE_VIDEO -> {
@@ -90,6 +91,7 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
                     adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
+                    viewModel.isEmpty.set(fileList.size == 0)
                 })
             }
             Constant.TYPE_DOC -> {
@@ -97,16 +99,10 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
                     adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
+                    viewModel.isEmpty.set(fileList.size == 0)
                 })
             }
         }
-
-        viewModel.searchItems.observe(this@MediaFragment, Observer {
-                fileList ->
-            searchAdapter.submitList(fileList)
-            viewModel.isLoading.set(false)
-            viewModel.isEmpty.set(fileList.size == 0)
-        })
 
         mBinding?.viewModel = viewModel  //Bind view and view model
     }
@@ -116,6 +112,11 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
     }
 
     fun doRefresh(type: Int){
+        viewModel.isLoading.set(true)
+        viewModel.doRefresh(type)
+    }
+
+    fun doReload(type: Int){
         viewModel.isLoading.set(true)
         destroyActionMode()
         val thread = Thread(Runnable {

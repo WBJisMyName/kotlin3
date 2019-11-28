@@ -149,8 +149,8 @@ class FileActionLocateFragment : BrowserFragment(Constant.Storage_Device_Root),
         return viewModel.items.value
     }
 
-    fun doReload(){
-        viewModel.doRefresh()
+    override fun doReload(){
+        viewModel.doReload()
     }
 
     override fun onBackPressed(): Boolean {

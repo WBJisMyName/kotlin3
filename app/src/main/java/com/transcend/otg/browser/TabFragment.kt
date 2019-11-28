@@ -93,7 +93,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         mBinding.swiperefresh.setOnRefreshListener {
             mBinding.swiperefresh.setRefreshing(false)
             //TODO
-            (mBinding.viewPager.adapter as TabPagerAdapter).doRefresh(mBinding.viewPager.currentItem)
+            (mBinding.viewPager.adapter as TabPagerAdapter).doReload(mBinding.viewPager.currentItem)
         }
 
         mBinding.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
@@ -152,13 +152,13 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             }
         }
 
-        fun doRefresh(position: Int){
+        fun doReload(position: Int){
             when(position){
-                Constant.TYPE_IMAGE -> imagePage.doRefresh(Constant.TYPE_IMAGE)
-                Constant.TYPE_MUSIC -> musicPage.doRefresh(Constant.TYPE_MUSIC)
-                Constant.TYPE_VIDEO -> videoPage.doRefresh(Constant.TYPE_VIDEO)
-                Constant.TYPE_DOC -> docPage.doRefresh(Constant.TYPE_DOC)
-                else -> allFilePage.doRefresh()
+                Constant.TYPE_IMAGE -> imagePage.doReload(Constant.TYPE_IMAGE)
+                Constant.TYPE_MUSIC -> musicPage.doReload(Constant.TYPE_MUSIC)
+                Constant.TYPE_VIDEO -> videoPage.doReload(Constant.TYPE_VIDEO)
+                Constant.TYPE_DOC -> docPage.doReload(Constant.TYPE_DOC)
+                else -> allFilePage.doReload()
             }
         }
     }
@@ -181,9 +181,8 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                 if (newText == null)
                     return false
                 if (newText.equals("")){
-                    setBrowserAdapter()
+
                 } else {
-                    setSearchAdapter()
                     when(mBinding.viewPager.currentItem){
                         Constant.TYPE_IMAGE -> mAdapter.imagePage.viewModel.doSearch(newText, Constant.TYPE_IMAGE)
                         Constant.TYPE_MUSIC -> mAdapter.musicPage.viewModel.doSearch(newText, Constant.TYPE_MUSIC)
@@ -199,7 +198,6 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         menu.findItem(R.id.action_search).setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 menu.findItem(R.id.action_more).setVisible(false)
-                setSearchAdapter()
                 return true
             }
 
@@ -232,21 +230,12 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    fun setSearchAdapter(){
-        when(mBinding.viewPager.currentItem){
-            Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.searchAdapter
-            Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.searchAdapter
-            Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.searchAdapter
-            Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.searchAdapter
-        }
-    }
-
     fun setBrowserAdapter(){
         when(mBinding.viewPager.currentItem){
-            Constant.TYPE_IMAGE -> mAdapter.imagePage.recyclerView.adapter = mAdapter.imagePage.adapter
-            Constant.TYPE_MUSIC -> mAdapter.musicPage.recyclerView.adapter = mAdapter.musicPage.adapter
-            Constant.TYPE_VIDEO -> mAdapter.videoPage.recyclerView.adapter = mAdapter.videoPage.adapter
-            Constant.TYPE_DOC -> mAdapter.docPage.recyclerView.adapter = mAdapter.docPage.adapter
+            Constant.TYPE_IMAGE -> mAdapter.imagePage.doRefresh()
+            Constant.TYPE_MUSIC -> mAdapter.musicPage.doRefresh()
+            Constant.TYPE_VIDEO -> mAdapter.videoPage.doRefresh()
+            Constant.TYPE_DOC -> mAdapter.docPage.doRefresh()
             else -> mAdapter.allFilePage.doRefresh()
         }
     }
@@ -377,7 +366,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
     override fun onLoadFinished(loader: Loader<Boolean>, data: Boolean?) {
         if (loader is LocalFolderCreateLoader){
-            mAdapter.doRefresh(Constant.TYPE_DIR)
+            mAdapter.doReload(Constant.TYPE_DIR)
         }
     }
 

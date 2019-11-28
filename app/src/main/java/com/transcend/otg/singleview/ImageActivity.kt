@@ -13,8 +13,9 @@ import com.transcend.otg.viewmodels.ImageViewModel
 
 class ImageActivity : AppCompatActivity(){
 
-    lateinit var mPath: String
-    lateinit var mTitle: String
+    var mFolderPath: String? = null
+    var mFilePath: String? = null
+    var mTitle: String? = null
     var mPosition : Int = 0
 
     val imageDataBinding : SingleViewImageBinding by lazy{
@@ -24,12 +25,17 @@ class ImageActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mPath = intent.getStringExtra("folderPath")
+        mFolderPath = intent.getStringExtra("folderPath")
+        mFilePath = intent.getStringExtra("path")
         mTitle = intent.getStringExtra("title")
 
         var viewModel = ViewModelProviders.of(this).get(ImageViewModel::class.java)
-        viewModel.loadImageList(mPath)
-        viewModel.title.set(mTitle)
+        if (mFolderPath == null)
+            viewModel.loadAllImageList()
+        else
+            viewModel.loadImageList(mFolderPath!!)
+
+        viewModel.title.set(mTitle ?: "N/A")
         imageDataBinding.viewModel = viewModel
 
         imageDataBinding.photoViewPager.adapter = ViewPagerAdapter(this)
@@ -38,7 +44,7 @@ class ImageActivity : AppCompatActivity(){
         viewModel.items.observe(this, Observer<List<FileInfo>> { value ->
             value?.let {
                 (imageDataBinding.photoViewPager.adapter as ViewPagerAdapter).update(it)
-                imageDataBinding.photoViewPager.setCurrentItem(getCurrentImagePosition(it))
+                imageDataBinding.photoViewPager.setCurrentItem(getCurrentImagePosition(it), false)
             }
         })
 
@@ -67,7 +73,7 @@ class ImageActivity : AppCompatActivity(){
         if (list.size > 0){
             var count = 0
             for (file in list){
-                if (file.title.equals(mTitle))
+                if (file.path.equals(mFilePath))
                     return count
                 count++
             }

@@ -178,6 +178,12 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         viewModel.doRefresh()
     }
 
+    open fun doReload(){
+        viewModel.isLoading.set(true)
+        destroyActionMode()
+        viewModel.doReload()
+    }
+
     protected fun startLocateActivity(actionID: Int) {
         val args = Bundle()
         args.putString("path", getPath())
@@ -236,9 +242,10 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
                 when(fileInfo.fileType){
                     Constant.TYPE_IMAGE -> {
                         val intent = Intent(activity, ImageActivity::class.java)
-                        intent.putExtra("folderPath", getPath())
+                        if (viewModel.mMediaType == -1) //-1為全瀏覽頁面，此時才季路目前路徑
+                            intent.putExtra("folderPath", getPath())
+                        intent.putExtra("path", fileInfo.path)
                         intent.putExtra("title", fileInfo.title)
-                        //TODO 須判斷是否顯示全部檔案
                         activity?.startActivity(intent)
                     }
                     Constant.TYPE_DIR -> doLoadFiles(fileInfo.path)

@@ -1,12 +1,12 @@
 package com.transcend.otg.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.data.FileRepository
 import com.transcend.otg.utilities.Constant
@@ -25,6 +25,18 @@ class ImageViewModel(application: Application) : AndroidViewModel(application){
         thread {
             var list = repository.getFiles(folderPath, Constant.TYPE_IMAGE)
             (items as MutableLiveData).postValue(list)
+        }
+    }
+
+    fun loadAllImageList(){
+        try {
+            val thread = Thread(Runnable {
+                var list = repository.getAllFilesByType(Constant.TYPE_IMAGE)
+                (items as MutableLiveData).postValue(list)
+            })
+            thread.start()
+        } catch (e: Exception) {
+            Log.e("FileRepository", e.toString())
         }
     }
 }

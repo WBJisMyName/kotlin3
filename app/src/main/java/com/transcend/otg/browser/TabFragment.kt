@@ -134,10 +134,10 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
         init{
             allFilePage = BrowserFragment(root)
-            imagePage = MediaFragment(Constant.TYPE_IMAGE)
-            musicPage = MediaFragment(Constant.TYPE_MUSIC)
-            videoPage = MediaFragment(Constant.TYPE_VIDEO)
-            docPage = MediaFragment(Constant.TYPE_DOC)
+            imagePage = MediaFragment(Constant.TYPE_IMAGE, root)
+            musicPage = MediaFragment(Constant.TYPE_MUSIC, root)
+            videoPage = MediaFragment(Constant.TYPE_VIDEO, root)
+            docPage = MediaFragment(Constant.TYPE_DOC, root)
         }
 
         override fun getItemCount(): Int = Pager_Count

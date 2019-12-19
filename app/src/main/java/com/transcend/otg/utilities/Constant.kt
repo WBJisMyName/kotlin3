@@ -18,7 +18,12 @@ object Constant{
     val TYPE_OTHERS = 5
 
     //用以判斷是否已讀取過，因為有件資料庫不須重新讀取
-    var mediaScanState: MutableList<ScanState> = mutableListOf(ScanState.SCANNED,   //全部(此處理論上不會用到)
+    var localMediaScanState: MutableList<ScanState> = mutableListOf(ScanState.SCANNED,   //全部(此處理論上不會用到)
+        ScanState.NONE, //圖片
+        ScanState.NONE, //音樂
+        ScanState.NONE, //影片
+        ScanState.NONE) //文件
+    var sdMediaScanState: MutableList<ScanState> = mutableListOf(ScanState.SCANNED,   //全部(此處理論上不會用到)
         ScanState.NONE, //圖片
         ScanState.NONE, //音樂
         ScanState.NONE, //影片

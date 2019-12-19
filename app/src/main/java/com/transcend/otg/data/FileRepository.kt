@@ -13,6 +13,10 @@ class FileRepository(application: Application) {
         return fileInfoDao.getAllFilesByType(type)
     }
 
+    fun getAllFilesByTypeFromSrc(type: Int, src: String): List<FileInfo> {
+        return fileInfoDao.getAllFilesByType(type, src+"%")
+    }
+
     fun getSearchFiles(searchText: String, type: Int): List<FileInfo>{
         return fileInfoDao.getSearchFilesByType("%"+searchText+"%", type)
     }

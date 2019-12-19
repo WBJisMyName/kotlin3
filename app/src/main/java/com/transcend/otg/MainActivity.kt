@@ -249,6 +249,7 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
             viewModel.updateTabMode(MainActivityViewModel.TabMode.Mid_Title_Only)
             viewModel.setMidTitleText("Home")
             viewModel.updateSystemMenuIconCount(0)  //首頁沒有menu
+            navController.popBackStack(R.id.startPermissionFragment, true)  //已取得權限，移除該fragment
         } else {
             navController.navigate(R.id.startPermissionFragment)
             supportActionBar?.hide()
@@ -270,10 +271,10 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
 
     fun initHome(){
         //SD卡安裝、移除後都需重新讀取檔案，故在此初始化Scan狀態
-        Constant.mediaScanState[1] = Constant.ScanState.NONE
-        Constant.mediaScanState[2] = Constant.ScanState.NONE
-        Constant.mediaScanState[3] = Constant.ScanState.NONE
-        Constant.mediaScanState[4] = Constant.ScanState.NONE
+        Constant.sdMediaScanState[1] = Constant.ScanState.NONE
+        Constant.sdMediaScanState[2] = Constant.ScanState.NONE
+        Constant.sdMediaScanState[3] = Constant.ScanState.NONE
+        Constant.sdMediaScanState[4] = Constant.ScanState.NONE
 
         val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
 

@@ -28,15 +28,19 @@ class ImageViewModel(application: Application) : AndroidViewModel(application){
         }
     }
 
-    fun loadAllImageList(){
+    fun loadAllImageList(mPath: String){
         try {
             val thread = Thread(Runnable {
-                var list = repository.getAllFilesByType(Constant.TYPE_IMAGE)
-                (items as MutableLiveData).postValue(list)
+                var rootPath = Constant.LOCAL_ROOT
+                if(Constant.SD_ROOT != null && mPath.startsWith(Constant.SD_ROOT!!))
+                    rootPath = Constant.SD_ROOT
+                val finalList = repository.getAllFilesByTypeFromSrc(Constant.TYPE_IMAGE, rootPath)
+                (items as MutableLiveData).postValue(finalList)
             })
             thread.start()
         } catch (e: Exception) {
             Log.e("FileRepository", e.toString())
         }
     }
+
 }

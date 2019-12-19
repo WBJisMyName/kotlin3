@@ -13,21 +13,25 @@ abstract class ScanMediaFiles(application: Application){
     val repository = FileRepository(application)
     val sleepTime = 300L
     val maxWaitingTime = 60
+    var mSrc = Constant.LOCAL_ROOT
 
     abstract fun onFinished(list: List<FileInfo>)
 
-    fun scanFileList(type: Int){
-        if (Constant.mediaScanState.get(type) == Constant.ScanState.SCANNING)   //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
+    fun scanFileList(type: Int, src: String){
+        if (src.equals(Constant.LOCAL_ROOT) && Constant.localMediaScanState.get(type) == Constant.ScanState.SCANNING)   //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
+            return
+        else if (Constant.SD_ROOT != null && src.equals(Constant.SD_ROOT) && Constant.sdMediaScanState.get(type) == Constant.ScanState.SCANNING)   //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
             return
 
+        mSrc = src
         repository.deleteAll(type)
 
         val thread = Thread(Runnable {
             when (type) {
-                Constant.TYPE_IMAGE -> scanLocalAllImage(MainApplication.mContext)
-                Constant.TYPE_MUSIC -> scanLocalAllMusics(MainApplication.mContext)
-                Constant.TYPE_VIDEO -> scanLocalAllVideos(MainApplication.mContext)
-                Constant.TYPE_DOC -> scanLocalAllDocs(MainApplication.mContext)
+                Constant.TYPE_IMAGE -> scanLocalAllImage(MainApplication.getInstance()!!.getContext())
+                Constant.TYPE_MUSIC -> scanLocalAllMusics(MainApplication.getInstance()!!.getContext())
+                Constant.TYPE_VIDEO -> scanLocalAllVideos(MainApplication.getInstance()!!.getContext())
+                Constant.TYPE_DOC -> scanLocalAllDocs(MainApplication.getInstance()!!.getContext())
             }
         })
         thread.start()
@@ -39,7 +43,11 @@ abstract class ScanMediaFiles(application: Application){
 
     private fun scanLocalAllImage(context: Context) {
         var count = 0
-        Constant.mediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNING)
+        if (mSrc.equals(Constant.LOCAL_ROOT))
+            Constant.localMediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNING)
+        else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+            Constant.sdMediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNING)
+
         try {
             val proj = arrayOf(
                 MediaStore.Images.Media.SIZE,
@@ -49,7 +57,7 @@ abstract class ScanMediaFiles(application: Application){
                 MediaStore.Images.Media.DATE_MODIFIED
             )
 
-            var select = "(" + MediaStore.Files.FileColumns.DATA + " LIKE '" + Constant.LOCAL_ROOT + "%')"
+            var select = "(" + MediaStore.Files.FileColumns.DATA + " LIKE '" + mSrc + "%')"
             val orderBy = MediaStore.Images.Media.DISPLAY_NAME
             val order = " ASC"
             val imagecursor = context.getContentResolver().query(
@@ -104,13 +112,16 @@ abstract class ScanMediaFiles(application: Application){
                     }
                 }
                 imagecursor.close()
-                Constant.mediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNED)
+                if (mSrc.equals(Constant.LOCAL_ROOT))
+                    Constant.localMediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNED)
+                else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                    Constant.sdMediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
                 //scan完直接撈資料，可能造成檔案不完全
-                var list = repository.getAllFilesByType(Constant.TYPE_IMAGE)
+                var list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_IMAGE, mSrc)
                 var loading_count = 0 //count表示撈幾次才正確(微秒)
                 while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或數秒後跳出
-                    list = repository.getAllFilesByType(Constant.TYPE_IMAGE)
+                    list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_IMAGE, mSrc)
                     Thread.sleep(500)
                     loading_count++
                 }
@@ -118,13 +129,19 @@ abstract class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.NONE)
+            if (mSrc.equals(Constant.LOCAL_ROOT))
+                Constant.localMediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.NONE)
+            else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                Constant.sdMediaScanState.set(Constant.TYPE_IMAGE, Constant.ScanState.NONE)
         }
     }
 
     private fun scanLocalAllMusics(context: Context){
         var count = 0
-        Constant.mediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNING)
+        if (mSrc.equals(Constant.LOCAL_ROOT))
+            Constant.localMediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNING)
+        else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+            Constant.sdMediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNING)
         try {
             val proj = arrayOf(
                 MediaStore.Audio.Media.SIZE,
@@ -133,7 +150,7 @@ abstract class ScanMediaFiles(application: Application){
                 //                    MediaStore.Audio.Media.ALBUM_ID,
                 MediaStore.Audio.Media.DATE_MODIFIED
             )
-            val select = "(" + MediaStore.Audio.Media.DURATION + " > 10000)"
+            val select = "(" + MediaStore.Audio.Media.DURATION + " > 10000 AND " + MediaStore.Files.FileColumns.DATA + " LIKE '" + mSrc + "%')"
             var orderBy = MediaStore.Audio.Media.DATE_MODIFIED
             val order = " ASC"
             val musiccursor = context.getContentResolver().query(
@@ -184,13 +201,16 @@ abstract class ScanMediaFiles(application: Application){
                     }
                 }
                 musiccursor.close()
-                Constant.mediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNED)
+                if (mSrc.equals(Constant.LOCAL_ROOT))
+                    Constant.localMediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNED)
+                else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                    Constant.sdMediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
                 //scan完直接撈資料，可能造成檔案不完全
-                var list = repository.getAllFilesByType(Constant.TYPE_MUSIC)
+                var list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_MUSIC, mSrc)
                 var loading_count = 0 //count表示撈幾次才正確(微秒)
                 while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或數秒後跳出
-                    list = repository.getAllFilesByType(Constant.TYPE_MUSIC)
+                    list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_MUSIC, mSrc)
                     Thread.sleep(100)
                     loading_count++
                 }
@@ -198,13 +218,19 @@ abstract class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.NONE)
+            if (mSrc.equals(Constant.LOCAL_ROOT))
+                Constant.localMediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.NONE)
+            else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                Constant.sdMediaScanState.set(Constant.TYPE_MUSIC, Constant.ScanState.NONE)
         }
     }
 
     private fun scanLocalAllVideos(context: Context){
         var count = 0
-        Constant.mediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNING)
+        if (mSrc.equals(Constant.LOCAL_ROOT))
+            Constant.localMediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNING)
+        else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+            Constant.sdMediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNING)
         try {
             val videoTypes = arrayOf(
                 MediaStore.Video.Media.SIZE,
@@ -214,10 +240,10 @@ abstract class ScanMediaFiles(application: Application){
             )
             var orderBy = MediaStore.Video.Media.DATE_MODIFIED
             val order = " ASC"
-
+            var select = "(" + MediaStore.Files.FileColumns.DATA + " LIKE '" + mSrc + "%')"
             val videocursor = context.getContentResolver().query(
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                videoTypes, null, null, orderBy + order
+                videoTypes, select, null, orderBy + order
             )
 
             if (videocursor != null) {
@@ -262,13 +288,16 @@ abstract class ScanMediaFiles(application: Application){
                     }
                 }
                 videocursor.close()
-                Constant.mediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNED)
+                if (mSrc.equals(Constant.LOCAL_ROOT))
+                    Constant.localMediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNED)
+                else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                    Constant.sdMediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
                 //scan完直接撈資料，可能造成檔案不完全
-                var list = repository.getAllFilesByType(Constant.TYPE_VIDEO)
+                var list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_VIDEO, mSrc)
                 var loading_count = 0 //count表示撈幾次才正確(微秒)
                 while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或3秒後跳出
-                    list = repository.getAllFilesByType(Constant.TYPE_VIDEO)
+                    list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_VIDEO, mSrc)
                     Thread.sleep(100)
                     loading_count++
                 }
@@ -276,13 +305,19 @@ abstract class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception){
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.NONE)
+            if (mSrc.equals(Constant.LOCAL_ROOT))
+                Constant.localMediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.NONE)
+            else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                Constant.sdMediaScanState.set(Constant.TYPE_VIDEO, Constant.ScanState.NONE)
         }
     }
 
     private fun scanLocalAllDocs(context: Context) {
         var count = 0
-        Constant.mediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNING)
+        if (mSrc.equals(Constant.LOCAL_ROOT))
+            Constant.localMediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNING)
+        else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+            Constant.sdMediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNING)
         try {
             val proj = arrayOf(
                 MediaStore.Files.FileColumns.MIME_TYPE,
@@ -293,12 +328,13 @@ abstract class ScanMediaFiles(application: Application){
 
             var orderBy = MediaStore.Files.FileColumns.DATE_MODIFIED
             val order = " ASC"
-            val select = ("(" + MediaStore.Files.FileColumns.DATA + " LIKE '%.doc'" + " or "
+            val select = ("((" + MediaStore.Files.FileColumns.DATA + " LIKE '%.doc'" + " or "
                     + MediaStore.Files.FileColumns.DATA + " LIKE '%.docx'" + " or "
                     + MediaStore.Files.FileColumns.DATA + " LIKE '%.xls'" + " or "
                     + MediaStore.Files.FileColumns.DATA + " LIKE '%.ppt'" + " or "
                     + MediaStore.Files.FileColumns.DATA + " LIKE '%.pdf'" + " or "
-                    + MediaStore.Files.FileColumns.DATA + " LIKE '%.txt'" + ")")
+                    + MediaStore.Files.FileColumns.DATA + " LIKE '%.txt'" + ") and "
+                    + MediaStore.Files.FileColumns.DATA + " LIKE '" + mSrc + "%' )")
 
             val docscursor = context.getContentResolver().query(
                 MediaStore.Files.getContentUri("external"), proj, select, null, orderBy + order
@@ -338,13 +374,16 @@ abstract class ScanMediaFiles(application: Application){
                     }
                 }
                 docscursor.close()
-                Constant.mediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNED)
+                if (mSrc.equals(Constant.LOCAL_ROOT))
+                    Constant.localMediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNED)
+                else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                    Constant.sdMediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.SCANNED)
                 Thread.sleep(sleepTime)
                 //scan完直接撈資料，可能造成檔案不完全
-                var list = repository.getAllFilesByType(Constant.TYPE_DOC)
+                var list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_DOC, mSrc)
                 var loading_count = 0 //count表示撈幾次才正確(微秒)
                 while (count != list.size && (loading_count * 2) < maxWaitingTime) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或3秒後跳出
-                    list = repository.getAllFilesByType(Constant.TYPE_DOC)
+                    list = repository.getAllFilesByTypeFromSrc(Constant.TYPE_DOC, mSrc)
                     Thread.sleep(100)
                     loading_count++
                 }
@@ -352,7 +391,10 @@ abstract class ScanMediaFiles(application: Application){
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Constant.mediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.NONE)
+            if (mSrc.equals(Constant.LOCAL_ROOT))
+                Constant.localMediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.NONE)
+            else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
+                Constant.sdMediaScanState.set(Constant.TYPE_DOC, Constant.ScanState.NONE)
         }
     }
 }

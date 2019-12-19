@@ -11,11 +11,12 @@ import com.transcend.otg.BrowserFragment
 import com.transcend.otg.adapter.FileInfoAdapter
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.utilities.MainApplication
 import com.transcend.otg.utilities.ScanMediaFiles
 import com.transcend.otg.viewmodels.BrowserViewModel
 import kotlinx.android.synthetic.main.fragment_browser.*
 
-class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
+class MediaFragment(val mType: Int, val root: String): BrowserFragment(root){
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,17 +29,23 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
     override fun onResume() {
         super.onResume()
 
-        if (activity != null && Constant.mediaScanState[mType] == Constant.ScanState.NONE) {  //初次讀取檔案，或需重讀檔案
-            createScanTask(mType)
-        } else
-            viewModel.doLoadMediaFiles(mType)
-
+        if(Constant.SD_ROOT != null && root.equals(Constant.SD_ROOT)){
+            if (Constant.sdMediaScanState[mType] == Constant.ScanState.NONE) {  //初次讀取檔案，或需重讀檔案
+                createScanTask(mType)
+            } else
+                viewModel.doLoadMediaFiles(mType)
+        } else {
+            if (Constant.localMediaScanState[mType] == Constant.ScanState.NONE) {  //初次讀取檔案，或需重讀檔案
+                createScanTask(mType)
+            } else
+                viewModel.doLoadMediaFiles(mType)
+        }
 
         startLoadingView()  //在這裡呼叫以避免tab切換中load到其他頁面
     }
 
     fun createScanTask(type: Int){
-        val scanTask = object:ScanMediaFiles(activity!!.application){
+        val scanTask = object:ScanMediaFiles(MainApplication.getInstance()!!){
             override fun onFinished(list: List<FileInfo>) {
                 val finalList = viewModel.sort(list)
                 when(type){
@@ -49,7 +56,7 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
                 }
             }
         }
-        scanTask.scanFileList(type)
+        scanTask.scanFileList(type, root)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,7 +79,6 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         when(mType){
             Constant.TYPE_IMAGE -> {
                 viewModel.imageItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                     viewModel.isEmpty.set(fileList.size == 0)
@@ -80,7 +86,6 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
             }
             Constant.TYPE_MUSIC -> {
                 viewModel.musicItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                     viewModel.isEmpty.set(fileList.size == 0)
@@ -88,7 +93,6 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
             }
             Constant.TYPE_VIDEO -> {
                 viewModel.videoItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                     viewModel.isEmpty.set(fileList.size == 0)
@@ -96,7 +100,6 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
             }
             Constant.TYPE_DOC -> {
                 viewModel.docItems.observe(this@MediaFragment, Observer { fileList ->
-                    adapter?.submitList(null)
                     adapter?.submitList(fileList)
                     viewModel.isLoading.set(false)
                     viewModel.isEmpty.set(fileList.size == 0)
@@ -120,8 +123,7 @@ class MediaFragment(val mType: Int): BrowserFragment(Constant.LOCAL_ROOT){
         viewModel.isLoading.set(true)
         destroyActionMode()
         val thread = Thread(Runnable {
-            if (activity != null)
-                createScanTask(type)
+            createScanTask(type)
             Thread.sleep(200)
         })
         thread.start()

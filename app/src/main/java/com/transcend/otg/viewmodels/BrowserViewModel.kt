@@ -82,7 +82,10 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
 
     fun doLoadMediaFiles(type: Int){
         val thread = Thread(Runnable {
-            val finalList = sort(repository.getAllFilesByType(type))
+            var rootPath = Constant.LOCAL_ROOT
+            if(Constant.SD_ROOT != null && mPath.startsWith(Constant.SD_ROOT!!))
+                rootPath = Constant.SD_ROOT
+            val finalList = sort(repository.getAllFilesByTypeFromSrc(type, rootPath))
             when(type){
                 Constant.TYPE_IMAGE -> imageItems.postValue(finalList)
                 Constant.TYPE_MUSIC -> musicItems.postValue(finalList)
@@ -110,12 +113,15 @@ open class BrowserViewModel(application: Application) : AndroidViewModel(applica
 
     fun doRefresh(type: Int){
         val thread = Thread(Runnable {
-            val list = repository.getAllFilesByType(type)
+            var rootPath = Constant.LOCAL_ROOT
+            if(Constant.SD_ROOT != null && mPath.startsWith(Constant.SD_ROOT!!))
+                rootPath = Constant.SD_ROOT
+            val finalList = sort(repository.getAllFilesByTypeFromSrc(type, rootPath))
             when(type){
-                Constant.TYPE_IMAGE -> imageItems.postValue(list)
-                Constant.TYPE_MUSIC -> musicItems.postValue(list)
-                Constant.TYPE_VIDEO -> videoItems.postValue(list)
-                Constant.TYPE_DOC -> docItems.postValue(list)
+                Constant.TYPE_IMAGE -> imageItems.postValue(finalList)
+                Constant.TYPE_MUSIC -> musicItems.postValue(finalList)
+                Constant.TYPE_VIDEO -> videoItems.postValue(finalList)
+                Constant.TYPE_DOC -> docItems.postValue(finalList)
             }
         })
         thread.start()

@@ -9,7 +9,10 @@
     <uk.co.senab.photoview.PhotoView
         android:id="@+id/viewer_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:scaleType="fitCenter" />
 
     <ProgressBar
         android:id="@+id/viewer_progress"

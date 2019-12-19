@@ -31,7 +31,7 @@ class ImageActivity : AppCompatActivity(){
 
         var viewModel = ViewModelProviders.of(this).get(ImageViewModel::class.java)
         if (mFolderPath == null)
-            viewModel.loadAllImageList()
+            viewModel.loadAllImageList(mFilePath!!)
         else
             viewModel.loadImageList(mFolderPath!!)
 

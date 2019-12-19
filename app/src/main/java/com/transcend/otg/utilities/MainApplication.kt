@@ -13,13 +13,14 @@ class MainApplication: Application() {
     private var mThumbnails: ThumbnailCache? = null
     var mDropdownAdapter: DropDownAdapter? = null
 
+
     override fun onCreate() {
         super.onCreate()
 
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memoryClassBytes = am.memoryClass * 1024 * 1024   //app內存限制大小
         mThumbnails = ThumbnailCache(memoryClassBytes / 4)
-
+        INSTANCE = this
         mContext = applicationContext
     }
 
@@ -53,6 +54,10 @@ class MainApplication: Application() {
             }
             return INSTANCE
         }
+    }
+
+    fun getContext(): Context{
+        return mContext
     }
 
     fun isPad() : Boolean{

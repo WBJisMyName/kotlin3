@@ -6,8 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -26,7 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val viewModel: BrowserViewModel) : ListAdapter<FileInfo, FileInfoAdapter.ViewHolder>(FileInfoDiffCallback()) {
+open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback, val viewModel: BrowserViewModel) : RecyclerView.Adapter<FileInfoAdapter.ViewHolder>() {
 
     companion object {
         val Footer = 0
@@ -36,6 +34,7 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
 
     var mViewType: Int = List
     var mRecyclerViewClickCallback: RecyclerViewClickCallback? = recyclerViewClickCallback
+    var mList = ArrayList<FileInfo>()
 
     var mLazyLoadCount = 30
 
@@ -53,18 +52,23 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
         if (isFooter(position))
             return
         if (holder is ViewHolderList)
-            holder.bind(getItem(position))
+            holder.bind(mList.get(position))
         else if (holder is ViewHolderGrid)
-            holder.bind(getItem(position))
+            holder.bind(mList.get(position))
+    }
+
+    fun submitList(list: List<FileInfo>){
+        mList = ArrayList(list)
+        notifyDataSetChanged()
     }
 
     fun isFooter(position: Int): Boolean {
         if (hasFooter()) {
             var count = 0
-            if (currentList.size > mLazyLoadCount)
+            if (mList.size > mLazyLoadCount)
                 count = mLazyLoadCount
             else
-                count = currentList.size
+                count = mList.size
 
             return position == count
         }
@@ -74,16 +78,16 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
     fun hasFooter(): Boolean {
         if (viewModel.mMediaType == -1)  //全瀏覽時不使用lazy load
             return false
-        return currentList.size > 0
+        return mList.size > 0
     }
 
     override fun getItemCount(): Int {
-        var count = currentList.size
+        var count = mList.size
         if (hasFooter()) {
-            if (currentList.size > mLazyLoadCount)  //總檔案數大於懶加載數，則顯示懶加載數
+            if (mList.size > mLazyLoadCount)  //總檔案數大於懶加載數，則顯示懶加載數
                 count = mLazyLoadCount + 1  //footer
             else    //否則顯示總檔案數
-                count = currentList.size     //footer
+                count = mList.size     //footer
         }
 
         return count
@@ -93,8 +97,8 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
         if (hasFooter()) {
             val lastCount = mLazyLoadCount
             mLazyLoadCount += 30
-            if (mLazyLoadCount > currentList.size)
-                mLazyLoadCount = currentList.size
+            if (mLazyLoadCount > mList.size)
+                mLazyLoadCount = mList.size
             if (lastCount != mLazyLoadCount && mLazyLoadCount > lastCount)    //懶加載數有變才作更新
                 notifyItemChanged(lastCount, mLazyLoadCount)
         }
@@ -102,7 +106,7 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
 
     fun loadAllFiles(){
         val lastCount = mLazyLoadCount
-        mLazyLoadCount = currentList.size
+        mLazyLoadCount = mList.size
         notifyItemChanged(lastCount, mLazyLoadCount)
     }
 
@@ -222,34 +226,34 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
 
     //TODO
     fun getSelectedFiles(): List<FileInfo>{
-        val mList = ArrayList<FileInfo>()
+        val list = ArrayList<FileInfo>()
         if (itemCount > 0){
-            for (file: FileInfo in currentList){
+            for (file: FileInfo in mList){
                 if (file.isSelected)
-                    mList.add(file)
+                    list.add(file)
             }
         }
-        return mList
+        return list
     }
 
     //TODO
     fun getSelectedFilesPath(): ArrayList<String>{
-        val mList = ArrayList<String>()
+        val list = ArrayList<String>()
         if (itemCount > 0){
-            for (file: FileInfo in currentList){
+            for (file: FileInfo in mList){
                 if (file.isSelected)
-                    mList.add(file.path)
+                    list.add(file.path)
             }
         }
-        return mList
+        return list
     }
 
     fun deselectAll(){
         if (itemCount > 0){
-            for (file: FileInfo in currentList){
+            for (file: FileInfo in mList){
                 if (file.isSelected) {
                     file.isSelected = false
-                    notifyItemChanged(currentList.indexOf(file))
+                    notifyItemChanged(mList.indexOf(file))
                 }
             }
 
@@ -259,22 +263,12 @@ open class FileInfoAdapter(recyclerViewClickCallback: RecyclerViewClickCallback,
     fun selectAll(){
         if (itemCount > 0){
             loadAllFiles()
-            for (file: FileInfo in currentList){
+            for (file: FileInfo in mList){
                 if (file.isSelected.not()) {
                     file.isSelected = true
-                    notifyItemChanged(currentList.indexOf(file))
+                    notifyItemChanged(mList.indexOf(file))
                 }
             }
         }
-    }
-}
-
-private class FileInfoDiffCallback : DiffUtil.ItemCallback<FileInfo>() {
-    override fun areItemsTheSame(oldItem: FileInfo, newItem: FileInfo): Boolean {
-        return oldItem.path.equals(newItem.path)
-    }
-
-    override fun areContentsTheSame(oldItem: FileInfo, newItem: FileInfo): Boolean {
-        return oldItem == newItem
     }
 }

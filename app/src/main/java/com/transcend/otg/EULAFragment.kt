@@ -19,7 +19,6 @@ class EULAFragment : Fragment() {
         fun onEulaAgreeClick(v: View)
     }
 
-
     companion object {
         var observableField = EULAOberableField(View.GONE, ObservableInt(View.GONE), "")
         var mListener: OnEulaClickListener? = null
@@ -68,6 +67,8 @@ class EULAFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        if (activity == null)
+            return
         (activity as MainActivity).setMidTitle(getString(R.string.about_enduser))
     }
 }

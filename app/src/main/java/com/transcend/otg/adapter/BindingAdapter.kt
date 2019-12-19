@@ -62,7 +62,7 @@ object BindingAdapter {
     @JvmStatic
     @BindingAdapter("dropdownList")
     fun setDropdownList(spinner: AppCompatSpinner?, dropdownList: List<String>) {
-        val adapter = MainApplication.getInstance()?.getDropdownAdapter()
+        val adapter = MainApplication.getInstance()!!.getDropdownAdapter()
         adapter?.setDropdowonList(dropdownList)
         spinner?.adapter = adapter
     }

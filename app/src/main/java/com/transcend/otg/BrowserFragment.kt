@@ -48,7 +48,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
     var mActionModeView: RelativeLayout? = null
     lateinit var mActionModeTitle: TextView
 
-    lateinit var mContext: Context
+    var mContext: Context? = null
     lateinit var mFileActionManager: FileActionManager  //action manager
     lateinit var mBottomSheetFragment: BottomSheetFragment   //底部進度視窗
     lateinit var mFloatingBtn: ProgressFloatingButton   //Custom floating btn
@@ -60,6 +60,11 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mContext = context
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        mContext = null
     }
 
     override fun onResume() {
@@ -78,8 +83,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
 //        setBottomSheetFragment()    //設定底部進度視窗
 
-        mFileActionManager = FileActionManager(mContext, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
-
+        mFileActionManager = FileActionManager(mContext!!, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
         setDropdownList(mRoot)
 
         mBinding = FragmentBrowserBinding.inflate(inflater, container, false)
@@ -102,7 +106,6 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
         viewModel.items.observe(this, Observer {
                 fileList ->
-            adapter?.submitList(null)
             adapter?.submitList(fileList)
             viewModel.isLoading.set(false)
             viewModel.isEmpty.set(fileList.size == 0)
@@ -160,7 +163,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         mainViewModel.mDropdownList.set(list)
 
         //監控Dropdown item click
-        MainApplication.getInstance()?.getDropdownAdapter()?.setOnDropdownItemSelectedListener(object: DropDownAdapter.OnDropdownItemSelectedListener{
+        MainApplication.getInstance()!!.getDropdownAdapter()?.setOnDropdownItemSelectedListener(object: DropDownAdapter.OnDropdownItemSelectedListener{
             override fun onDropdownItemSelected(path: String) {
                 var selected_path = path
                 if (getPath().startsWith(Constant.LOCAL_ROOT))
@@ -236,7 +239,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         override fun onClick(fileInfo: FileInfo) {
             if (mActionMode != null) {
                 fileInfo.isSelected = fileInfo.isSelected.not()
-                adapter?.notifyItemChanged(adapter?.currentList?.indexOf(fileInfo)!!)
+                adapter?.notifyItemChanged(adapter?.mList?.indexOf(fileInfo)!!)
                 updateActionTitle()
             } else {
                 when(fileInfo.fileType){
@@ -256,7 +259,7 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         override fun onLongClick(fileInfo: FileInfo) {
             startActionMode()
             fileInfo.isSelected = fileInfo.isSelected.not()
-            adapter?.notifyItemChanged(adapter?.currentList?.indexOf(fileInfo)!!)
+            adapter?.notifyItemChanged(adapter?.mList?.indexOf(fileInfo)!!)
             updateActionTitle()
         }
     }
@@ -266,36 +269,39 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         when(id){
             R.id.action_delete -> {
                 // setup dialog builder
-                AlertDialog.Builder(mContext)
-                    .setTitle("Delete")
-                    .setPositiveButton("Confirm",{ dialog, whichButton ->
-                        mFileActionManager.delete(adapter?.getSelectedFilesPath()!!)
-                    })
-                    .setNegativeButton("Cancel", { dialog, whichButton ->
-                        println("cancel")
-                    })
-                    .show()
-            }
-            R.id.action_rename -> {
-                if (adapter?.getSelectedFiles()?.size == 1) {
-                    val fileInfo = adapter?.getSelectedFiles()!![0]
-
-                    val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
-                    val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
-                    textLayout.editText?.setText(fileInfo.title)
-                    AlertDialog.Builder(mContext)
-                        .setTitle("Rename")
-                        .setIcon(R.drawable.ic_tab_rename_grey)
-                        .setView(view)
+                if(mContext != null) {
+                    AlertDialog.Builder(mContext!!)
+                        .setTitle("Delete")
                         .setPositiveButton("Confirm", { dialog, whichButton ->
-                            val name = textLayout.editText?.text.toString()
-                            mFileActionManager.rename(fileInfo.path, name)
+                            mFileActionManager.delete(adapter?.getSelectedFilesPath()!!)
                         })
                         .setNegativeButton("Cancel", { dialog, whichButton ->
                             println("cancel")
                         })
-                        .setCancelable(true)
                         .show()
+                }
+            }
+            R.id.action_rename -> {
+                if (adapter?.getSelectedFiles()?.size == 1) {
+                    val fileInfo = adapter?.getSelectedFiles()!![0]
+                    if(mContext != null) {
+                        val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
+                        val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
+                        textLayout.editText?.setText(fileInfo.title)
+                        AlertDialog.Builder(mContext!!)
+                            .setTitle("Rename")
+                            .setIcon(R.drawable.ic_tab_rename_grey)
+                            .setView(view)
+                            .setPositiveButton("Confirm", { dialog, whichButton ->
+                                val name = textLayout.editText?.text.toString()
+                                mFileActionManager.rename(fileInfo.path, name)
+                            })
+                            .setNegativeButton("Cancel", { dialog, whichButton ->
+                                println("cancel")
+                            })
+                            .setCancelable(true)
+                            .show()
+                    }
                 }
             }
             R.id.action_selectAll -> {
@@ -374,11 +380,11 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
         when(id){
-            LoaderID.LOCAL_FILE_DELETE -> return LocalFileDeleteLoader(mContext, args?.getStringArrayList("paths")!!)
-            LoaderID.LOCAL_FILE_RENAME -> return LocalRenameLoader(mContext, args?.getString("path")!!, args.getString("name")!!)
+            LoaderID.LOCAL_FILE_DELETE -> return LocalFileDeleteLoader(MainApplication.getInstance()!!.getContext(), args?.getStringArrayList("paths")!!)
+            LoaderID.LOCAL_FILE_RENAME -> return LocalRenameLoader(MainApplication.getInstance()!!.getContext(), args?.getString("path")!!, args.getString("name")!!)
             LoaderID.LOCAL_FILE_COPY -> return LocalCopyLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args?.getString("path")!!)
             LoaderID.LOCAL_FILE_MOVE -> return LocalMoveLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args?.getString("path")!!)
-            else -> return NullLoader(mContext)
+            else -> return NullLoader(MainApplication.getInstance()!!.getContext())
         }
     }
 

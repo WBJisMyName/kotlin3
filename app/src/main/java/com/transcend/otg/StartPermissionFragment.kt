@@ -24,6 +24,8 @@ class StartPermissionFragment: Fragment(){
 
     override fun onResume() {
         super.onResume()
+        if (activity == null)
+            return
         (activity as MainActivity).setMidTitle(getString(R.string.about_opensource))
     }
 }

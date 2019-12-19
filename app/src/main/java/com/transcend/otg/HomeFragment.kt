@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.transcend.otg.databinding.FragmentHomeBinding
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.FileFactory
+import com.transcend.otg.utilities.MainApplication
 import com.transcend.otg.viewmodels.HomeViewModel
 
 class HomeFragment : Fragment() {
@@ -33,8 +34,8 @@ class HomeFragment : Fragment() {
         mViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
         mBinding.viewModel = mViewModel
 
-        mViewModel.localCapabilityText.set(getString(R.string.loading))
-        mViewModel.sdCapabilityText.set(getString(R.string.loading))
+        mViewModel.localCapabilityText.set(MainApplication.getInstance()!!.resources.getString(R.string.loading))
+        mViewModel.sdCapabilityText.set(MainApplication.getInstance()!!.resources.getString(R.string.loading))
 
         return mBinding.root
     }

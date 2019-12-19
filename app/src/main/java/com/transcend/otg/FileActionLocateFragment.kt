@@ -32,23 +32,28 @@ class FileActionLocateFragment : BrowserFragment(Constant.Storage_Device_Root),
         val id = item.itemId
         when(id){
             R.id.action_new_folder -> {
-                val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
-                val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
-
-                 AlertDialog.Builder(mContext)
-                    .setTitle("New Folder")
-                    .setIcon(R.drawable.ic_tab_newfolder_grey)
-                    .setView(view)
-                    .setPositiveButton("Confirm",{ dialog, whichButton ->
-                        dialog_folder_create_name
-                        val tmp = textLayout.editText?.text.toString()
-                        mFileActionManager.createFolder(viewModel.mPath, tmp)   //通知action manager執行createFolder
-                    })
-                    .setNegativeButton("Cancel", { dialog, whichButton ->
-                        println("cancel")
-                    })
-                    .setCancelable(true)
-                    .show()
+                if(mContext != null) {
+                    val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
+                    val textLayout =
+                        view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
+                    AlertDialog.Builder(mContext!!)
+                        .setTitle("New Folder")
+                        .setIcon(R.drawable.ic_tab_newfolder_grey)
+                        .setView(view)
+                        .setPositiveButton("Confirm", { dialog, whichButton ->
+                            dialog_folder_create_name
+                            val tmp = textLayout.editText?.text.toString()
+                            mFileActionManager.createFolder(
+                                viewModel.mPath,
+                                tmp
+                            )   //通知action manager執行createFolder
+                        })
+                        .setNegativeButton("Cancel", { dialog, whichButton ->
+                            println("cancel")
+                        })
+                        .setCancelable(true)
+                        .show()
+                }
             }
         }
         return super.onOptionsItemSelected(item)
@@ -101,8 +106,8 @@ class FileActionLocateFragment : BrowserFragment(Constant.Storage_Device_Root),
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
         when(id){
-            LoaderID.LOCAL_NEW_FOLDER -> return LocalFolderCreateLoader(mContext, args?.getString("path")!!)
-            else -> return NullLoader(mContext)
+            LoaderID.LOCAL_NEW_FOLDER -> return LocalFolderCreateLoader(MainApplication.getInstance()!!.getContext(), args?.getString("path")!!)
+            else -> return NullLoader(MainApplication.getInstance()!!.getContext())
         }
     }
 

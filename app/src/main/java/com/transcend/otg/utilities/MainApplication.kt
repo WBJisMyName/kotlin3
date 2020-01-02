@@ -5,14 +5,16 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
+import android.location.Address
+import android.location.Geocoder
 import android.os.Build
 import com.transcend.otg.bitmap.ThumbnailCache
 import com.transcend.otg.browser.DropDownAdapter
+import java.io.IOException
 
 class MainApplication: Application() {
     private var mThumbnails: ThumbnailCache? = null
     var mDropdownAdapter: DropDownAdapter? = null
-
 
     override fun onCreate() {
         super.onCreate()
@@ -73,5 +75,31 @@ class MainApplication: Application() {
         if (mDropdownAdapter == null)
             mDropdownAdapter = DropDownAdapter()
         return mDropdownAdapter as DropDownAdapter
+    }
+
+    fun getAddress(latitude: Double, longitude: Double): String?{
+        try {
+            val gc = Geocoder(mContext)
+            val lstAddress: List<Address>? = gc.getFromLocation(latitude, longitude, 1)
+            if (lstAddress != null && lstAddress.size != 0) { //取得部分地址
+                //                lstAddress.get(0).getCountryName();  //台灣省
+                //                lstAddress.get(0).getAdminArea();  //台北市
+                //                lstAddress.get(0).getLocality();  //中正區
+                //                lstAddress.get(0).getThoroughfare();  //信陽街 (包含路巷弄)
+                //                lstAddress.get(0).getFeatureName();  //33 (號)
+                //                lstAddress.get(0).getPostalCode();  //100 (郵遞區號)
+                //取得全部地址
+                var resultAddress = lstAddress[0].getAddressLine(0)
+                if (lstAddress[0].postalCode != null) resultAddress =
+                    resultAddress.replace(
+                        lstAddress[0].postalCode,
+                        ""
+                    ) //過濾"郵遞區號"
+                return resultAddress
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
     }
 }

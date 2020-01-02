@@ -28,6 +28,7 @@ import com.transcend.otg.data.FileInfo
 import com.transcend.otg.databinding.FragmentBrowserBinding
 import com.transcend.otg.floatingbtn.BottomSheetFragment
 import com.transcend.otg.floatingbtn.ProgressFloatingButton
+import com.transcend.otg.information.InfoActivity
 import com.transcend.otg.singleview.ImageActivity
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.BrowserViewModel
@@ -197,6 +198,15 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
         startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE)
     }
 
+    protected fun startInfoActivity(path: String) {
+        val args = Bundle()
+        args.putString("path", path)
+        val intent = Intent()
+        intent.setClass(activity as MainActivity, InfoActivity::class.java)
+        intent.putExtras(args)
+        startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE)
+    }
+
     fun setBottomSheetFragment(){
         mBottomSheetFragment = BottomSheetFragment()
         mFloatingBtn = (activity as MainActivity).findViewById(R.id.progress_floating_btn)
@@ -310,7 +320,13 @@ open class BrowserFragment(val mRoot: String) : Fragment(),
             R.id.action_copy, R.id.action_move -> {
                 startLocateActivity(id)
             }
-
+            R.id.action_info -> {
+                val list = adapter?.getSelectedFilesPath()
+                if (list == null || list!!.size != 1)
+                    return false
+                else
+                    startInfoActivity(list.get(0))
+            }
         }
         return false
     }

@@ -39,6 +39,7 @@ dependencies {
     def room_version = "2.1.0"
     def kxtVersion = "1.0.2"
     def navigationVersion = "2.0.0"
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
     kapt "androidx.room:room-compiler:$room_version"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -80,4 +81,7 @@ dependencies {
 
     //preference screen
     implementation 'androidx.preference:preference:1.1.0'
+
+    //ImageMetadataReader
+    implementation 'com.drewnoakes:metadata-extractor:2.8.1'
 }

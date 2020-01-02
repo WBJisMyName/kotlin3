@@ -7,13 +7,11 @@ class UnitConverter(context: Context?) {
     companion object {
 
         private lateinit var mContext: WeakReference<Context?>
-
         /**
          * Covert px to dp
          * @param px
          * @return dp
          */
-
     }
 
     init {

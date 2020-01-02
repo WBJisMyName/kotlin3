@@ -7,4 +7,5 @@ object LoaderID {
     val LOCAL_FILE_MOVE = 3
     val LOCAL_FILE_DELETE = 4
     val OTG_LOCAL_NEW_FOLDER = 5
+    val FILE_INFORMATION = 6
 }

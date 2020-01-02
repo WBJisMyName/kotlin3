@@ -11,6 +11,12 @@
         <menu>
 
             <item
+                    android:id="@+id/action_info"
+                    android:icon="@drawable/ic_tab_info_grey"
+                    android:title="@string/setting_information"
+                    app:showAsAction="never" />
+
+            <item
                 android:id="@+id/action_delete"
                 android:icon="@drawable/ic_tab_delete_grey"
                 android:title="@string/delete"

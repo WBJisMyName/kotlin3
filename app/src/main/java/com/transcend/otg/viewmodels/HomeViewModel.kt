@@ -10,5 +10,7 @@ class HomeViewModel: ViewModel(){
     var localCapabilityText = ObservableField<String>("Loading...")
     var sdProgressThousandth = ObservableInt(0) //千分之幾
     var sdCapabilityText = ObservableField<String>("Loading...")
+
     var sdLayoutVisible = ObservableBoolean(false)
+    var otgLayoutVisible = ObservableBoolean(false)
 }

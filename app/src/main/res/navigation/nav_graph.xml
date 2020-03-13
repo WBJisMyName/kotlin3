@@ -7,7 +7,7 @@
     <fragment android:id="@+id/browserFragment"
               android:name="com.transcend.otg.browser.TabFragment"
               android:label="BrowserFragment"
-              tools:layout="@layout/fragment_browser">
+              tools:layout="@layout/fragment_tab">
 
         <argument
                 android:name="root"
@@ -19,7 +19,19 @@
     <fragment android:id="@+id/sdFragment"
               android:name="com.transcend.otg.browser.TabFragment"
               android:label="BrowserFragment"
-              tools:layout="@layout/fragment_browser">
+              tools:layout="@layout/fragment_tab">
+
+        <argument
+                android:name="root"
+                app:argType="string"
+                app:nullable="false"
+                android:defaultValue="none" />
+    </fragment>
+
+    <fragment android:id="@+id/otgFragment"
+            android:name="com.transcend.otg.browser.OTGFragment"
+            android:label="BrowserFragment"
+            tools:layout="@layout/fragment_browser">
 
         <argument
                 android:name="root"

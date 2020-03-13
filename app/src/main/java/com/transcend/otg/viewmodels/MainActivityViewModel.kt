@@ -1,11 +1,12 @@
 package com.transcend.otg.viewmodels
 
+import android.app.Application
 import android.view.View
 import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
-import androidx.lifecycle.ViewModel
+import com.transcend.otg.browser.DropDownAdapter
 
-class MainActivityViewModel : ViewModel() {
+open class MainActivityViewModel(application: Application) : AbstractViewModel(application) {
     var dropdownVisibility = ObservableInt(View.GONE)//GONE = 8, Invisible = 4, visible = 0
     var dropdownArrowVisibility = ObservableInt(View.GONE)//GONE = 8, Invisible = 4, visible = 0
     var midTitleVisibility = ObservableInt(View.VISIBLE)//GONE = 8, Invisible = 4, visible = 0
@@ -15,6 +16,7 @@ class MainActivityViewModel : ViewModel() {
     var midTitlePaddingRight = ObservableInt(0)
 
     var mDropdownList = ObservableField<List<String>>(ArrayList<String>())
+    var mDropdownAdapter = DropDownAdapter()
 
     var mTabMode: TabMode = TabMode.Mid_Title_Only
     enum class TabMode{

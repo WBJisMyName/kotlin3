@@ -38,7 +38,7 @@
                         app:tabIndicatorColor="@color/transcend_red" />
             </RelativeLayout>
 
-            <com.transcend.otg.browser.PagerSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            <com.transcend.otg.browser.PagerSwipeRefreshLayout
                     android:id="@+id/swiperefresh"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">

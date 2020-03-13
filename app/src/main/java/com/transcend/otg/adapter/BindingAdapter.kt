@@ -6,9 +6,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.databinding.BindingAdapter
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.transcend.otg.utilities.MainApplication
+import com.transcend.otg.browser.DropDownAdapter
 
 object BindingAdapter {
 
@@ -53,18 +51,23 @@ object BindingAdapter {
     @BindingAdapter("imageResource")
     @JvmStatic
     fun setImageResource(imageView : ImageView, resId : Int){
-        Glide.with(imageView.context)
-            .load(resId)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .into(imageView)
+        if (resId == 0 || resId == 1)
+            return
+        imageView.setImageResource(resId)
+    }
+
+    @JvmStatic
+    @BindingAdapter("dropdownAdapter")
+    fun setDropdownAdapter(spinner: AppCompatSpinner?, adapter: DropDownAdapter) {
+        if (spinner == null)    return
+        spinner.adapter = adapter
     }
 
     @JvmStatic
     @BindingAdapter("dropdownList")
     fun setDropdownList(spinner: AppCompatSpinner?, dropdownList: List<String>) {
-        val adapter = MainApplication.getInstance()!!.getDropdownAdapter()
-        adapter?.setDropdowonList(dropdownList)
-        spinner?.adapter = adapter
+        if (spinner == null || spinner.adapter == null)    return
+        (spinner.adapter as DropDownAdapter).setDropdowonList(dropdownList)
     }
 
     @JvmStatic

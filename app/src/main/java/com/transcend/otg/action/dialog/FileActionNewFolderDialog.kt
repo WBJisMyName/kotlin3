@@ -21,9 +21,9 @@ abstract class FileActionNewFolderDialog(private val mContext: Context, private 
     private val uniqueName: String  //避免已存在"未命名資料夾"，此處以index作分別
         get() {
             var index = 1
-            val name = "Untitled Folder"
+            val name = mContext.getString(R.string.untitled_folder)
             var unique = name
-            while (mFolderNames.contains(unique)) {
+            while (mFolderNames.contains(unique.toLowerCase())) {
                 unique = String.format("$name (%d)", index++)
             }
             return unique
@@ -38,11 +38,11 @@ abstract class FileActionNewFolderDialog(private val mContext: Context, private 
 
     private fun initDialog() {
         val builder = AlertDialog.Builder(mContext)
-        builder.setTitle("New Folder")
+        builder.setTitle(mContext.getString(R.string.new_folder))
         builder.setIcon(R.drawable.ic_tab_newfolder_grey)
         builder.setView(R.layout.dialog_folder_create)
-        builder.setNegativeButton("Cancel", null)
-        builder.setPositiveButton("Confirm", null)
+        builder.setNegativeButton(mContext.getString(R.string.cancel), null)
+        builder.setPositiveButton(mContext.getString(R.string.confirm), null)
         builder.setCancelable(true)
         mDialog = builder.show()
         mDlgBtnPos = mDialog!!.getButton(DialogInterface.BUTTON_POSITIVE)
@@ -66,10 +66,10 @@ abstract class FileActionNewFolderDialog(private val mContext: Context, private 
         var error: String? = null
         var enabled = true
         if (isInvalid(name)) {
-            error = "Invalid name"
+            error = mContext.getString(R.string.invalid_name)
             enabled = false
         } else if (isDuplicated(name)) {
-            error = "Duplicate name"
+            error = mContext.getString(R.string.duplicate_name)
             enabled = false
         }
         mFieldName!!.setError(error)
@@ -86,7 +86,7 @@ abstract class FileActionNewFolderDialog(private val mContext: Context, private 
             val name = mFieldName!!.getEditText()?.getText().toString()
             val checker = FileNameChecker(name)
             if (checker.isContainInvalid || checker.isStartWithSpace) {
-                Toast.makeText(mContext, "Invalid name", Toast.LENGTH_SHORT).show()
+                Toast.makeText(mContext, mContext.getString(R.string.invalid_name), Toast.LENGTH_SHORT).show()
             } else {
                 onConfirm(name)
                 mDialog!!.dismiss()

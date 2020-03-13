@@ -9,7 +9,13 @@ import android.os.AsyncTask
 import android.os.OperationCanceledException
 import android.provider.MediaStore
 import android.util.Log
+import com.github.mjdev.libaums.fs.UsbFileStreamFactory
 import com.transcend.otg.utilities.Constant
+import com.transcend.otg.utilities.UsbUtils
+import java.io.BufferedInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+
 
 abstract class ImageLoaderTask(internal val mPath: String,
                       internal val mType : Int,
@@ -23,15 +29,34 @@ abstract class ImageLoaderTask(internal val mPath: String,
             return null
 
         var result: Bitmap? = null
-        try {   //landscape 轉portrait
-            if (mType == Constant.TYPE_IMAGE) run {
-                result = decodeFullScreenBitmapFromPath(mPath, mThumbSize.x, mThumbSize.y)
-            } else if (mType == Constant.TYPE_VIDEO)
-                result = ThumbnailUtils.createVideoThumbnail(mPath, MediaStore.Video.Thumbnails.MINI_KIND)
-            else if (mType == Constant.TYPE_MUSIC) run { result = loadAlbumThumbnail(mPath) }
-        } catch (e: Exception) {
-            if (e !is OperationCanceledException) {
+        if (mPath.startsWith(Constant.LOCAL_ROOT) || (Constant.SD_ROOT != null && mPath.startsWith(Constant.SD_ROOT!!))) {
+            try {   //landscape 轉portrait
+                if (mType == Constant.TYPE_IMAGE) run {
+                    result = decodeFullScreenBitmapFromPath(mPath, mThumbSize.x, mThumbSize.y)
+                } else if (mType == Constant.TYPE_VIDEO)
+                    result = ThumbnailUtils.createVideoThumbnail(mPath, MediaStore.Video.Thumbnails.MINI_KIND)
+                else if (mType == Constant.TYPE_MUSIC) run { result = loadAlbumThumbnail(mPath) }
+            } catch (e: Exception) {
+                if (e !is OperationCanceledException) {
 //                Log.d(TAG, "Failed to load thumbnail for $mPath: $e")
+                }
+            }
+        } else {
+            //TODO OTG
+            try {   //landscape 轉portrait
+                if (mType == Constant.TYPE_IMAGE) {
+                    run {
+                        val source = UsbUtils.usbFileSystem?.rootDirectory?.search(mPath)
+                        if (source == null)
+                            return null
+                        val inputStream: InputStream = UsbFileStreamFactory.createBufferedInputStream(source, UsbUtils.usbFileSystem!!)
+                        result = decodeStream(inputStream, mThumbSize.x, mThumbSize.y)
+                    }
+                }
+            } catch (e: Exception) {
+                if (e !is OperationCanceledException) {
+//                Log.d(TAG, "Failed to load thumbnail for $mPath: $e")
+                }
             }
         }
 
@@ -69,6 +94,43 @@ abstract class ImageLoaderTask(internal val mPath: String,
 
         }
 
+        return bitmap
+    }
+
+    fun decodeStream(inputStream: InputStream, reqWidth: Int, reqHeight: Int): Bitmap? {
+        var bitmap: Bitmap? = null
+        var bis: BufferedInputStream? = null
+        var baos: ByteArrayOutputStream? = null
+        try {
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = true
+            bis = BufferedInputStream(inputStream)
+            baos = ByteArrayOutputStream()
+            val buffer = ByteArray(1024)
+            var len: Int = 0
+            while (bis.read(buffer, 0, buffer.size).also({ len = it }) > 0) {
+                baos.write(buffer, 0, len)
+            }
+            val imageData: ByteArray = baos.toByteArray()
+            BitmapFactory.decodeByteArray(imageData, 0, imageData.size, options)
+            //获取imageview想要显示的宽和高
+            var scale = 1
+            if (options.outHeight > reqHeight || options.outWidth > reqWidth) {
+                val halfHeight = options.outHeight
+                val halfWidth = options.outWidth
+                while (halfHeight / scale > reqHeight && halfWidth / scale > reqWidth) {
+                    scale *= 2
+                }
+            }
+            options.inJustDecodeBounds = false
+            bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size, options)
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        } finally {
+            bis?.close()
+            baos?.close()
+            inputStream.close()
+        }
         return bitmap
     }
 

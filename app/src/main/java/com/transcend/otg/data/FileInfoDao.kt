@@ -14,6 +14,9 @@ interface FileInfoDao {//data access object
     @Query("SELECT * FROM files WHERE fileType = :type AND title LIKE :searchText")
     fun getSearchFilesByType(searchText: String, type: Int): List<FileInfo>
 
+    @Query("SELECT * FROM files WHERE fileType = :type AND path LIKE :src AND title LIKE :searchText")
+    fun getSearchFilesByType(searchText: String, type: Int, src: String): List<FileInfo>
+
     @Query("SELECT * FROM files WHERE title LIKE :searchText AND parent = :folderPath")
     fun getSearchFilesAtFolder(searchText: String, folderPath: String): List<FileInfo>
 
@@ -40,6 +43,9 @@ interface FileInfoDao {//data access object
 
     @Query("DELETE FROM files WHERE path = :path")
     fun delete(path: String)
+
+    @Query("DELETE FROM files WHERE rootType = :rootType")
+    fun deleteAllFromRoot(rootType: Int)
 
     @Query("DELETE FROM files")
     fun deleteAll()

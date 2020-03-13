@@ -28,8 +28,6 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-
         mBinding = FragmentHomeBinding.inflate(inflater, container, false)
         mViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
         mBinding.viewModel = mViewModel
@@ -42,6 +40,7 @@ class HomeFragment : Fragment() {
 
     fun initHome(){
         mViewModel.sdLayoutVisible.set(Constant.SD_ROOT != null)
+        mViewModel.otgLayoutVisible.set(Constant.OTG_ROOT != null)
 
         val localUsedSize = FileFactory().getUsedStorageSize(Constant.LOCAL_ROOT)
         val localTotalSize = FileFactory().getStorageAllSizeLong(Constant.LOCAL_ROOT)
@@ -71,6 +70,12 @@ class HomeFragment : Fragment() {
         mBinding.cardviewSD.setOnClickListener(object: View.OnClickListener{
             override fun onClick(p0: View?) {
                 (activity as MainActivity).goToBrowser(R.id.sdFragment)
+            }
+        })
+
+        mBinding.cardviewOTG.setOnClickListener(object: View.OnClickListener{
+            override fun onClick(p0: View?) {
+                (activity as MainActivity).goToBrowser(R.id.otgFragment)
             }
         })
 

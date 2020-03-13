@@ -32,7 +32,8 @@ data class FileInfo(
     var hasScanned = false  //用以判斷是否掃瞄過，主要用於資料夾
     var isSelected = false
     var defaultIcon: Int = R.drawable.ic_filelist_others_grey
-    var uri: String? = null
+
+    var rootType: Int = 0   //0 → Local；1 → SD；2 → OTG
 
     //List
     var subtitle: String? = null

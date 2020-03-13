@@ -16,7 +16,7 @@ import org.apache.commons.io.FilenameUtils
 abstract class FileActionRenameDialog(
     private val mContext: Context,
     private val mIgnoreType: Boolean,
-    name: String,
+    private val name: String,
     private val mNames: List<String>
 ) : TextWatcher, View.OnClickListener {
     private var mDialog: AlertDialog? = null
@@ -44,8 +44,8 @@ abstract class FileActionRenameDialog(
         builder.setTitle(mContext.resources.getString(R.string.rename))
         builder.setIcon(R.drawable.ic_tab_rename_grey)
         builder.setView(R.layout.dialog_folder_create)
-        builder.setNegativeButton("Cancel", null)
-        builder.setPositiveButton("Confirm", null)
+        builder.setNegativeButton(mContext.getString(R.string.cancel), null)
+        builder.setPositiveButton(mContext.getString(R.string.confirm), null)
         builder.setCancelable(true)
         mDialog = builder.show()
         mDlgBtnPos = mDialog!!.getButton(DialogInterface.BUTTON_POSITIVE)
@@ -69,10 +69,10 @@ abstract class FileActionRenameDialog(
         var error: String? = null
         var enabled = true
         if (isInvalid(name)) {
-            error = "Invalid Name"
+            error = mContext.getString(R.string.invalid_name)
             enabled = false
         } else if (isDuplicated(name)) {
-            error = "Duplicate Name"
+            error = mContext.getString(R.string.duplicate_name)
             enabled = false
         }
         mFieldName!!.error = error
@@ -90,7 +90,7 @@ abstract class FileActionRenameDialog(
             val text = mFieldName!!.editText!!.text.toString()
             val checker = FileNameChecker(text)
             if (checker.isContainInvalid || checker.isStartWithSpace) {
-                Toast.makeText(mContext, "Invalid Name", Toast.LENGTH_SHORT).show()
+                Toast.makeText(mContext, mContext.getString(R.string.invalid_name), Toast.LENGTH_SHORT).show()
             } else {
                 if (mName != text)
                     onConfirm(addExtension(text))

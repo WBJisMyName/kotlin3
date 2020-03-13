@@ -16,8 +16,13 @@
 
     <item
             android:id="@+id/sdFragment"
-            android:title="@string/sdTitle"
+            android:title="@string/nav_sd"
             android:icon="@drawable/ic_drawer_microsd_grey"/>
+
+    <item
+            android:id="@+id/otgFragment"
+            android:title="@string/nav_otg"
+            android:icon="@drawable/ic_drawer_otg_grey"/>
 
     <item
             android:id="@+id/settingsFragment"

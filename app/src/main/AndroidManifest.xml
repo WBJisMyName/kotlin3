@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         package="com.transcend.otg">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
             android:name=".utilities.MainApplication"
@@ -25,6 +28,7 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
+
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
                 android:value="@string/google_maps_key" />
@@ -36,9 +40,15 @@
                 android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+                <action android:name="com.transcend.otg.USB_PERMISSION" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data
+                    android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                    android:resource="@xml/device_filter" />
         </activity>
         <activity
                 android:name=".FileActionLocateActivity"
@@ -48,7 +58,8 @@
                 android:name=".information.InfoActivity"
                 android:launchMode="singleTask"
                 android:screenOrientation="portrait"></activity>
-        <activity android:name=".singleview.ImageActivity" />
+        <activity android:name=".singleview.ImageActivity"
+                android:configChanges="orientation|screenSize|keyboardHidden"/>
 
         <receiver android:name=".receiver.SDCardReceiver">
             <intent-filter>
@@ -58,6 +69,27 @@
                 <data android:scheme="file" />
             </intent-filter>
         </receiver>
-    </application>
 
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="${applicationId}.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths" />
+        </provider>
+
+        <provider
+                android:name="com.github.mjdev.libaums.storageprovider.UsbDocumentProvider"
+                android:authorities="com.github.mjdev.libaums.storageprovider.documents"
+                android:exported="true"
+                android:grantUriPermissions="true"
+                android:permission="android.permission.MANAGE_DOCUMENTS"
+                android:enabled="@bool/isAtLeastKitKat">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+    </application>
 </manifest>

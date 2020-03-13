@@ -7,37 +7,35 @@ import java.io.File
 import java.lang.reflect.InvocationTargetException
 
 class FileFactory{
-    private var mFileFactory: FileFactory? = null
-    private val mMute = Any()
-    private val mNotificationList: MutableList<String>
+    private val mNotificationList: MutableList<Int> = ArrayList()
 
-    init {
-        mNotificationList = ArrayList()
-    }
-
-    fun getInstance(): FileFactory {
-        synchronized(mMute) {
-            if (mFileFactory == null)
-                mFileFactory = FileFactory()
+    companion object {
+        private val mMute = Object()
+        private var INSTANCE: FileFactory? = null
+        fun getInstance(): FileFactory {
+            if (INSTANCE == null) {
+                synchronized(mMute) {
+                    INSTANCE = FileFactory()
+                }
+            }
+            return INSTANCE!!
         }
-        return mFileFactory!!
     }
 
-    fun getNotificationID(): Int {
+    fun getNotificationID(): Int {  //統一管理Notification ID
         var id = 1
         if (mNotificationList.size > 0) {
             val value = mNotificationList.get(mNotificationList.size - 1)
-            id = Integer.parseInt(value) + 1
-            mNotificationList.add(Integer.toString(id))
+            id = value + 1
+            mNotificationList.add(id)
         } else {
-            mNotificationList.add(Integer.toString(id))
+            mNotificationList.add(id)
         }
         return id
     }
 
     fun releaseNotificationID(id: Int) {
-        val value = "" + id
-        mNotificationList.remove(value)
+        mNotificationList.remove(id)
     }
 
     fun getUsedStorageSize(filePath: String): Long {
@@ -59,6 +57,10 @@ class FileFactory{
             return 0
         }
 
+    }
+
+    fun isLocalPath(path: String): Boolean{
+        return path.startsWith(Constant.LOCAL_ROOT)
     }
 
     fun isSDCardPath(context: Context, path: String): Boolean {

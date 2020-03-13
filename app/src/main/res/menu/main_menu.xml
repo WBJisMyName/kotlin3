@@ -39,7 +39,7 @@
             <item
                     android:id="@+id/action_new_folder"
                     android:icon="@drawable/ic_tab_newfolder_grey"
-                    android:title="@string/newFolder"
+                    android:title="@string/new_folder"
                     app:showAsAction="never" />
         </menu>
     </item>

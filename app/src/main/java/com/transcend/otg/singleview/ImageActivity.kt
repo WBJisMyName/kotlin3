@@ -1,6 +1,8 @@
 package com.transcend.otg.singleview
 
+import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -9,6 +11,7 @@ import androidx.viewpager.widget.ViewPager
 import com.transcend.otg.R
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.databinding.SingleViewImageBinding
+import com.transcend.otg.utilities.UiHelper
 import com.transcend.otg.viewmodels.ImageViewModel
 
 class ImageActivity : AppCompatActivity(){
@@ -29,6 +32,7 @@ class ImageActivity : AppCompatActivity(){
         mFilePath = intent.getStringExtra("path")
         mTitle = intent.getStringExtra("title")
 
+        UiHelper.setSystemBarTranslucent(this)
         var viewModel = ViewModelProviders.of(this).get(ImageViewModel::class.java)
         if (mFolderPath == null)
             viewModel.loadAllImageList(mFilePath!!)
@@ -79,5 +83,16 @@ class ImageActivity : AppCompatActivity(){
             }
         }
         return 0
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        Log.e(ImageActivity::class.java.simpleName, "Focus")
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus)
+            Log.e(ImageActivity::class.java.simpleName, "Focus")
     }
 }

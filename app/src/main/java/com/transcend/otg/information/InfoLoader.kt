@@ -5,8 +5,6 @@ import android.graphics.BitmapFactory
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
-import android.provider.MediaStore
-import androidx.documentfile.provider.DocumentFile
 import androidx.loader.content.AsyncTaskLoader
 import com.drew.imaging.ImageMetadataReader
 import com.drew.imaging.ImageProcessingException
@@ -14,11 +12,10 @@ import com.drew.metadata.MetadataException
 import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import com.drew.metadata.exif.GpsDirectory
+import com.github.mjdev.libaums.fs.UsbFile
+import com.github.mjdev.libaums.fs.UsbFileStreamFactory
 import com.transcend.otg.R
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.FileFactory
-import com.transcend.otg.utilities.MainApplication
-import com.transcend.otg.utilities.MathUtils
+import com.transcend.otg.utilities.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -37,7 +34,7 @@ class InfoLoader(
     val repository = MediaInfoRepository(mApplication)
 
     override fun loadInBackground(): Boolean? {
-        if (mPath.startsWith(Constant.LOCAL_ROOT) || FileFactory().isSDCardPath(context, mPath)) {
+        if (FileFactory().isLocalPath(mPath) || FileFactory().isSDCardPath(context, mPath)) {
             when (mType) {
                 Constant.TYPE_IMAGE -> return retrieveImage()
                 Constant.TYPE_VIDEO -> return retrieveVideo()
@@ -46,12 +43,27 @@ class InfoLoader(
                 else -> return retrieveFile()
             }
         } else {
-            //TODO OTG
+            val target = UsbUtils.usbFileSystem?.rootDirectory?.search(mPath)
+            if (target != null){
+                when (mType) {
+                    Constant.TYPE_IMAGE -> return retrieveImage(target)
+                    Constant.TYPE_VIDEO -> return retrieveVideo(target)
+                    Constant.TYPE_MUSIC -> return retrieveMusic(target)
+                    Constant.TYPE_DIR -> return retrieveFolder(target)
+                    else -> return retrieveFile(target)
+                }
+                return true
+            }
             return false
         }
     }
 
     private fun retrieveImage(): Boolean {
+        imageInfo = repository.getImageInfo(mPath)
+        if (imageInfo != null){
+            return true
+        }
+
         val file = File(mPath)
         var inputStream: InputStream? = null
 
@@ -188,56 +200,7 @@ class InfoLoader(
                 }
             }
             repository.insert(mediaInfo!!)
-
-            if(mediaInfo != null) {
-                imageInfo = ImageInfo(mPath, mediaInfo!!.name)
-                var nameSub = ""
-                if (mediaInfo!!.size != -1L)
-                    nameSub = MathUtils.getStorageSize(mediaInfo!!.size)
-                if (mediaInfo!!.width != -1 && mediaInfo!!.height != -1)
-                    imageInfo!!.name_subtitle = mediaInfo!!.width.toString() + "x" + mediaInfo!!.height.toString() + "   $nameSub"
-
-                if (mediaInfo!!.date_time != null) {
-                    val dateString = mediaInfo!!.date_time!!
-                    val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-                    val date: Date = sdf.parse(dateString)!!
-
-                    //先行定義時間格式
-                    val date_format = SimpleDateFormat(context.resources.getString(R.string.date_format))
-                    val week_time_format = SimpleDateFormat(context.resources.getString(R.string.week_time_format))
-                    imageInfo!!.time_title = date_format.format(date)
-                    imageInfo!!.time_subtitle = week_time_format.format(date)
-                }
-
-                if (mediaInfo!!.model != null && mediaInfo!!.f_number != -1.0 && mediaInfo!!.focal_length != -1.0 && mediaInfo!!.iso_speed_rating != -1){
-                    //感覺機型非必要，若沒有則顯示前者即可
-                    var tmp_make = ""
-                    if (mediaInfo!!.make != null)
-                        tmp_make = ", " + mediaInfo!!.make
-                    imageInfo!!.device_title = mediaInfo!!.model.toString() + tmp_make
-
-                    var df = DecimalFormat("0.0")
-                    val f_number: Double = df.format(mediaInfo!!.f_number).toDouble() //四捨五入到小數第一位
-
-                    var exposure_time = ""
-                    if (mediaInfo!!.exposure_time_numerator != -1 && mediaInfo!!.exposure_time_denominator != -1)
-                        exposure_time = mediaInfo!!.exposure_time_numerator.toString() + "/" + mediaInfo!!.exposure_time_denominator.toString()
-                    df = DecimalFormat("0.00")
-                    val focal_length: Double = df.format(mediaInfo!!.focal_length).toDouble()
-
-                    imageInfo!!.device_subtitle = "f/" + f_number + ",  " + exposure_time + ",  " + focal_length + "mm,  " + "ISO" + mediaInfo!!.iso_speed_rating
-                }
-                if(mediaInfo!!.latitude != -1.0 && mediaInfo!!.longitude != -1.0){
-                    val address = MainApplication.getInstance()!!.getAddress(mediaInfo!!.latitude, mediaInfo!!.longitude)
-                    if (address != null) {
-                        val df = DecimalFormat("0.000000")
-                        imageInfo!!.location_title = address
-                        imageInfo!!.location_subtitle = df.format(mediaInfo!!.latitude).toString() + ", " + df.format(mediaInfo!!.longitude)
-                    }
-                }
-                repository.insert(imageInfo!!)
-            }
-
+            buildImageInfo()
             return true
         } catch (e: IOException) {
             e.printStackTrace()
@@ -252,6 +215,11 @@ class InfoLoader(
     }
 
     private fun retrieveMusic(): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
+
         val mmr = MediaMetadataRetriever()
         mmr.setDataSource(mPath)
         val title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
@@ -266,14 +234,21 @@ class InfoLoader(
         val f = File(mPath)
         mediaInfo = MediaInfo(mPath, f.name)
         mediaInfo!!.parent = f.parent!! + "/"
+        mediaInfo!!.name = f.name
         mediaInfo!!.album = album
         mediaInfo!!.artist = artist
         mediaInfo!!.genre = mime
         mediaInfo!!.release_date = date
+        repository.insert(mediaInfo!!)
         return true
     }
 
     private fun retrieveVideo(): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
+
         val f = File(mPath)
         mediaInfo = MediaInfo(mPath, f.name)
         mediaInfo!!.parent = f.parent!! + "/"
@@ -308,6 +283,7 @@ class InfoLoader(
                         val sec = (duration / (1000L * 1000L) - (hour.toLong() * 60L * 60L + min * 60L)).toInt()
                         mediaInfo!!.duration = String.format("%d:%02d:%02d", hour, min, sec)
                     }
+                    repository.insert(mediaInfo!!)
                 }
             }
         } catch (e: IOException) {
@@ -321,15 +297,26 @@ class InfoLoader(
     }
 
     private fun retrieveFile(): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
+
         val file = File(mPath)
         mediaInfo = MediaInfo(mPath, file.name)
         mediaInfo!!.parent = file.parent + "/"
         mediaInfo!!.size = file.length()
         mediaInfo!!.last_modify = file.lastModified()
+        repository.insert(mediaInfo!!)
         return true
     }
 
     private fun retrieveFolder(): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
+
         val file_directory_numbers = intArrayOf(0, 0)
         val size = getDocumentFilesNumberAndSize(file_directory_numbers)
 
@@ -340,18 +327,22 @@ class InfoLoader(
         mediaInfo!!.file_num = file_directory_numbers[0].toLong()
         mediaInfo!!.folder_num = file_directory_numbers[1].toLong()
         mediaInfo!!.size = size
+        repository.insert(mediaInfo!!)
         return true
     }
 
-    private fun retrieveImage(file: DocumentFile): Boolean {
-        if (file == null)   return false
-        var inputStream: InputStream? = null
+    private fun retrieveImage(file: UsbFile): Boolean {
+        imageInfo = repository.getImageInfo(mPath)
+        if (imageInfo != null){
+            return true
+        }
 
-        mediaInfo = MediaInfo(mPath, file.name!!)
-        mediaInfo!!.parent = File(mPath).parent!! + "/"
-        mediaInfo!!.size = file.length()
+        var inputStream: InputStream? = null
+        mediaInfo = MediaInfo("Usb Device"+mPath, file.name)
+        mediaInfo!!.parent = "Usb Device"+(file.parent?.absolutePath ?: "")
+        mediaInfo!!.size = file.length
         try {
-            inputStream = mApplication.contentResolver.openInputStream(file.uri)
+            inputStream = UsbFileStreamFactory.createBufferedInputStream(file, UsbUtils.usbFileSystem!!)
             val metadata = ImageMetadataReader.readMetadata(inputStream)
 
             // A Metadata object contains multiple Directory objects
@@ -466,14 +457,17 @@ class InfoLoader(
                     }
                 }
 
-                if (mediaInfo!!.width == -1 || mediaInfo!!.height == -1) {
-                    val bitmap = MediaStore.Images.Media.getBitmap(mApplication.contentResolver, file.uri)
-                    //                    Bitmap bitmap= BitmapFactory.decodeFile(mPath);
-                    if(bitmap != null) {
-                        mediaInfo!!.height = bitmap.height
-                        mediaInfo!!.width = bitmap.width
-                    }
-                }
+//                if (mediaInfo!!.width == -1 || mediaInfo!!.height == -1) {
+//                    val bitmap = MediaStore.Images.Media.getBitmap(mApplication.contentResolver, file.uri)
+//                    //                    Bitmap bitmap= BitmapFactory.decodeFile(mPath);
+//                    if(bitmap != null) {
+//                        mediaInfo!!.height = bitmap.height
+//                        mediaInfo!!.width = bitmap.width
+//                    }
+//                }
+
+                repository.insert(mediaInfo!!)
+                buildImageInfo()
             }
             return true
         } catch (e: IOException) {
@@ -482,105 +476,130 @@ class InfoLoader(
             e.printStackTrace()
         } catch (e: MetadataException) {
             e.printStackTrace()
+        } finally {
+            inputStream?.close()
         }
 
         return false
     }
 
-    private fun retrieveMusic(file: DocumentFile): Boolean {
-        if (file == null) return false
-        val mmr = MediaMetadataRetriever()
-        mmr.setDataSource(mApplication, file.uri)
-        val title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-        val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
-        val mime = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE)
-        val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-        val duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION) // ms
-        val bitrate =
-            mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE) // bit/s api >= 14
-        val date = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
+    private fun buildImageInfo(){
+        if(mediaInfo != null) {
+            imageInfo = ImageInfo(mPath, mediaInfo!!.name)
+            var nameSub = ""
+            if (mediaInfo!!.size != -1L)
+                nameSub = MathUtils.getStorageSize(mediaInfo!!.size)
+            if (mediaInfo!!.width != -1 && mediaInfo!!.height != -1)
+                imageInfo!!.name_subtitle =
+                    mediaInfo!!.width.toString() + "x" + mediaInfo!!.height.toString() + "   $nameSub"
 
-        mediaInfo = MediaInfo(mPath, file.name!!)
-        mediaInfo!!.parent = File(mPath).parent!! + "/"
-        mediaInfo!!.album = album
-        mediaInfo!!.artist = artist
-        mediaInfo!!.genre = mime
-        mediaInfo!!.release_date = date
-        return true
-    }
+            if (mediaInfo!!.date_time != null) {
+                val dateString = mediaInfo!!.date_time!!
+                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+                val date: Date = sdf.parse(dateString)!!
 
-    private fun retrieveVideo(file: DocumentFile): Boolean {
-        if (file == null)   return false
-        mediaInfo = MediaInfo(mPath, file.name!!)
-        mediaInfo!!.parent = File(mPath).parent!! + "/"
+                //先行定義時間格式
+                val date_format =
+                    SimpleDateFormat(context.resources.getString(R.string.date_format))
+                val week_time_format =
+                    SimpleDateFormat(context.resources.getString(R.string.week_time_format))
+                imageInfo!!.time_title = date_format.format(date)
+                imageInfo!!.time_subtitle = week_time_format.format(date)
+            }
 
-        val extractor = MediaExtractor()
-        try {
-            //Adjust data source as per the requirement if file, URI, etc.
-            extractor.setDataSource(mApplication, file.uri, null)
-            val numTracks = extractor.trackCount
-            for (i in 0 until numTracks) {
-                val format = extractor.getTrackFormat(i)
-                val mime = format.getString(MediaFormat.KEY_MIME)
-                if (mime!!.startsWith("video/")) {
-                    mediaInfo!!.format = mime
+            if (mediaInfo!!.model != null && mediaInfo!!.f_number != -1.0 && mediaInfo!!.focal_length != -1.0 && mediaInfo!!.iso_speed_rating != -1) {
+                //感覺機型非必要，若沒有則顯示前者即可
+                var tmp_make = ""
+                if (mediaInfo!!.make != null)
+                    tmp_make = ", " + mediaInfo!!.make
+                imageInfo!!.device_title = mediaInfo!!.model.toString() + tmp_make
 
-                    if (format.containsKey(MediaFormat.KEY_FRAME_RATE)) {
-                        mediaInfo!!.frame_rate =
-                            format.getInteger(MediaFormat.KEY_FRAME_RATE).toString() + ""
-                    }
+                var df = DecimalFormat("0.0")
+                val f_number: Double =
+                    df.format(mediaInfo!!.f_number).toDouble() //四捨五入到小數第一位
 
-                    if (format.containsKey(MediaFormat.KEY_WIDTH)) {
-                        mediaInfo!!.width = format.getInteger(MediaFormat.KEY_WIDTH)
-                    }
+                var exposure_time = ""
+                if (mediaInfo!!.exposure_time_numerator != -1 && mediaInfo!!.exposure_time_denominator != -1)
+                    exposure_time =
+                        mediaInfo!!.exposure_time_numerator.toString() + "/" + mediaInfo!!.exposure_time_denominator.toString()
+                df = DecimalFormat("0.00")
+                val focal_length: Double = df.format(mediaInfo!!.focal_length).toDouble()
 
-                    if (format.containsKey(MediaFormat.KEY_HEIGHT)) {
-                        mediaInfo!!.height = format.getInteger(MediaFormat.KEY_HEIGHT)
-                    }
-
-                    if (format.containsKey(MediaFormat.KEY_DURATION)) {
-                        val duration = format.getLong(MediaFormat.KEY_DURATION)
-                        val hour = (duration / (1000L * 1000L * 60L * 60L)).toInt()
-                        val min = (duration / (1000L * 1000L * 60L) - hour * 60L).toInt()
-                        val sec =
-                            (duration / (1000L * 1000L) - (hour.toLong() * 60L * 60L + min * 60L)).toInt()
-                        mediaInfo!!.duration = String.format("%d:%02d:%02d", hour, min, sec)
-                    }
+                imageInfo!!.device_subtitle =
+                    "f/" + f_number + ",  " + exposure_time + ",  " + focal_length + "mm,  " + "ISO" + mediaInfo!!.iso_speed_rating
+            }
+            if (mediaInfo!!.latitude != -1.0 && mediaInfo!!.longitude != -1.0) {
+                val address = MainApplication.getInstance()!!.getAddress(
+                    mediaInfo!!.latitude,
+                    mediaInfo!!.longitude
+                )
+                if (address != null) {
+                    val df = DecimalFormat("0.000000")
+                    imageInfo!!.location_title = address
+                    imageInfo!!.location_subtitle =
+                        df.format(mediaInfo!!.latitude).toString() + ", " + df.format(
+                            mediaInfo!!.longitude
+                        )
                 }
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally {
-            //Release stuff
-            extractor.release()
+            repository.insert(imageInfo!!)
         }
+    }
+
+    private fun retrieveMusic(file: UsbFile): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
+        mediaInfo = MediaInfo("Usb Device"+mPath, file.name)
+        mediaInfo!!.parent = "Usb Device"+(file.parent?.absolutePath)
+        repository.insert(mediaInfo!!)
         return true
     }
 
-    private fun retrieveFile(file: DocumentFile): Boolean {
-        if (file == null) return false
-        mediaInfo = MediaInfo(mPath, file.name!!)
-        mediaInfo!!.size = file.length()
+    private fun retrieveVideo(file: UsbFile): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
+        mediaInfo = MediaInfo("Usb Device"+mPath, file.name)
+        mediaInfo!!.parent = "Usb Device"+(file.parent?.absolutePath)
+        repository.insert(mediaInfo!!)
+        return true
+    }
+
+    private fun retrieveFile(file: UsbFile): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
+        mediaInfo = MediaInfo("Usb Device"+mPath, file.name)
+        mediaInfo!!.size = file.length
         mediaInfo!!.last_modify = file.lastModified()
-        mediaInfo!!.parent = File(mPath).parent //拿取該路徑的父資料夾
+        mediaInfo!!.parent = "Usb Device"+(file.parent?.absolutePath)
+        repository.insert(mediaInfo!!)
         return true
     }
 
-    private fun retrieveFolder(file: DocumentFile): Boolean {
-        if (file == null) return false
+    private fun retrieveFolder(file: UsbFile): Boolean {
+        mediaInfo = repository.getMediaInfo(mPath)
+        if (mediaInfo != null){
+            return true
+        }
         val file_directory_numbers = intArrayOf(0, 0)
         val size = getDocumentFilesNumberAndSize(file_directory_numbers)
 
-        mediaInfo = MediaInfo("$mPath/", file.name!!)
+        mediaInfo = MediaInfo("Usb Device"+"$mPath/", file.name)
         mediaInfo!!.file_num = file_directory_numbers[0].toLong()
         mediaInfo!!.folder_num = file_directory_numbers[1].toLong()
         mediaInfo!!.size = size
-        mediaInfo!!.parent = "$mPath/"
+        mediaInfo!!.parent = "Usb Device"+"$mPath"
         mediaInfo!!.last_modify = file.lastModified()
+        repository.insert(mediaInfo!!)
         return true
     }
 
-    private fun getFilesNumber(dfile: DocumentFile, _file_directory_numbers: IntArray) {
+    private fun getFilesNumber(dfile: UsbFile, _file_directory_numbers: IntArray) {
         for (df in dfile.listFiles()) {
             if (df.isDirectory) {
                 getFilesNumber(df, _file_directory_numbers)
@@ -618,21 +637,20 @@ class InfoLoader(
                 }
             }
         } else {
-            //TODO OTG
-        }
-        return total_size
-    }
-
-    private fun getDocumentFilsTotalSize(dfile: DocumentFile): Long {
-        var size: Long = 0
-        for (df in dfile.listFiles()) {
-            if (df.isDirectory) {
-                size += getDocumentFilsTotalSize(df)
-            } else if (!df.name!!.startsWith(".")) {
-                size += df.length()
+            val file = UsbUtils.usbFileSystem?.rootDirectory?.search(mPath)
+            if (file != null) {
+                for (f in file.listFiles()) {
+                    if (f.isDirectory) {
+                        getFilesNumber(f, _file_directory_numbers)
+                        _file_directory_numbers[1]++
+                    } else {
+                        _file_directory_numbers[0]++
+                        total_size += f.length
+                    }
+                }
             }
         }
-        return size
+        return total_size
     }
 
     private fun stringConverter(tmp: String): Double {

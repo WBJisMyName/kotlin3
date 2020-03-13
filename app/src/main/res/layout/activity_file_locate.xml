@@ -42,12 +42,12 @@
                                 android:id="@+id/main_dropdown"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="15dp"
+                                android:layout_marginLeft="10dp"
                                 android:background="@null"
-                                android:dropDownHorizontalOffset="20dp"
-                                android:dropDownVerticalOffset="20dp"
+                                android:clickable="false"
                                 android:gravity="center"
                                 android:visibility="@{viewModel.dropdownVisibility}"
+                                app:dropdownAdapter="@{viewModel.mDropdownAdapter}"
                                 app:dropdownList="@{viewModel.mDropdownList}"
                                 app:enable="@{viewModel.dropdownArrowVisibility == View.VISIBLE}" />
 
@@ -89,7 +89,8 @@
                         android:text="Select"
                         android:textAllCaps="false"
                         android:textColor="@color/colorWhite"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:visibility="@{viewModel.confirmBtnVisibility}"/>
 
             </RelativeLayout>
 

@@ -4,18 +4,29 @@ import android.content.Context
 
 object AppPref {
 
-    val SD_KEY = "STRING sd key"
+    val SD_KEY = "String sd key"
     val SORT_BY = "Int sortBy key"
     val SORT_ORDER = "Int sortOrder key"
+    val OTG_KEY = "String otg key"
 
     fun setSDKey(context: Context, value: String) {
-        PrefUtil.write(context,
-            SD_KEY, PrefUtil.KEY_STRING, value)
+        PrefUtil.write(context, SD_KEY, PrefUtil.KEY_STRING, value)
     }
 
-    fun getSdKey(context: Context): String {
-        return PrefUtil.read(context,
-            SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
+    fun getSDKey(context: Context): String {
+        return PrefUtil.read(context, SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
+    }
+
+    fun setOTGKey(context: Context, sn: String?, uri: String) {
+        if (sn == null) return
+        val key: String = OTG_KEY + "-" +  sn
+        PrefUtil.write(context, SD_KEY, PrefUtil.KEY_STRING, uri)
+    }
+
+    fun getOTGKey(context: Context, sn: String?): String {
+        if (sn == null) return ""
+        val key: String = OTG_KEY + "-" +  sn
+        return PrefUtil.read(context, SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
     }
 
     fun setSortBy(context: Context, type: Int, value: Int){

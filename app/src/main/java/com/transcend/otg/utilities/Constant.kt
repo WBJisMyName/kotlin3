@@ -6,9 +6,9 @@ object Constant{
     var DropDownMainTitle = ""
     val LOCAL_ROOT = Environment.getExternalStorageDirectory().absolutePath
     var SD_ROOT: String? = null
+    var OTG_ROOT: String? = null
     var Storage_Device_Root = "Storage/"
-    var LocalBrowserMainPageTitle = SystemUtil().getDeviceName()
-    var SDBrowserMainPageTitle = "SD Card"
+    var PhoneName = SystemUtil().getDeviceName()
 
     val TYPE_DIR = 0
     val TYPE_IMAGE = 1

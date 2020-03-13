@@ -18,13 +18,13 @@ abstract class ScanMediaFiles(application: Application){
     abstract fun onFinished(list: List<FileInfo>)
 
     fun scanFileList(type: Int, src: String){
-        if (src.equals(Constant.LOCAL_ROOT) && Constant.localMediaScanState.get(type) == Constant.ScanState.SCANNING)   //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
+        //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
+        if (src.equals(Constant.LOCAL_ROOT) && Constant.localMediaScanState[type] == Constant.ScanState.SCANNING)
             return
-        else if (Constant.SD_ROOT != null && src.equals(Constant.SD_ROOT) && Constant.sdMediaScanState.get(type) == Constant.ScanState.SCANNING)   //防呆，避免重複任務，但掃過了可以再掃一遍直接覆蓋過去
+        else if ((Constant.SD_ROOT != null && src.equals(Constant.SD_ROOT)) && Constant.sdMediaScanState[type] == Constant.ScanState.SCANNING)
             return
 
         mSrc = src
-        repository.deleteAll(type)
 
         val thread = Thread(Runnable {
             when (type) {
@@ -103,7 +103,6 @@ abstract class ScanMediaFiles(application: Application){
                         fileInfo.lastModifyTime = picTime
                         fileInfo.fileType = Constant.TYPE_IMAGE
                         fileInfo.size = picSize
-                        fileInfo.uri = imageUri.toString()
                         fileInfo.defaultIcon = R.drawable.ic_filelist_pic_grey
                         fileInfo.parent = picPath.replace(picName, "")
 

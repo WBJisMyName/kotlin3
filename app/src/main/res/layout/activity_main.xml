@@ -44,6 +44,7 @@
                                 android:clickable="false"
                                 android:gravity="center"
                                 android:visibility="@{viewModel.dropdownVisibility}"
+                                app:dropdownAdapter="@{viewModel.mDropdownAdapter}"
                                 app:dropdownList="@{viewModel.mDropdownList}"
                                 app:enable="@{viewModel.dropdownArrowVisibility == View.VISIBLE}"
                                 />
@@ -137,6 +138,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="start"
+                app:headerLayout="@layout/navigation_drawer_header"
                 app:menu="@menu/menu_navigation"/>
 
     </androidx.drawerlayout.widget.DrawerLayout>

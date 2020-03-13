@@ -18,6 +18,9 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.CenterInside
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener
@@ -27,7 +30,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.transcend.otg.R
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.MainApplication
+import com.transcend.otg.utilities.MathUtils
 import com.transcend.otg.utilities.UnitConverter
+import java.io.File
+import java.text.SimpleDateFormat
 
 class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewHolder>() {
 
@@ -37,9 +43,10 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
 
     val mList = ArrayList<InfoContentItem>()
     var mType = -1
+    var mPath = ""
 
     private var mMap: GoogleMap? = null
-    private val thumbnailBitmap: Bitmap? = null
+    private var thumbnailBitmap: Bitmap? = null
 
     var mPortraitScreenWidth: Int = 0
 
@@ -54,9 +61,10 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
     fun setData(info: ImageInfo?){
         if (info == null)
             return
+        mPath = info.path
         mType = Constant.TYPE_IMAGE
         val pathContent = InfoContentItem()
-        pathContent.title = info.path
+        pathContent.title = File(info.path).parent
         pathContent.iconResID = R.drawable.ic_mediainfo_folder_grey
         mList.add(pathContent)
         if(info.time_title != null) {
@@ -91,6 +99,145 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
         notifyDataSetChanged()
     }
 
+    fun setData(mediaInfo: MediaInfo, type: Int){
+        mType = type
+        mPath = mediaInfo.parent + mediaInfo.name
+        thumbnailBitmap = MainApplication.thumbnailsCache?.get(mediaInfo.parent + mediaInfo.name + Constant.thumbnailCacheTail)
+        when(mType){
+            Constant.TYPE_MUSIC -> {
+                val pathContent = InfoContentItem()
+                pathContent.title = mediaInfo.parent
+                pathContent.iconResID = R.drawable.ic_mediainfo_folder_grey
+                mList.add(pathContent)
+
+                val nameContent = InfoContentItem()
+                nameContent.title = mediaInfo.name
+                nameContent.iconResID = R.drawable.ic_musicinfo_title_grey
+                mList.add(nameContent)
+
+                if (mediaInfo.artist != null) {
+                    val artistContent = InfoContentItem()
+                    artistContent.title = mediaInfo.artist
+                    artistContent.iconResID = R.drawable.ic_musicinfo_artist_grey
+                    mList.add(artistContent)
+                }
+
+                if (mediaInfo.album != null) {
+                    val albumContent = InfoContentItem()
+                    albumContent.title = mediaInfo.album
+                    albumContent.iconResID = R.drawable.ic_musicinfo_album_grey
+                    mList.add(albumContent)
+                }
+
+                if (mediaInfo.release_date != null){
+                    val dateContent = InfoContentItem()
+                    dateContent.title = mediaInfo.release_date
+                    dateContent.iconResID = R.drawable.ic_photoinfo_date_grey
+                    mList.add(dateContent)
+                }
+
+                if (mediaInfo.genre != null) {
+                    val genreContent = InfoContentItem()
+                    genreContent.title = mediaInfo.genre
+                    genreContent.iconResID = R.drawable.ic_musicinfo_genre_grey
+                    mList.add(genreContent)
+                }
+            }
+            Constant.TYPE_VIDEO -> {
+                 val pathContent = InfoContentItem()
+                pathContent.title = mediaInfo.parent
+                pathContent.iconResID = R.drawable.ic_mediainfo_folder_grey
+                mList.add(pathContent)
+
+                val nameContent = InfoContentItem()
+                nameContent.title = mediaInfo.name
+                nameContent.iconResID = R.drawable.ic_videoinfo_resolution_grey
+                var sub = ""
+                if (mediaInfo.width != -1 && mediaInfo.height != -1)
+                    sub = mediaInfo.width.toString() + " x " + mediaInfo.height + "    "
+                if (mediaInfo.frame_rate != null)
+                    sub += mediaInfo.frame_rate.toString() + "fps"
+                if (!sub.equals(""))
+                    nameContent.subtitle = sub
+                mList.add(nameContent)
+
+                if (mediaInfo.artist != null) {
+                    val durationContent = InfoContentItem()
+                    durationContent.title = mediaInfo.duration
+                    durationContent.iconResID = R.drawable.ic_videoinfo_length_grey
+                    mList.add(durationContent)
+                }
+
+                if (mediaInfo.album != null) {
+                    val rateContent = InfoContentItem()
+                    rateContent.title = mediaInfo.frame_rate
+                    rateContent.iconResID = R.drawable.ic_videoinfo_format_grey
+                    mList.add(rateContent)
+                }
+
+                if (mediaInfo.release_date != null){
+                    val dateContent = InfoContentItem()
+                    dateContent.title = mediaInfo.release_date
+                    dateContent.iconResID = R.drawable.ic_photoinfo_date_grey
+                    mList.add(dateContent)
+                }
+            }
+            Constant.TYPE_DIR -> {
+                val pathContent = InfoContentItem()
+                pathContent.title = mediaInfo.parent
+                pathContent.iconResID = R.drawable.ic_mediainfo_folder_grey
+                mList.add(pathContent)
+
+                val nameContent = InfoContentItem()
+                nameContent.title = mediaInfo.name
+                nameContent.iconResID = R.drawable.ic_mediainfo_folder_grey
+                var sub = ""
+                if (mediaInfo.last_modify > 0) {
+                    //先行定義時間格式
+                    val date_format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    sub += date_format.format(mediaInfo.last_modify)
+                }
+                if (!sub.equals(""))
+                    nameContent.subtitle = sub
+                mList.add(nameContent)
+
+                val detailContent = InfoContentItem()
+                detailContent.title = ("" + mediaInfo.file_num + " " + context.getString(R.string.files) + ", " + mediaInfo.folder_num + " " + context.getString(R.string.folders))
+                detailContent.iconResID = R.drawable.ic_browser_filetype_all_gray
+                sub = ""
+                if (mediaInfo.size >= 0)
+                    sub += MathUtils.getStorageSize(mediaInfo.size)
+                if (!sub.equals(""))
+                    detailContent.subtitle = sub
+                mList.add(detailContent)
+            }
+            Constant.TYPE_OTHERS -> {
+                val pathContent = InfoContentItem()
+                pathContent.title = mediaInfo.parent
+                pathContent.iconResID = R.drawable.ic_mediainfo_folder_grey
+                mList.add(pathContent)
+
+                val nameContent = InfoContentItem()
+                nameContent.title = mediaInfo.name
+                nameContent.iconResID = R.drawable.ic_browser_filetype_document_gray
+                var sub = ""
+                if (mediaInfo.size >= 0)
+                    sub += MathUtils.getStorageSize(mediaInfo.size)
+                if (mediaInfo.last_modify > 0){
+                    //先行定義時間格式
+                    val date_format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    if (!sub.equals(""))
+                        sub += ", "
+                    sub += date_format.format(mediaInfo.last_modify)
+                }
+                if (!sub.equals(""))
+                    nameContent.subtitle = sub
+                mList.add(nameContent)
+            }
+        }
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val mLayoutInflater = LayoutInflater.from(parent.context)
         if (viewType == Recycler_View_Content)
@@ -110,13 +257,13 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
             else
                 return mList.size
         } else if (mType == Constant.TYPE_MUSIC){
-
+            return mList.size + 1   //Header: 專輯封面
         } else if (mType == Constant.TYPE_VIDEO){
-
-        } else if (mType == Constant.TYPE_DOC){
-
+            return mList.size + 1   //Header: 專輯封面
+        } else if (mType == Constant.TYPE_OTHERS){
+            return mList.size
         } else if (mType == Constant.TYPE_DIR){
-
+            return mList.size
         } else {
 
         }
@@ -132,13 +279,19 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
             else
                 return Recycler_View_Content
         } else if (mType == Constant.TYPE_MUSIC){
-
+            if (position == 0)
+                return Recycler_View_Thumbnail
+            else
+                return Recycler_View_Content
         } else if (mType == Constant.TYPE_VIDEO){
-
-        } else if (mType == Constant.TYPE_DOC){
-
+            if (position == 0)
+                return Recycler_View_Thumbnail
+            else
+                return Recycler_View_Content
+        } else if (mType == Constant.TYPE_OTHERS){
+            return Recycler_View_Content
         } else if (mType == Constant.TYPE_DIR){
-
+            return Recycler_View_Content
         } else {
 
         }
@@ -159,10 +312,17 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
                 mMap = googleMap
                 val converter = UnitConverter(context)
                 //Activity先送圖檔，此處應該已經有圖，但還是防呆
-                if (thumbnailBitmap != null)
-                    holder.imageThumbnail!!.setImageBitmap(thumbnailBitmap)
-                else
-                    holder.imageThumbnail!!.setImageResource(R.drawable.ic_photoinfo_name_grey)
+//                if (thumbnailBitmap != null)
+//                    holder.imageThumbnail!!.setImageBitmap(thumbnailBitmap)
+//                else
+//                    holder.imageThumbnail!!.setImageResource(R.drawable.ic_photoinfo_name_grey)
+
+                Glide.with(context)
+                    .load(File(mPath))
+                    .placeholder(R.drawable.ic_browser_filetype_image)
+                    .transform(CenterInside(), CenterCrop())
+                    .into(holder.imageThumbnail!!)
+
                 //禁止拖動及移動地圖
                 mMap!!.getUiSettings().setAllGesturesEnabled(false)
                 val sydney = LatLng(latitude, longitude)
@@ -205,13 +365,12 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
                 })
             })
             return
-        }
-        else if(holder.itemViewType == Recycler_View_Content) {
-            if (position >= mList.size)
-                return
+        } else if(holder.itemViewType == Recycler_View_Content) {
             adjustContentUI(MainApplication.getInstance()!!.applicationContext, holder)
             when (mType) {
                 Constant.TYPE_IMAGE -> {
+                    if (position >= mList.size)
+                        return
                     //若沒有sub title，且位置須改為置中。最多三行
                     if (mList[position].subtitle == null || mList[position].subtitle!!.length == 0) {
                         holder.title!!.gravity = Gravity.CENTER_VERTICAL
@@ -234,6 +393,54 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
                         lp.setMargins(50, 30, 50, 0)
                         holder.title_layout!!.layoutParams = lp
                     }
+                }
+                Constant.TYPE_MUSIC, Constant.TYPE_VIDEO -> {
+                    val item_position = position - 1    //position 0 為縮圖
+                    if (item_position >= mList.size)
+                        return
+                    //若沒有sub title，且位置須改為置中。最多三行
+                    if (mList[item_position].subtitle == null || mList[item_position].subtitle!!.length == 0) {
+                        holder.title!!.gravity = Gravity.CENTER_VERTICAL
+                        holder.title!!.isSingleLine = false
+                        holder.title!!.maxLines = 3
+                        holder.subtitle!!.visibility = View.GONE
+                        holder.title!!.text = mList[item_position].title
+                    } else {
+                        holder.title!!.text = mList[item_position].title
+                        holder.subtitle!!.text = mList[item_position].subtitle
+                    }
+                    holder.icon!!.setImageResource(mList[item_position].iconResID)
+                }
+                Constant.TYPE_DIR, Constant.TYPE_OTHERS -> {
+                    if (position >= mList.size)
+                        return
+                    //若沒有sub title，且位置須改為置中。最多三行
+                    if (mList[position].subtitle == null || mList[position].subtitle!!.length == 0) {
+                        holder.title!!.gravity = Gravity.CENTER_VERTICAL
+                        holder.title!!.isSingleLine = false
+                        holder.title!!.maxLines = 3
+                        holder.subtitle!!.visibility = View.GONE
+                        holder.title!!.text = mList[position].title
+                    } else {
+                        holder.title!!.text = mList[position].title
+                        holder.subtitle!!.text = mList[position].subtitle
+                    }
+                    holder.icon!!.setImageResource(mList[position].iconResID)
+                }
+            }
+        } else if(holder.itemViewType == Recycler_View_Thumbnail) {
+            if (thumbnailBitmap != null)
+                holder.mediaThumbnail?.setImageBitmap(thumbnailBitmap)
+            else {
+                if (mType == Constant.TYPE_MUSIC)
+                    holder.mediaThumbnail!!.setImageResource(R.drawable.ic_musicinfo_title_grey)
+                else {
+                    holder.mediaThumbnail!!.setImageResource(R.drawable.ic_videoinfo_resolution_grey)
+                    Glide.with(holder.itemView)
+                        .load(File(mPath))
+                        .placeholder(R.drawable.ic_videoinfo_resolution_grey)
+                        .transform(CenterInside(), CenterCrop())
+                        .into(holder.mediaThumbnail!!)
                 }
             }
         }

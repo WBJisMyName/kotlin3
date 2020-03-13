@@ -21,6 +21,10 @@ class FileRepository(application: Application) {
         return fileInfoDao.getSearchFilesByType("%"+searchText+"%", type)
     }
 
+    fun getSearchFiles(searchText: String, type: Int, src: String): List<FileInfo> {
+        return fileInfoDao.getSearchFilesByType("%"+searchText+"%", type, src+"%")
+    }
+
     fun getSearchFiles(searchText: String, folderPath: String): List<FileInfo>{
         return fileInfoDao.getSearchFilesAtFolder("%"+searchText+"%", folderPath)   //不管前後文，有符合的就撈出來
     }
@@ -97,6 +101,15 @@ class FileRepository(application: Application) {
         try {
             val thread = Thread(Runnable {
                 fileInfoDao.deleteAll(type)
+            })
+            thread.start()
+        } catch (e: Exception) { }
+    }
+
+    fun deleteAllFromRoot(rootType: Int) {  //From Constant.kt, 0 → Local；1 → SD；2 → OTG
+        try {
+            val thread = Thread(Runnable {
+                fileInfoDao.deleteAllFromRoot(rootType)
             })
             thread.start()
         } catch (e: Exception) { }

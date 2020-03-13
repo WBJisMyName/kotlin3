@@ -10,11 +10,13 @@ import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import androidx.core.app.NotificationCompat
+import com.github.mjdev.libaums.fs.UsbFile
 import com.transcend.otg.R
 import com.transcend.otg.utilities.FileFactory
+import com.transcend.otg.utilities.UsbUtils
 import java.io.File
 
-abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mSrcs: List<String>, val mDest: String): LocalAbstractLoader(mActivity){
+abstract class NotificationAbstractLoader(val mActivity: Activity, val mSrcs: List<String>, val mDest: String): ActionAbstractLoader(mActivity){
     var mThread: HandlerThread? = null
     var mHandler: Handler? = null
     var mWatcher: Runnable? = null
@@ -23,15 +25,48 @@ abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mS
     var itemTotal: Int = 0
     var mNotificationID: Int = -1
 
+    //失敗時方便刪除用
+    var current_file_path: String? = null
+
+    protected fun deleteFailedFile(){
+        if (current_file_path == null)
+            return
+        when(destRoot){
+            Root.Local, Root.SD -> {
+                val file = File(current_file_path)
+                if (file != null && file.exists())
+                    file.delete()
+            }
+            Root.OTG -> {
+                val file = UsbUtils.usbFileSystem?.rootDirectory?.search(current_file_path!!)
+                if (file != null)
+                    file.delete()
+            }
+        }
+    }
+
     protected fun checkTotalFileCount(action: String) {
         updateProgress(action, context.getString(R.string.loading), 0, 0) //顯示讀取中
         itemTotal = 0
-        for (path in mSrcs) {
-            val source = File(path)
-            if (source.isDirectory)
-                checkDirectory(source)
-            else
-                itemTotal++
+        when(srcRoot){
+            Root.Local, Root.SD -> {
+                for (path in mSrcs) {
+                    val source = File(path)
+                    if (source.isDirectory)
+                        checkDirectory(source)
+                    else
+                        itemTotal++
+                }
+            }
+            Root.OTG -> {
+                for (path in mSrcs) {
+                    val source = UsbUtils.usbFileSystem?.rootDirectory?.search(path)
+                    if (source?.isDirectory ?: false)
+                        checkDirectory(source)
+                    else
+                        itemTotal++
+                }
+            }
         }
     }
 
@@ -47,7 +82,19 @@ abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mS
         }
     }
 
-    protected fun startProgressWatcher(target: File, total: Long) {
+    protected fun checkDirectory(source: UsbFile?) {
+        val files = source?.listFiles()
+        if (files == null || files.size==0)
+            return
+        for (file in files) {
+            if (file.isDirectory)
+                checkDirectory(file)
+            else
+                itemTotal++
+        }
+    }
+
+    protected fun startProgressWatcher(target: File, total: Long, action: String) {
         mThread = HandlerThread(TAG)
         mThread!!.start()
         mHandler = Handler(mThread!!.getLooper())
@@ -56,7 +103,23 @@ abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mS
             val count = target.length()
             if (mHandler != null) {
                 mHandler!!.postDelayed(mWatcher, 500)    //每一秒更新progress
-                updateProgress(context.getString(R.string.copy), target.name, count, total)
+                updateProgress(action, target.name, count, total)
+            }
+        }
+
+        mHandler!!.post(mWatcher)
+    }
+
+    protected fun startProgressWatcher(target: UsbFile, total: Long, action: String) {
+        mThread = HandlerThread(TAG)
+        mThread!!.start()
+        mHandler = Handler(mThread!!.getLooper())
+
+        mWatcher = Runnable {
+            val count = target.length
+            if (mHandler != null) {
+                mHandler!!.postDelayed(mWatcher, 500)    //每一秒更新progress
+                updateProgress(action, target.name, count, total)
             }
         }
 
@@ -66,10 +129,12 @@ abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mS
     protected fun closeProgressWatcher() {
         if (mHandler != null) {
             mHandler!!.removeCallbacks(mWatcher)
+            Thread.sleep(500)
             mHandler = null
         }
         if (mThread != null) {
             mThread!!.quit()
+            Thread.sleep(500)
             mThread = null
         }
     }
@@ -77,7 +142,7 @@ abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mS
     protected fun updateProgress(action: String, name: String, count: Long, total: Long) {
         val channelId = mNotificationID.toString()
 
-        val max = if (count == total) 0 else 100
+        val max = 100
         var progress = 0
         if (total > 100 && count > 0)
             progress = if (total > 0) (count / (total / 100)).toInt() else 0
@@ -94,8 +159,7 @@ abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mS
         val intent = mActivity.getIntent()
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        val pendingIntent =
-            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(context, channelId)
         builder.setSmallIcon(icon)
         builder.setContentTitle(name)
@@ -145,6 +209,6 @@ abstract class LocalActionWithNotificationLoader(val mActivity: Activity, val mS
             builder.setChannelId(channelId)
         }
         ntfMgr.notify(mNotificationID, builder.build())
-        FileFactory().getInstance().releaseNotificationID(mNotificationID)
+        FileFactory.getInstance().releaseNotificationID(mNotificationID)
     }
 }

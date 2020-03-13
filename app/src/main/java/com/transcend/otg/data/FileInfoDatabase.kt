@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [FileInfo::class], version = 11)
+@Database(entities = [FileInfo::class], version = 12)
 abstract class FileInfoDatabase : RoomDatabase() {
 
     abstract fun fileInfoDao(): FileInfoDao

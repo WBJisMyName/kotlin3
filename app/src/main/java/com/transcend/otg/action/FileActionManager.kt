@@ -8,8 +8,6 @@ import com.transcend.otg.action.loader.FileActionService
 import com.transcend.otg.action.loader.PhoneActionService
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.SystemUtil
-import java.io.File
 import java.util.*
 
 class FileActionManager @JvmOverloads constructor(
@@ -33,7 +31,7 @@ class FileActionManager @JvmOverloads constructor(
         }
 
     enum class FileActionServiceType {  //action 執行類別
-        PHONE, SD
+        PHONE, SD, OTG
     }
 
     init {
@@ -53,32 +51,13 @@ class FileActionManager @JvmOverloads constructor(
             when (type) {
                 FileActionServiceType.SD -> service = SdcardActionService()
                 FileActionServiceType.PHONE -> service = PhoneActionService()
+                FileActionServiceType.OTG -> service = OTGActionService()
             }
             mFileActionServicePool!![type] = service
         }
 
         mFileActionServiceType = type
         fileActionService = service
-    }
-
-    fun setServiceType(path: String?) {
-        if (isLockType)
-            return
-
-        if (path == null)
-            return
-
-        if (path.startsWith("/storage")) {
-            if (SystemUtil().isSDCardPath(context, path))
-                setServiceType(FileActionManager.FileActionServiceType.SD)
-            else
-                setServiceType(FileActionManager.FileActionServiceType.PHONE)
-        }
-    }
-
-    fun setCurrentPath(path: String) {
-        if (fileActionService != null)
-            fileActionService!!.setCurrentPath(path)
     }
 
     fun rename(path: String, name: String) {
@@ -149,12 +128,6 @@ class FileActionManager @JvmOverloads constructor(
                 val action = fileActionService!!.getFileAction(type)
                 if (action != null) {
                     loader = fileActionService!!.onCreateLoader(context, action, args)
-                    if (loader != null) {
-//                        when (action) {
-//                            LIST, RENAME, DELETE, CreateFOLDER, SHARE, ShareLINK, OPEN -> showProgress()
-//                            else -> hideProgress()
-//                        }
-                    }
                 }
             }
         }
@@ -172,41 +145,4 @@ class FileActionManager @JvmOverloads constructor(
     override fun onLoaderReset(loader: AsyncTaskLoader<*>) {
 
     }
-
-    fun isTopDirectory(path: String?): Boolean {
-        if (path == null)
-            return false
-
-        val root = serviceRootPath
-        when (mFileActionServiceType) {
-            FileActionServiceType.SD, FileActionServiceType.PHONE -> {
-                val base = File(root)
-                val file = File(path)
-                return file == base
-            }
-            else -> return path == root
-        }
-    }
-
-    fun isSubDirectory(dest: String, paths: ArrayList<String>): Boolean {
-        for (path in paths) {
-            if (dest.startsWith(path)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    fun isDirectorySupportFileAction(path: String): Boolean {
-        return isTopDirectory(path)
-    }
-
-    fun doLockActionType() {
-        isLockType = true
-    }
-
-    fun doUnLockActionType() {
-        isLockType = false
-    }
-
 }

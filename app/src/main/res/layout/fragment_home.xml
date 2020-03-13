@@ -167,8 +167,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="6dp"
-                    android:visibility="gone"
-                    app:cardCornerRadius="6dp">
+                    app:cardCornerRadius="6dp"
+                    app:visible="@{viewModel.otgLayoutVisible}">
 
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -194,6 +194,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:gravity="center_vertical"
+                                android:text="@string/nav_otg"
                                 android:textColor="@color/c_02"
                                 android:textSize="16sp" />
 
@@ -207,7 +208,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="10dp"
-                    android:text="@string/homeMedia"
+                    android:text="@string/media"
                     android:textSize="18sp" />
 
             <androidx.cardview.widget.CardView

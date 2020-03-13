@@ -11,9 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.transcend.otg.R
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.databinding.ActivityFileInfoBinding
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.LoaderID
-import com.transcend.otg.utilities.MimeUtil
+import com.transcend.otg.utilities.*
 import java.io.File
 
 class InfoActivity: AppCompatActivity(), LoaderManager.LoaderCallbacks<Boolean> {
@@ -24,16 +22,30 @@ class InfoActivity: AppCompatActivity(), LoaderManager.LoaderCallbacks<Boolean> 
     lateinit var mAdapter: InfoAdapter
     lateinit var mPath: String
     var mType: Int = Constant.TYPE_IMAGE
+    var isLocal: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         mPath = intent.getStringExtra("path")!!
-        val file = File(mPath)
-        if (file.isDirectory)
-            mType = Constant.TYPE_DIR
-        else
-            mType = MimeUtil.getFileType(mPath)
+        if (!FileFactory().isLocalPath(mPath) && !FileFactory().isSDCardPath(this, mPath))
+            isLocal = false
+
+        if (isLocal) {
+            val file = File(mPath)
+            if (file.isDirectory)
+                mType = Constant.TYPE_DIR
+            else
+                mType = MimeUtil.getFileType(mPath)
+        } else {
+            val file = UsbUtils.usbFileSystem?.rootDirectory?.search(mPath)
+            if (file != null){
+                if (file.isDirectory)
+                    mType = Constant.TYPE_DIR
+                else
+                    mType = MimeUtil.getFileType(mPath)
+            }
+        }
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_file_info)
         mViewModel = ViewModelProviders.of(this).get(InfoViewModel::class.java)
@@ -46,14 +58,15 @@ class InfoActivity: AppCompatActivity(), LoaderManager.LoaderCallbacks<Boolean> 
         mBinding.infomationRecyclerView.setLayoutManager(lm)
         mBinding.infomationRecyclerView.setHasFixedSize(true)
 
-//        if (mViewModel.getImageInfo(mPath) != null){
-//
-//        } else
-            LoaderManager.getInstance(this).restartLoader(LoaderID.FILE_INFORMATION, null, this).forceLoad()
+        mBinding.toolbar.setNavigationIcon(R.drawable.ic_navi_back_white)
+        mBinding.toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+        
+        LoaderManager.getInstance(this).restartLoader(LoaderID.FILE_INFORMATION, null, this).forceLoad()
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
-
         when(id){
             LoaderID.FILE_INFORMATION -> {
                 mBinding.mainProgressView.visibility = View.VISIBLE
@@ -69,6 +82,10 @@ class InfoActivity: AppCompatActivity(), LoaderManager.LoaderCallbacks<Boolean> 
                 Constant.TYPE_IMAGE -> {
                     val info = loader.imageInfo
                     mAdapter.setData(info)
+                    mBinding.mainProgressView.visibility = View.GONE
+                }
+                Constant.TYPE_MUSIC, Constant.TYPE_VIDEO, Constant.TYPE_DIR, Constant.TYPE_OTHERS -> {
+                    mAdapter.setData(loader.mediaInfo!!, mType)
                     mBinding.mainProgressView.visibility = View.GONE
                 }
             }

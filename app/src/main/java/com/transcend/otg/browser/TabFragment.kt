@@ -3,7 +3,6 @@ package com.transcend.otg.browser
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -16,18 +15,16 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.android.material.textfield.TextInputLayout
-import com.transcend.otg.BrowserFragment
 import com.transcend.otg.R
 import com.transcend.otg.action.FileActionManager
-import com.transcend.otg.action.loader.LocalFolderCreateLoader
+import com.transcend.otg.action.dialog.FileActionNewFolderDialog
+import com.transcend.otg.action.loader.FolderCreateLoader
 import com.transcend.otg.action.loader.NullLoader
-import com.transcend.otg.adapter.FileInfoAdapter
+import com.transcend.otg.adapter.RecyclerViewAdapter
 import com.transcend.otg.databinding.FragmentTabBinding
 import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.LoaderID
-import kotlinx.android.synthetic.main.dialog_folder_create.*
 import kotlinx.android.synthetic.main.fragment_browser.*
 
 class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<Boolean> {
@@ -41,6 +38,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         R.drawable.ic_browser_filetype_video,
         R.drawable.ic_browser_filetype_document)
     lateinit var mMenu: Menu
+    lateinit var mSearchView: SearchView
     private var mRoot = Constant.LOCAL_ROOT
     lateinit var mFileActionManager: FileActionManager  //action manager
 
@@ -52,22 +50,20 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         savedInstanceState: Bundle?
     ): View? {
 
-        setHasOptionsMenu(true)     //設定支援選單
+        setHasOptionsMenu(true)     //設定選單
 
         if (arguments != null) {
             if (arguments!!.getString("root") != null)
-                mRoot = arguments!!.getString("root")    //設定根目錄路徑
-            if (arguments!!.getInt("media_type") != 0)
+                mRoot = arguments!!.getString("root")  //設定根目錄路徑
+            if (arguments!!.getInt("media_type") != 0)  //設定初始顯示頁面
                 mStartTab = arguments!!.getInt("media_type")
         }
-
 
         if (mRoot.startsWith(Constant.SD_ROOT ?: "Sdcard")){
             mFileActionManager = FileActionManager(context!!, FileActionManager.FileActionServiceType.SD, this)   //action manager
         } else if (mRoot.startsWith(Constant.LOCAL_ROOT)){
             mFileActionManager = FileActionManager(context!!, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
         }
-        //TODO OTG
 
         mBinding = FragmentTabBinding.inflate(inflater, container, false)
         return mBinding.root
@@ -78,7 +74,6 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
         mAdapter = TabPagerAdapter(activity!!, mRoot)
         mBinding.viewPager.adapter = mAdapter
-//        mBinding.viewPager.setCurrentItem(mStartTab, false)
         mBinding.viewPager.post(Runnable { mBinding.viewPager.setCurrentItem(mStartTab, false) })
         mBinding.viewPager.offscreenPageLimit = 1
 
@@ -92,8 +87,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         mBinding.swiperefresh.setColorSchemeResources(R.color.c_06)
         mBinding.swiperefresh.setOnRefreshListener {
             mBinding.swiperefresh.setRefreshing(false)
-            //TODO
-            (mBinding.viewPager.adapter as TabPagerAdapter).doReload(mBinding.viewPager.currentItem)
+            (mBinding.viewPager.adapter as TabPagerAdapter).doRefresh(mBinding.viewPager.currentItem)
         }
 
         mBinding.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
@@ -124,16 +118,20 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         })
     }
 
+    fun doRefresh(){
+        mAdapter.doRefresh(mBinding.viewPager.currentItem)
+    }
+
     class TabPagerAdapter(fragmentActivity: FragmentActivity, root: String): FragmentStateAdapter(fragmentActivity) {
         val Pager_Count = 5
-        var allFilePage: BrowserFragment
+        var allFilePage: LocalFragment
         var imagePage: MediaFragment
         var musicPage: MediaFragment
         var videoPage: MediaFragment
         var docPage: MediaFragment
 
         init{
-            allFilePage = BrowserFragment(root)
+            allFilePage = LocalFragment(root)
             imagePage = MediaFragment(Constant.TYPE_IMAGE, root)
             musicPage = MediaFragment(Constant.TYPE_MUSIC, root)
             videoPage = MediaFragment(Constant.TYPE_VIDEO, root)
@@ -152,13 +150,13 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             }
         }
 
-        fun doReload(position: Int){
+        fun doRefresh(position: Int){
             when(position){
-                Constant.TYPE_IMAGE -> imagePage.doReload(Constant.TYPE_IMAGE)
-                Constant.TYPE_MUSIC -> musicPage.doReload(Constant.TYPE_MUSIC)
-                Constant.TYPE_VIDEO -> videoPage.doReload(Constant.TYPE_VIDEO)
-                Constant.TYPE_DOC -> docPage.doReload(Constant.TYPE_DOC)
-                else -> allFilePage.doReload()
+                Constant.TYPE_IMAGE -> imagePage.doRefresh()
+                Constant.TYPE_MUSIC -> musicPage.doRefresh()
+                Constant.TYPE_VIDEO -> videoPage.doRefresh()
+                Constant.TYPE_DOC -> docPage.doRefresh()
+                else -> allFilePage.doRefresh()
             }
         }
     }
@@ -167,12 +165,12 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         inflater.inflate(R.menu.main_menu, menu)
         mMenu = menu
 
-        val searchView: SearchView = menu.findItem(R.id.action_search).actionView as SearchView
-        val search_editText = searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
+        mSearchView = menu.findItem(R.id.action_search).actionView as SearchView
+        val search_editText = mSearchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
         search_editText.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorWhite))
         search_editText.setTextColor(ContextCompat.getColor(context!!, R.color.c_02))
         search_editText.setHintTextColor(ContextCompat.getColor(context!!, R.color.c_04))
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+        mSearchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return true
             }
@@ -181,7 +179,13 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                 if (newText == null)
                     return false
                 if (newText.equals("")){
-
+                    when(mBinding.viewPager.currentItem){
+                        Constant.TYPE_IMAGE -> mAdapter.imagePage.viewModel.doReload()
+                        Constant.TYPE_MUSIC -> mAdapter.musicPage.viewModel.doReload()
+                        Constant.TYPE_VIDEO -> mAdapter.videoPage.viewModel.doReload()
+                        Constant.TYPE_DOC -> mAdapter.docPage.viewModel.doReload()
+                        else -> mAdapter.allFilePage.viewModel.doReload()
+                    }
                 } else {
                     when(mBinding.viewPager.currentItem){
                         Constant.TYPE_IMAGE -> mAdapter.imagePage.viewModel.doSearch(newText, Constant.TYPE_IMAGE)
@@ -203,7 +207,13 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
                 menu.findItem(R.id.action_more).setVisible(true)
-                setBrowserAdapter()
+                when(mBinding.viewPager.currentItem){
+                    Constant.TYPE_IMAGE -> mAdapter.imagePage.doRefresh()
+                    Constant.TYPE_MUSIC -> mAdapter.musicPage.doRefresh()
+                    Constant.TYPE_VIDEO -> mAdapter.videoPage.doRefresh()
+                    Constant.TYPE_DOC -> mAdapter.docPage.doRefresh()
+                    else -> mAdapter.allFilePage.doRefresh()
+                }
                 return true
             }
         })
@@ -211,7 +221,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         menu.findItem(R.id.action_more).setOnMenuItemClickListener(object : MenuItem.OnMenuItemClickListener {
             override fun onMenuItemClick(p0: MenuItem?): Boolean {
                 //設定顯示模式 list or grid
-                var adapter: FileInfoAdapter?
+                var adapter: RecyclerViewAdapter?
                 when(mBinding.viewPager.currentItem){
                     Constant.TYPE_IMAGE -> adapter = mAdapter.imagePage.adapter
                     Constant.TYPE_MUSIC -> adapter = mAdapter.musicPage.adapter
@@ -219,7 +229,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                     Constant.TYPE_DOC -> adapter = mAdapter.docPage.adapter
                     else -> adapter = mAdapter.allFilePage.adapter
                 }
-                if (adapter?.mViewType == FileInfoAdapter.List)
+                if (adapter?.mViewType == RecyclerViewAdapter.List)
                     menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
                 else
                     menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
@@ -228,16 +238,6 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         })
 
         super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    fun setBrowserAdapter(){
-        when(mBinding.viewPager.currentItem){
-            Constant.TYPE_IMAGE -> mAdapter.imagePage.doRefresh()
-            Constant.TYPE_MUSIC -> mAdapter.musicPage.doRefresh()
-            Constant.TYPE_VIDEO -> mAdapter.videoPage.doRefresh()
-            Constant.TYPE_DOC -> mAdapter.docPage.doRefresh()
-            else -> mAdapter.allFilePage.doRefresh()
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -254,27 +254,22 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                 }
             }
             R.id.action_new_folder -> {
-                val view = View.inflate(context, R.layout.dialog_folder_create, null)
-                val textLayout = view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
+                val fileList = mAdapter.allFilePage.adapter?.mList
+                if (fileList == null)
+                    return false
+                val nameList: MutableList<String> = ArrayList<String>()
+                for (fileInfo in fileList){
+                    nameList.add(fileInfo.title.toLowerCase())
+                }
 
-                AlertDialog.Builder(context!!)
-                    .setTitle("New Folder")
-                    .setIcon(R.drawable.ic_tab_newfolder_grey)
-                    .setView(view)
-                    .setPositiveButton("Confirm",{ dialog, whichButton ->
-                        dialog_folder_create_name
-                        val tmp = textLayout.editText?.text.toString()
-
+                val newFolderDialog = object: FileActionNewFolderDialog(context!!, nameList){
+                    override fun onConfirm(newName: String) {
                         if(mBinding.viewPager.currentItem == Constant.TYPE_DIR){    //Tab在第一個(全檔案)時才能執行新增資料夾
                             val path = mAdapter.allFilePage.getPath()
-                            mFileActionManager.createFolder(path, tmp)   //通知action manager執行createFolder
+                            mFileActionManager.createFolder(path, newName)   //通知action manager執行createFolder
                         }
-                    })
-                    .setNegativeButton("Cancel", { dialog, whichButton ->
-                        println("cancel")
-                    })
-                    .setCancelable(true)
-                    .show()
+                    }
+                }
             }
             R.id.action_selectAll -> {
                 when(mBinding.viewPager.currentItem){
@@ -285,22 +280,12 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                     else -> mAdapter.allFilePage.selectAll()
                 }
             }
-//            R.id.action_progress_test -> {
-//                count = 0
-//                mFloatingBtn.visibility = View.VISIBLE
-//                mFloatingBtn.setProgressMax(max)
-//                mBottomSheetFragment.setProgressMax(max)
-//                handler.post(ProgressTest())
-//            }
-//            R.id.action_locate_test -> {
-//                startLocateActivity()
-//            }
         }
         return super.onOptionsItemSelected(item)
     }
 
     fun changeViewType(){
-        var adapter: FileInfoAdapter? = null
+        var adapter: RecyclerViewAdapter? = null
         var recyclerview: RecyclerView? = null
         when(mBinding.viewPager.currentItem){
             Constant.TYPE_IMAGE -> {
@@ -329,16 +314,16 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
         if (adapter?.itemCount ?: 0 > 0){
             val currentItemType = adapter?.getItemViewType(0)
             when(currentItemType){
-                FileInfoAdapter.Grid -> {
+                RecyclerViewAdapter.Grid -> {
                     val listLayoutManager = LinearLayoutManager(context)
                     recyclerview?.layoutManager = listLayoutManager
-                    adapter?.setViewType(FileInfoAdapter.List)
+                    adapter?.setViewType(RecyclerViewAdapter.List)
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
                 }
-                FileInfoAdapter.List -> {
+                RecyclerViewAdapter.List -> {
                     val gridLayoutManager = GridLayoutManager(context, 3)
                     recyclerview?.layoutManager = gridLayoutManager
-                    adapter?.setViewType(FileInfoAdapter.Grid)
+                    adapter?.setViewType(RecyclerViewAdapter.Grid)
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
                 }
             }
@@ -356,7 +341,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
         when(id) {
-            LoaderID.LOCAL_NEW_FOLDER -> return LocalFolderCreateLoader(
+            LoaderID.NEW_FOLDER -> return FolderCreateLoader(
                 context!!,
                 args?.getString("path")!!
             )
@@ -365,12 +350,12 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
     }
 
     override fun onLoadFinished(loader: Loader<Boolean>, data: Boolean?) {
-        if (loader is LocalFolderCreateLoader){
-            mAdapter.doReload(Constant.TYPE_DIR)
+        if (loader is FolderCreateLoader){
+            mAdapter.doRefresh(Constant.TYPE_DIR)
         }
     }
 
     override fun onLoaderReset(loader: Loader<Boolean>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 }

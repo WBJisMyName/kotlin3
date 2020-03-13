@@ -37,7 +37,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/colorPrimary"
-                    android:text="@string/homepermissionButton"
+                    android:text="@string/allow_permission"
                     android:textAllCaps="false"
                     android:textColor="@color/colorWhite"
                     android:textSize="16sp"

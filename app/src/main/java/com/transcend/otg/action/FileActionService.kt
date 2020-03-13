@@ -31,7 +31,6 @@ abstract class FileActionService {
         mPath = path
     }
 
-
     fun getFileAction(action: Int): FileAction? {
         for (type in mFileActionIDs.keys) {
             val id = mFileActionIDs[type]!!
@@ -50,14 +49,13 @@ abstract class FileActionService {
         val path = args.getString("path")!!
         val name = args.getString("name")!!
         when (id) {
-            FileActionService.FileAction.RENAME -> return rename(context, path, name)
-            FileActionService.FileAction.COPY -> return copy(context, paths, path)
-            FileActionService.FileAction.MOVE -> return move(context, paths, path)
-            FileActionService.FileAction.DELETE -> return delete(context, paths)
-            FileActionService.FileAction.CreateFOLDER -> return createFolder(context, path)
-            FileActionService.FileAction.SHARE -> return share(context, paths, path)
+            FileAction.RENAME -> return rename(context, path, name)
+            FileAction.COPY -> return copy(context, paths, path)
+            FileAction.MOVE -> return move(context, paths, path)
+            FileAction.DELETE -> return delete(context, paths)
+            FileAction.CreateFOLDER -> return createFolder(context, path)
+            FileAction.SHARE -> return share(context, paths, path)
         }
-
         return null
     }
 

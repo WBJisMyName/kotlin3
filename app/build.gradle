@@ -12,8 +12,8 @@ android {
         applicationId "com.transcend.otg"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 22  //3.4 → 21
+        versionName "3.4.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -84,4 +84,9 @@ dependencies {
 
     //ImageMetadataReader
     implementation 'com.drewnoakes:metadata-extractor:2.8.1'
+
+    //libaums for usb device permission
+    implementation 'me.jahnen:libaums:0.7.5'
+    implementation 'me.jahnen:libaums-httpserver:0.5.3'
+    implementation 'me.jahnen:libaums-storageprovider:0.5.1'
 }

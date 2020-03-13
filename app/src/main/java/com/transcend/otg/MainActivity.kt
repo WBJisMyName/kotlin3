@@ -1,10 +1,8 @@
 package com.transcend.otg
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.storage.StorageManager
@@ -15,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.documentfile.provider.DocumentFile
 import androidx.drawerlayout.widget.DrawerLayout
@@ -25,6 +24,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.snackbar.Snackbar
+import com.transcend.otg.browser.OTGFragment
+import com.transcend.otg.browser.TabFragment
 import com.transcend.otg.databinding.ActivityMainBinding
 import com.transcend.otg.receiver.SDCardReceiver
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
@@ -33,7 +35,9 @@ import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel
 import java.io.File
 
-class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFragment.OnEulaClickListener {
+class MainActivity : AppCompatActivity(),
+    SDCardReceiver.SDCardObserver,
+    EULAFragment.OnEulaClickListener {
     private val TAG = MainActivity::class.java.simpleName
 
     override fun onEulaAgreeClick(v: View) {
@@ -52,12 +56,14 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
 
     override fun onResume() {
         super.onResume()
+        initBroadcast()
         SDCardReceiver.instance.registerObserver(this) //監測SD卡插拔
     }
 
     override fun onPause() {
         super.onPause()
         try {
+            unregisterReceiver(usbReceiver)
             SDCardReceiver.instance.unregisterObserver(this)
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
@@ -71,6 +77,7 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
         binding.viewModel = viewModel
 
         EULAFragment.setOnEulaClickListener(this)
+        UiHelper.setSystemBarTranslucent(this)
 
         //設置Toolbar
         setSupportActionBar(binding.toolbar)
@@ -88,7 +95,6 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
 
         //設置下拉式選單箭頭行為
         binding.dropdownArrow.setOnClickListener {
-            view ->
             binding.mainDropdown.performClick()
         }
 
@@ -97,11 +103,14 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
             binding.toolbar.setNavigationIcon(R.drawable.ic_toggle_menu)    //TODO toggle 圖示暫時固定為menu樣式，待修改
             binding.toolbar.setNavigationOnClickListener {
                     v: View? ->
-                drawerLayout.openDrawer(Gravity.LEFT)
+                drawerLayout.openDrawer(GravityCompat.START)
             }
 
             when(destination.id) {
                 //不須帶參數的Fragment切換讓他自動實作
+                R.id.homeFragment -> {
+                    setToolbarMode(MainActivityViewModel.TabMode.Mid_Title_Only, 0, getString(R.string.homeTitle))
+                }
                 R.id.helpFragment -> {
                     setToolbarMode(MainActivityViewModel.TabMode.Mid_Title_Only, 0, getString(R.string.helpTitle))
                 }
@@ -117,6 +126,13 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
                 R.id.sdFragment -> {
                     arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
                 }
+                R.id.otgFragment -> {
+                    arguments?.putString("root", "/")   //讀取本地路徑
+                    if (!UsbUtils.hasUSBPermission()) {
+                        UsbUtils.doUSBRequestPermission(this)
+                        navController.popBackStack()
+                    }
+                }
             }
         }
 
@@ -129,33 +145,51 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
             binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(true)
         } else
             binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(false)
+
+        //初始化資料庫
+        viewModel.deleteAll()
+    }
+
+    fun setToggleAction(iconId: Int){
+        binding.toolbar.setNavigationIcon(iconId)
+        when(iconId){
+            R.drawable.ic_toggle_menu -> {
+                binding.toolbar.setNavigationOnClickListener {
+                        v: View? ->
+                    drawerLayout.openDrawer(Gravity.LEFT)
+                }
+            }
+            R.drawable.ic_navi_back_white -> {
+                //TODO
+            }
+        }
     }
 
     fun goToBrowser(browser_id: Int){
-        binding.toolbar.setNavigationIcon(R.drawable.ic_toggle_menu)    //TODO toggle 圖示暫時固定為menu樣式，待修改
-        binding.toolbar.setNavigationOnClickListener {
-                v: View? ->
-            drawerLayout.openDrawer(Gravity.LEFT)
-        }
+        setToggleAction(R.drawable.ic_toggle_menu)
 
         val arguments: Bundle? = Bundle()
         when(browser_id) {
             R.id.browserFragment -> {
                 arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
+                navController.navigate(browser_id, arguments)
             }
             R.id.sdFragment -> {
                 arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
+                navController.navigate(browser_id, arguments)
+            }
+            R.id.otgFragment -> {
+                arguments?.putString("root", "/")   //讀取本地路徑
+                if (!UsbUtils.hasUSBPermission())
+                    UsbUtils.doUSBRequestPermission(this)
+                else
+                    navController.navigate(browser_id, arguments)
             }
         }
-        navController.navigate(browser_id, arguments)
     }
 
     fun goToMediaTab(mediaType: Int){
-        binding.toolbar.setNavigationIcon(R.drawable.ic_toggle_menu)    //TODO toggle 圖示暫時固定為menu樣式，待修改
-        binding.toolbar.setNavigationOnClickListener {
-                v: View? ->
-            drawerLayout.openDrawer(Gravity.LEFT)
-        }
+        setToggleAction(R.drawable.ic_toggle_menu)
 
         val arguments: Bundle? = Bundle()
         arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
@@ -182,8 +216,12 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
     }
 
     override fun onBackPressed() {
-        val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            return
+        }
 
+        val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
         if(fragment?.childFragmentManager?.fragments?.get(0) is BackpressCallback){
             (fragment.childFragmentManager.fragments.get(0)as? BackpressCallback)?.onBackPressed()?.let {
                 if(it) super.onBackPressed()
@@ -264,7 +302,7 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
     }
 
     override fun notifyUnmounted() {    //sd card unmount event
-        Constant.SD_ROOT = null
+        Constant.SD_ROOT = SystemUtil().getSDLocation(this)
         binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(false)
         initHome()
     }
@@ -277,14 +315,30 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
         Constant.sdMediaScanState[4] = Constant.ScanState.NONE
 
         val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
-
         if(fragment?.childFragmentManager?.fragments?.get(0) is HomeFragment){
             (fragment.childFragmentManager.fragments.get(0) as? HomeFragment)?.initHome()
+        } else if (fragment?.childFragmentManager?.fragments?.get(0) is OTGFragment){
+            if (UsbUtils.usbDevice == null || !UsbUtils.hasUSBPermission()) {
+                navController.popBackStack()    //pop出該層fragment(即返回上一頁)
+            }
+        }
+    }
+
+    //更新Fragment頁面
+    fun actionFinishedReminder(resId: Int){
+        val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
+        if (fragment != null && fragment.view != null)
+            Snackbar.make(fragment.view!!, resId, Snackbar.LENGTH_LONG).setAction("Action", null).show()
+        val childFragment = fragment?.childFragmentManager?.fragments?.get(0)
+        if (childFragment is TabFragment){
+            childFragment.doRefresh()
+        } else if (childFragment is OTGFragment){
+            childFragment.doRefresh()
         }
     }
 
     private fun checkSDPermission(): Boolean {
-        val sdKey = AppPref.getSdKey(this)
+        val sdKey = AppPref.getSDKey(this)
         Log.d(TAG, "sdKey: $sdKey")
         if (!sdKey.equals("")) {
             val uriSDKey = Uri.parse(sdKey)
@@ -332,13 +386,12 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
                 Log.d(TAG, "ActivityNotFoundException")
                 requestSDCardPermissionDialog()
             }
-
         }
     }
 
     private fun requestSDCardPermissionDialog() {
         //*索取權限
-        val sdKey = AppPref.getSdKey(this)
+        val sdKey = AppPref.getSDKey(this)
         if (!sdKey.equals("")) {
             //釋放已記錄的權限
             contentResolver.releasePersistableUriPermission(
@@ -372,5 +425,41 @@ class MainActivity : AppCompatActivity(), SDCardReceiver.SDCardObserver, EULAFra
         val viewerPager = dialog.findViewById(R.id.viewer_pager_sd) as ViewPagerZoomFixed?
         viewerPager?.setAdapter(ViewerPagerAdapterSD(this))
         viewerPager?.setCurrentItem(0)
+    }
+
+    private fun initBroadcast() {
+        val filter = IntentFilter()
+        filter.addAction(UsbUtils.ACTION_USB_PERMISSION)
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+        filter.addAction(UsbManager.EXTRA_PERMISSION_GRANTED)
+        registerReceiver(usbReceiver, filter)
+
+        SDCardReceiver.instance.registerObserver(this)
+        checkOtgDevice()
+    }
+
+    fun checkOtgDevice() {
+        val isFindDevice = UsbUtils.isOtgDeviceExist(this)
+        binding.navigationView.menu.findItem(R.id.otgFragment).setVisible(isFindDevice)
+        initHome()
+    }
+
+    val usbReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (UsbUtils.ACTION_USB_PERMISSION == action) {
+                if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
+                    UsbUtils.discoverDevices(this@MainActivity)
+                } else {
+                    Log.e("Permission", "False")
+                }
+            } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED == action){
+                checkOtgDevice()
+            } else if (UsbManager.ACTION_USB_DEVICE_DETACHED == action){
+                checkOtgDevice()
+                viewModel.deleteAllFromRoot(Constant.STORAGEMODE_OTG)
+            }
+        }
     }
 }

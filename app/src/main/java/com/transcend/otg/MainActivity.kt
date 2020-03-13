@@ -30,6 +30,8 @@ import com.transcend.otg.browser.TabFragment
 import com.transcend.otg.databinding.ActivityMainBinding
 import com.transcend.otg.receiver.SDCardReceiver
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
+import com.transcend.otg.settings.EULAFragment
+import com.transcend.otg.settings.HomeFragment
 import com.transcend.otg.singleview.ViewPagerZoomFixed
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel

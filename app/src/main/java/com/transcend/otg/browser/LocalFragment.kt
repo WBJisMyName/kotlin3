@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.lifecycle.ViewModelProviders
 import androidx.loader.content.Loader
-import com.transcend.otg.FileActionLocateActivity
 import com.transcend.otg.MainActivity
 import com.transcend.otg.R
 import com.transcend.otg.action.FileActionManager

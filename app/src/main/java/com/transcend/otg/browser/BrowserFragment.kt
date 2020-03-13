@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.loader.app.LoaderManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.transcend.otg.FileActionLocateActivity
 import com.transcend.otg.R
 import com.transcend.otg.action.FileActionManager
 import com.transcend.otg.adapter.RecyclerViewAdapter

@@ -1,4 +1,4 @@
-package com.transcend.otg
+package com.transcend.otg.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater

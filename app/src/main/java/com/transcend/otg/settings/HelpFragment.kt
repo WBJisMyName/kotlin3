@@ -1,4 +1,4 @@
-package com.transcend.otg
+package com.transcend.otg.settings
 
 import android.graphics.Bitmap
 import android.os.Bundle

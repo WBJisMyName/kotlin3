@@ -51,7 +51,7 @@
                     android:resource="@xml/device_filter" />
         </activity>
         <activity
-                android:name=".FileActionLocateActivity"
+                android:name=".browser.FileActionLocateActivity"
                 android:launchMode="singleTask"
                 android:screenOrientation="portrait"></activity>
         <activity

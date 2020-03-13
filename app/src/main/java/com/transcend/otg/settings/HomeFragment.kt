@@ -1,4 +1,4 @@
-package com.transcend.otg
+package com.transcend.otg.settings
 
 
 import android.os.Bundle
@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.transcend.otg.MainActivity
+import com.transcend.otg.R
 import com.transcend.otg.databinding.FragmentHomeBinding
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.FileFactory
@@ -32,8 +34,12 @@ class HomeFragment : Fragment() {
         mViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
         mBinding.viewModel = mViewModel
 
-        mViewModel.localCapabilityText.set(MainApplication.getInstance()!!.resources.getString(R.string.loading))
-        mViewModel.sdCapabilityText.set(MainApplication.getInstance()!!.resources.getString(R.string.loading))
+        mViewModel.localCapabilityText.set(MainApplication.getInstance()!!.resources.getString(
+            R.string.loading
+        ))
+        mViewModel.sdCapabilityText.set(MainApplication.getInstance()!!.resources.getString(
+            R.string.loading
+        ))
 
         return mBinding.root
     }
@@ -63,19 +69,25 @@ class HomeFragment : Fragment() {
     fun setClickEvent(){
         mBinding.cardviewLocal.setOnClickListener(object: View.OnClickListener{
             override fun onClick(p0: View?) {
-                (activity as MainActivity).goToBrowser(R.id.browserFragment)
+                (activity as MainActivity).goToBrowser(
+                    R.id.browserFragment
+                )
             }
         })
 
         mBinding.cardviewSD.setOnClickListener(object: View.OnClickListener{
             override fun onClick(p0: View?) {
-                (activity as MainActivity).goToBrowser(R.id.sdFragment)
+                (activity as MainActivity).goToBrowser(
+                    R.id.sdFragment
+                )
             }
         })
 
         mBinding.cardviewOTG.setOnClickListener(object: View.OnClickListener{
             override fun onClick(p0: View?) {
-                (activity as MainActivity).goToBrowser(R.id.otgFragment)
+                (activity as MainActivity).goToBrowser(
+                    R.id.otgFragment
+                )
             }
         })
 

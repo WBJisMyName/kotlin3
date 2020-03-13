@@ -97,6 +97,7 @@
     <string name="q_sd_permission_remind">Elite has not yet obtained the rights to this SD card. Please select the outermost layer of the SD card and allow access.</string>
     <string name="q_otg_permission_remind">Elite has not yet obtained the permissions of this USB. Please select the outermost layer of USB and allow access.</string>
     <string name="permission_tryagain">Try again</string>
+    <string name="no_suitable_file">Could no find an app for that file!</string>
 
     <!-- Format -->
     <string name="date_format" translatable="false">MMM d, yyyy</string>

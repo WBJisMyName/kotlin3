@@ -13,7 +13,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel;
 import com.transcend.otg.BuildConfig
-import com.transcend.otg.FeedbackFragment
+import com.transcend.otg.settings.FeedbackFragment
 import jcifs.util.Base64
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException

@@ -21,7 +21,6 @@ import com.github.mjdev.libaums.fs.UsbFile
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService.ServiceBinder
 import com.github.mjdev.libaums.server.http.server.AsyncHttpServer
-import com.transcend.otg.FileActionLocateActivity
 import com.transcend.otg.MainActivity
 import com.transcend.otg.R
 import com.transcend.otg.action.FileActionManager
@@ -148,7 +147,6 @@ class OTGFragment: BrowserFragment("/"){
         }
     }
 
-
     //UsbServer for open with
     var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -196,7 +194,7 @@ class OTGFragment: BrowserFragment("/"){
         try {
             startActivity(myIntent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(context, "Could no find an app for that file!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.no_suitable_file, Toast.LENGTH_LONG).show()
         }
     }
 

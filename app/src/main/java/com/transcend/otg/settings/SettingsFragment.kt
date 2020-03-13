@@ -1,4 +1,4 @@
-package com.transcend.otg
+package com.transcend.otg.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
+import com.transcend.otg.MainActivity
+import com.transcend.otg.R
 import com.transcend.otg.databinding.FragmentSettingsBinding
 import com.transcend.otg.viewmodels.SettingsViewModel
 
@@ -31,7 +33,9 @@ class SettingsFragment: Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val navController = (activity as MainActivity).findNavController(R.id.container)
+        val navController = (activity as MainActivity).findNavController(
+            R.id.container
+        )
         binding.layoutAbout.setOnClickListener {
             navController.navigate(R.id.aboutFragment)
         }
@@ -41,6 +45,8 @@ class SettingsFragment: Fragment(){
         super.onResume()
         if (activity == null)
             return
-        (activity as MainActivity).setMidTitle(getString(R.string.settingsTitle))
+        (activity as MainActivity).setMidTitle(getString(
+            R.string.settingsTitle
+        ))
     }
 }

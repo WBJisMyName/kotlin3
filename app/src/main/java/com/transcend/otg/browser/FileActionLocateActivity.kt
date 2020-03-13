@@ -1,4 +1,4 @@
-package com.transcend.otg
+package com.transcend.otg.browser
 
 import android.content.*
 import android.hardware.usb.UsbManager
@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModelProviders
-import com.transcend.otg.browser.FileActionLocateFragment
+import com.transcend.otg.R
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.databinding.ActivityFileLocateBinding
 import com.transcend.otg.permission.SdPermission
@@ -55,7 +55,9 @@ class FileActionLocateActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_file_locate)
+        mBinding = DataBindingUtil.setContentView(this,
+            R.layout.activity_file_locate
+        )
         viewModel = ViewModelProviders.of(this).get(ActionLocateViewModel::class.java)
         mBinding.viewModel = viewModel
 
@@ -65,8 +67,10 @@ class FileActionLocateActivity : AppCompatActivity(),
 
         mActionID = intent.getIntExtra("action_id", -1)
         when(mActionID){
-            R.id.action_copy -> Toast.makeText(this, R.string.copy_items_to, Toast.LENGTH_LONG).show()
-            R.id.action_move -> Toast.makeText(this, R.string.move_items_to, Toast.LENGTH_LONG).show()
+            R.id.action_copy -> Toast.makeText(this,
+                R.string.copy_items_to, Toast.LENGTH_LONG).show()
+            R.id.action_move -> Toast.makeText(this,
+                R.string.move_items_to, Toast.LENGTH_LONG).show()
         }
 
         mBinding.toggle.setOnClickListener {
@@ -204,8 +208,12 @@ class FileActionLocateActivity : AppCompatActivity(),
 
         var title: String = getString(R.string.app_name)
         when(mActionID){
-            R.id.action_copy -> title = getString(R.string.copy_items_to)
-            R.id.action_move -> title = getString(R.string.move_items_to)
+            R.id.action_copy -> title = getString(
+                R.string.copy_items_to
+            )
+            R.id.action_move -> title = getString(
+                R.string.move_items_to
+            )
         }
 
         val builder = AlertDialog.Builder(this)

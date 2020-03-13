@@ -41,27 +41,27 @@
     </fragment>
 
     <fragment android:id="@+id/EULAFragment"
-              android:name="com.transcend.otg.EULAFragment"
+              android:name="com.transcend.otg.settings.EULAFragment"
               android:label="@string/eulaTitle"
               tools:layout="@layout/fragment_eula"/>
 
     <fragment android:id="@+id/feedbackFragment"
-              android:name="com.transcend.otg.FeedbackFragment"
+              android:name="com.transcend.otg.settings.FeedbackFragment"
               android:label="@string/feedbackTitle"
               tools:layout="@layout/fragment_feedback"/>
 
     <fragment android:id="@+id/helpFragment"
-              android:name="com.transcend.otg.HelpFragment"
+              android:name="com.transcend.otg.settings.HelpFragment"
               android:label="@string/helpTitle"
               tools:layout="@layout/fragment_help"/>
 
     <fragment android:id="@+id/statementFragment"
-              android:name="com.transcend.otg.StatementFragment"
+              android:name="com.transcend.otg.settings.StatementFragment"
               android:label="@string/statementTitle"
               tools:layout="@layout/fragment_statement"/>
 
     <fragment android:id="@+id/homeFragment"
-              android:name="com.transcend.otg.HomeFragment"
+              android:name="com.transcend.otg.settings.HomeFragment"
               android:label="@string/homeTitle"
               tools:layout="@layout/fragment_home">
         <action android:id="@+id/action_homeFragment_to_feedbackFragment"
@@ -86,7 +86,7 @@
 
     <fragment
             android:id="@+id/startPermissionFragment"
-            android:name="com.transcend.otg.StartPermissionFragment"
+            android:name="com.transcend.otg.settings.StartPermissionFragment"
             android:label="PermissionFragment" />
     <fragment
             android:id="@+id/tabFragment"
@@ -94,7 +94,7 @@
             android:label="TabFragment" />
     <fragment
             android:id="@+id/settingsFragment"
-            android:name="com.transcend.otg.SettingsFragment"
+            android:name="com.transcend.otg.settings.SettingsFragment"
             android:label="SettingsFragment" >
         <action
                 android:id="@+id/action_settingsFragment_to_aboutFragment"
@@ -102,7 +102,7 @@
     </fragment>
     <fragment
             android:id="@+id/aboutFragment"
-            android:name="com.transcend.otg.AboutFragment"
+            android:name="com.transcend.otg.settings.AboutFragment"
             android:label="AboutFragment" >
         <action
                 android:id="@+id/action_aboutFragment_to_statementFragment"

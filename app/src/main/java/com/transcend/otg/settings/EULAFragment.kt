@@ -1,4 +1,4 @@
-package com.transcend.otg
+package com.transcend.otg.settings
 
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -9,6 +9,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.databinding.ObservableInt
 import androidx.fragment.app.Fragment
+import com.transcend.otg.MainActivity
+import com.transcend.otg.R
 import com.transcend.otg.data.EULAOberableField
 import com.transcend.otg.databinding.FragmentEulaBinding
 import kotlinx.android.synthetic.main.fragment_eula.*
@@ -35,7 +37,8 @@ class EULAFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var binding = FragmentEulaBinding.inflate(inflater, container, false)
-        binding.observable = observableField
+        binding.observable =
+            observableField
         binding.onClickListener = View.OnClickListener {
             mListener?.onEulaAgreeClick(it)
         }
@@ -69,6 +72,8 @@ class EULAFragment : Fragment() {
         super.onResume()
         if (activity == null)
             return
-        (activity as MainActivity).setMidTitle(getString(R.string.about_enduser))
+        (activity as MainActivity).setMidTitle(getString(
+            R.string.about_enduser
+        ))
     }
 }

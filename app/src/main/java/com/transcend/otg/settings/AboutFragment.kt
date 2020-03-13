@@ -1,4 +1,4 @@
-package com.transcend.otg
+package com.transcend.otg.settings
 
 import android.app.Activity
 import android.content.Context
@@ -11,6 +11,9 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.transcend.otg.BuildConfig
+import com.transcend.otg.MainActivity
+import com.transcend.otg.R
 import com.transcend.otg.databinding.FragmentAboutBinding
 import com.transcend.otg.utilities.MainApplication
 import com.transcend.otg.viewmodels.AboutViewModel
@@ -55,7 +58,9 @@ class AboutFragment: Fragment(){
     class AboutPreference: PreferenceFragmentCompat(){
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             addPreferencesFromResource(R.xml.preference_about)
-            val version = findPreference<Preference>(MainApplication.getInstance()!!.resources.getString(R.string.about_version))
+            val version = findPreference<Preference>(MainApplication.getInstance()!!.resources.getString(
+                R.string.about_version
+            ))
             version?.setSummary(BuildConfig.VERSION_NAME)
             
         }
@@ -64,7 +69,9 @@ class AboutFragment: Fragment(){
             if(activity == null)
                 return super.onPreferenceTreeClick(preference)
 
-            val navController = (activity as MainActivity).findNavController(R.id.container)
+            val navController = (activity as MainActivity).findNavController(
+                R.id.container
+            )
             if (preference?.key.equals(getString(R.string.about_enduser))){
                 navController.navigate(R.id.EULAFragment)
             } else if (preference?.key.equals(getString(R.string.about_opensource))){
@@ -78,6 +85,8 @@ class AboutFragment: Fragment(){
         super.onResume()
         if (activity == null)
             return
-        (activity as MainActivity).setMidTitle(getString(R.string.setting_about))
+        (activity as MainActivity).setMidTitle(getString(
+            R.string.setting_about
+        ))
     }
 }

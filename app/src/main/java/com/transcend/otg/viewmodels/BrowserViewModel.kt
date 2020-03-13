@@ -3,11 +3,10 @@ package com.transcend.otg.viewmodels
 import android.app.Application
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.MutableLiveData
-import com.github.mjdev.libaums.fs.UsbFile
-import com.transcend.otg.R
 import com.transcend.otg.data.FileInfo
-import com.transcend.otg.utilities.*
-import java.io.File
+import com.transcend.otg.task.ScanMediaFiles
+import com.transcend.otg.task.ScanFolderFilesTask
+import com.transcend.otg.utilities.Constant
 
 open class BrowserViewModel(application: Application) : AbstractViewModel(application) {
 
@@ -156,139 +155,20 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
     //撈資料夾檔案列表，撈完會post給liveData
     fun scanFolderFiles(isLocal: Boolean, parent: String, type: Int){
         isLoading.set(true)
-
-        //若掃描路徑為根目錄，則將insert進資料庫(若不如此，則無法知道根目錄是否掃描過了)
-        if (parent.equals(Constant.LOCAL_ROOT) || (Constant.SD_ROOT != null && parent.equals(Constant.SD_ROOT)) || parent.equals("/")){
-            val fileInfo = FileInfo()
-            fileInfo.path = parent
-            fileInfo.title = "Root"
-            if (parent.equals(Constant.LOCAL_ROOT))
-                fileInfo.rootType = Constant.STORAGEMODE_LOCAL
-            else if((Constant.SD_ROOT != null && parent.equals(Constant.SD_ROOT)))
-                fileInfo.rootType = Constant.STORAGEMODE_SD
-            else
-                fileInfo.rootType = Constant.STORAGEMODE_OTG
-            fileInfo.fileType = Constant.TYPE_DIR
-            fileInfo.defaultIcon = R.drawable.ic_filelist_folder_grey
-            fileInfo.infoIcon = R.drawable.ic_brower_listview_filearrow
-            insert(fileInfo)
-        }
-
-        var insert_count = 0
-        if (isLocal){
-            val localFile = File(parent)
-            if (localFile.exists()) {
-                val list = localFile.listFiles()
-                if (list==null)
-                    return
-                for (file in list) {
-                    if (isCancelScanTask){  //使用者點擊了返回鍵，flag升起
-                        isCancelScanTask = false
-                        postDataList(parent, insert_count, type)
-                        //由於取消任務，此處不更新為已掃描
-                    }
-
-                    if (file.name.toString().startsWith("."))
-                        continue
-                    val info = FileInfo()
-                    info.title = file.name
-                    info.path = file.path
-                    info.rootType = if (file.path.startsWith(Constant.LOCAL_ROOT)) Constant.STORAGEMODE_LOCAL else Constant.STORAGEMODE_SD
-                    info.lastModifyTime = file.lastModified()
-                    info.size = file.length()
-                    info.fileType = if (file.isDirectory) Constant.TYPE_DIR else MimeUtil.getFileType(file.path)
-                    if (file.parent != null)
-                        info.parent = file.parent
-                    else
-                        info.parent = ""
-
-                    when(info.fileType){
-                        Constant.TYPE_DIR -> {
-                            info.defaultIcon = R.drawable.ic_filelist_folder_grey
-                            info.infoIcon = R.drawable.ic_brower_listview_filearrow
-                        }
-                        Constant.TYPE_IMAGE -> {
-                            info.defaultIcon = R.drawable.ic_filelist_pic_grey
-                            info.smallMediaIconResId = 1
-                        }
-                        Constant.TYPE_MUSIC -> {
-                            info.defaultIcon = R.drawable.ic_filelist_mp3_grey
-                            info.smallMediaIconResId = R.drawable.ic_browser_lable_music
-                        }
-                        Constant.TYPE_VIDEO -> {
-                            info.defaultIcon = R.drawable.ic_filelist_video_grey
-                            info.smallMediaIconResId = R.drawable.ic_cameraroll_video
-                        }
-                        else -> {
-                            info.defaultIcon = R.drawable.ic_filelist_others_grey
-                        }
-                    }
-                    insert(info)
-                    if (info.fileType == type || type == -1)
-                        insert_count++
-                }
-            }
-        } else {
-            val target = UsbUtils.usbFileSystem?.rootDirectory?.search(parent)
-            if (target != null){
-                if (target.isDirectory){
-                    val list = target.listFiles()
-                    for (file in list){
-                        if (isCancelScanTask){  //使用者點擊了返回鍵，flag升起
-                            isCancelScanTask = false
-                            postDataList(parent, insert_count, type)
-                            //由於取消任務，此處不更新為已掃描
-                        }
-
-                        if (file.name.toString().startsWith("."))
-                            continue
-                        val info = FileInfo()
-                        info.title = file.name
-                        info.path = file.absolutePath
-                        info.rootType = Constant.STORAGEMODE_OTG
-                        info.lastModifyTime = file.lastModified()
-                        info.size = if (!file.isDirectory) file.length else 0
-                        info.fileType = if (file.isDirectory) Constant.TYPE_DIR else MimeUtil.getFileType(file.absolutePath)
-                        if (file.parent != null)
-                            info.parent = (file.parent as UsbFile).absolutePath
-                        else
-                            info.parent = ""
-
-                        when(info.fileType){
-                            Constant.TYPE_DIR -> {
-                                info.defaultIcon = R.drawable.ic_filelist_folder_grey
-                                info.infoIcon = R.drawable.ic_brower_listview_filearrow
-                            }
-                            Constant.TYPE_IMAGE -> {
-                                info.defaultIcon = R.drawable.ic_filelist_pic_grey
-                                info.smallMediaIconResId = 1
-                            }
-                            Constant.TYPE_MUSIC -> {
-                                info.defaultIcon = R.drawable.ic_filelist_mp3_grey
-                                info.smallMediaIconResId = R.drawable.ic_browser_lable_music
-                            }
-                            Constant.TYPE_VIDEO -> {
-                                info.defaultIcon = R.drawable.ic_filelist_video_grey
-                                info.smallMediaIconResId = R.drawable.ic_cameraroll_video
-                            }
-                            else -> {
-                                info.defaultIcon = R.drawable.ic_filelist_others_grey
-                            }
-                        }
-                        insert(info)
-                        if (info.fileType == type || type == -1)
-                            insert_count++
-                    }
-                }
+        val scanTask = object: ScanFolderFilesTask(isLocal, parent){
+            override fun onPostExecute(result: List<FileInfo>?) {
+                super.onPostExecute(result)
+                if (result == null)
+                    items.postValue(ArrayList<FileInfo>())
+                else
+                    items.postValue(sort(result))
             }
         }
-
-        postDataList(parent, insert_count, type)
-        setFolderScanned(parent)    //順利結束任務，更新為已掃描
+        scanTask.execute(type)
     }
 
     fun scanMediaFiles(type: Int, root: String){
-        val scanTask = object: ScanMediaFiles(MainApplication.getInstance()!!){
+        val scanTask = object: ScanMediaFiles(){
             override fun onFinished(list: List<FileInfo>) {
                 val finalList = sort(list)
                 items.postValue(finalList)
@@ -298,26 +178,6 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
                     Constant.sdMediaScanState[type] = Constant.ScanState.SCANNED
             }
         }
-        scanTask.scanFileList(type, root)
-    }
-
-    fun postDataList(path: String, insert_count: Int, type: Int){
-        //scan完直接撈資料，可能造成檔案不完全
-        var list = run {
-            if(type == -1)
-                repository.getAllFileInfos(path)
-            else
-                repository.getFiles(path, type)
-        }
-        var count = 0 //count表示撈幾次才正確(微秒)
-        while (insert_count != list.size && count < 30) {    //此處檢查撈到的資料跟insert的資料數量是否有一致，或3秒後跳出
-            if(type == -1)
-                list = repository.getAllFileInfos(path)
-            else
-                list = repository.getFiles(path, type)
-            Thread.sleep(100)
-            count++
-        }
-        items.postValue(sort(list))
+        scanTask.scanMediaFiles(type, root)
     }
 }

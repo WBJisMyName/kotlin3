@@ -164,7 +164,7 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                         listItemBinding.itemIcon.setImageBitmap(cache)
                     } else {
                         val thumbSize = Point(180, 180)
-                        object : ImageLoaderTask(item.path, item.fileType, thumbSize) {
+                        val task = object : ImageLoaderTask(item.path, item.fileType, thumbSize) {
                             override fun onFinished(bitmap: Bitmap?) {
                                 if (bitmap != null) {
                                     MainApplication.thumbnailsCache?.put(item.path + Constant.thumbnailCacheTail, bitmap)  //將thumbnail記錄於Cache
@@ -172,7 +172,9 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                                     listItemBinding.itemIcon.setImageBitmap(bitmap)
                                 }
                             }
-                        }.execute()
+                        }
+                        listItemBinding.itemIcon.tag = task
+                        task.execute()
                     }
                 }
             }
@@ -222,7 +224,7 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                         gridItemBinding.itemIcon.setImageBitmap(cache)
                     } else {
                         val thumbSize = Point(180, 180)
-                        object : ImageLoaderTask(item.path, item.fileType, thumbSize) {
+                        val task = object : ImageLoaderTask(item.path, item.fileType, thumbSize) {
                             override fun onFinished(bitmap: Bitmap?) {
                                 if (bitmap != null) {
                                     MainApplication.thumbnailsCache?.put(item.path + Constant.thumbnailCacheTail, bitmap)  //將thumbnail記錄於Cache
@@ -230,7 +232,9 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                                     gridItemBinding.itemIcon.setImageBitmap(bitmap)
                                 }
                             }
-                        }.execute()
+                        }
+                        gridItemBinding.itemIcon.tag = task
+                        task.execute()
                     }
                 }
             }
@@ -256,7 +260,7 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
             imageView.scaleType = ImageView.ScaleType.CENTER_CROP
         } else {
             val thumbSize = Point(180, 180)
-            object : ImageLoaderTask(fileInfo.path, fileInfo.fileType, thumbSize) {
+            val task = object : ImageLoaderTask(fileInfo.path, fileInfo.fileType, thumbSize) {
                 override fun onFinished(bitmap: Bitmap?) {
                     if (bitmap != null) {
                         MainApplication.thumbnailsCache?.put(fileInfo.path + Constant.thumbnailCacheTail, bitmap)  //將thumbnail記錄於Cache
@@ -264,7 +268,9 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
                     }
                 }
-            }.execute()
+            }
+            imageView.tag = task
+            task.execute()
         }
     }
 
@@ -311,6 +317,21 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                     file.isSelected = true
                     notifyItemChanged(mList.indexOf(file))
                 }
+            }
+        }
+    }
+
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        if (holder is ViewHolderList){
+            if (holder.listItemBinding.itemIcon.tag is ImageLoaderTask) {
+                val task = (holder.listItemBinding.itemIcon.tag as ImageLoaderTask)
+                task.cancel(true)
+            }
+        } else if (holder is ViewHolderGrid){
+            if(holder.gridItemBinding.itemIcon.tag is ImageLoaderTask) {
+                val task = (holder.gridItemBinding.itemIcon.tag as ImageLoaderTask)
+                task.cancel(true)
             }
         }
     }

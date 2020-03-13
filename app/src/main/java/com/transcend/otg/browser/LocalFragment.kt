@@ -221,4 +221,6 @@ open class LocalFragment(root: String): BrowserFragment(root){
             doLoadFiles(File(viewModel.mPath).parent ?: Constant.LOCAL_ROOT)  //讀取parent路徑
         return false
     }
+
+
 }

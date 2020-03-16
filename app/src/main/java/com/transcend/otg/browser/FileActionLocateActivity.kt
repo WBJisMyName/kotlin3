@@ -77,6 +77,13 @@ class FileActionLocateActivity : AppCompatActivity(),
             this@FileActionLocateActivity.finish()
         }
 
+        //設置Toolbar
+        setSupportActionBar(mBinding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        supportActionBar?.setDisplayShowCustomEnabled(true)    // enable overriding the default toolbar layout
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        supportActionBar?.setDisplayShowHomeEnabled(false)  // show or hide the default home button
+
         initFragment()
     }
 
@@ -373,6 +380,7 @@ class FileActionLocateActivity : AppCompatActivity(),
             if (UsbUtils.ACTION_USB_PERMISSION == action) {
                 if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
                     UsbUtils.discoverDevices(this@FileActionLocateActivity)
+                    mFragment?.doLoadFiles("/")
                 } else {
                     Log.e("Permission", "False")
                 }

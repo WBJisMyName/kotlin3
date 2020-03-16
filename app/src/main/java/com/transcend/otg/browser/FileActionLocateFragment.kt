@@ -20,6 +20,7 @@ import kotlin.concurrent.thread
 class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
 
     lateinit var mainViewModel: ActionLocateViewModel
+    var mMenu: Menu? = null
 
     override fun getFragmentActicity(): AppCompatActivity {
         return activity as FileActionLocateActivity
@@ -92,6 +93,7 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
                 viewModel.items.postValue(list)
                 viewModel.mPath = Constant.Storage_Device_Root
                 setDropdownList(Constant.Storage_Device_Root)
+                mMenu?.findItem(R.id.action_new_folder)?.setVisible(false)
                 return
             } else {    //只有一個則直接讀取本地路徑
                 mainViewModel.confirmBtnVisibility.set(View.VISIBLE)
@@ -109,6 +111,7 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
                 setDropdownList(path)
             }
         }
+        mMenu?.findItem(R.id.action_new_folder)?.setVisible(true)
     }
 
     fun buildStorageDeviceRoot(): ArrayList<FileInfo>{
@@ -186,7 +189,12 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        mMenu = menu
         inflater.inflate(R.menu.action_locate_menu, menu)
+        if (getPath().equals(Constant.Storage_Device_Root))
+            menu.findItem(R.id.action_new_folder).setVisible(false)
+        else
+            menu.findItem(R.id.action_new_folder).setVisible(true)
         super.onCreateOptionsMenu(menu, inflater)
     }
 

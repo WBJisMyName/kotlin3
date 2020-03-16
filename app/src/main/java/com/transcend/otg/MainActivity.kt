@@ -453,6 +453,9 @@ class MainActivity : AppCompatActivity(),
             if (UsbUtils.ACTION_USB_PERMISSION == action) {
                 if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
                     UsbUtils.discoverDevices(this@MainActivity)
+                    val arguments = Bundle()
+                    arguments.putString("root", "/")   //讀取本地路徑
+                    navController.navigate(R.id.otgFragment, arguments)
                 } else {
                     Log.e("Permission", "False")
                 }

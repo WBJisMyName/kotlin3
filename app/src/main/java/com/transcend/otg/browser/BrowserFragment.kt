@@ -106,7 +106,7 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
         recyclerView.setLayoutManager(lm)
         recyclerView.setHasFixedSize(true)
 
-        val viewType = AppPref.getViewType(context, mRoot, viewModel.mMediaType)
+        val viewType = AppPref.getViewType(context, viewModel.mMediaType)
         adapter?.setViewType(viewType)
     }
 

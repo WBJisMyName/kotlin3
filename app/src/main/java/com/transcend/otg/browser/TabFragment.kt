@@ -319,14 +319,14 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                     val listLayoutManager = LinearLayoutManager(context)
                     recyclerview?.layoutManager = listLayoutManager
                     adapter?.setViewType(RecyclerViewAdapter.List)
-                    AppPref.setViewType(context, mRoot, mBinding.viewPager.currentItem, RecyclerViewAdapter.List)
+                    AppPref.setViewType(context, mBinding.viewPager.currentItem, RecyclerViewAdapter.List)
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
                 }
                 RecyclerViewAdapter.List -> {
                     val gridLayoutManager = GridLayoutManager(context, 3)
                     recyclerview?.layoutManager = gridLayoutManager
                     adapter?.setViewType(RecyclerViewAdapter.Grid)
-                    AppPref.setViewType(context, mRoot, mBinding.viewPager.currentItem, RecyclerViewAdapter.Grid)
+                    AppPref.setViewType(context, mBinding.viewPager.currentItem, RecyclerViewAdapter.Grid)
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
                 }
             }

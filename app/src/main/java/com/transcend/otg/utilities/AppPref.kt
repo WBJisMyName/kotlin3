@@ -22,17 +22,17 @@ object AppPref {
         return PrefUtil.read(context, SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
     }
 
-    fun setViewType(context: Context?, root: String, type: Int, value: Int) {
+    fun setViewType(context: Context?, type: Int, value: Int) {
         if (context == null)
             return
-        val key = View_Type + "-" + root + "-" + type
+        val key = View_Type + "-" + type
         PrefUtil.write(context, key, PrefUtil.KEY_INTEGER, value)
     }
 
-    fun getViewType(context: Context?, root: String, type: Int): Int {
+    fun getViewType(context: Context?, type: Int): Int {
         if (context == null)
             return RecyclerViewAdapter.List
-        val key = View_Type + "-" + root + "-" + type
+        val key = View_Type + "-" + type
         var default = RecyclerViewAdapter.List
         when(type){
             Constant.TYPE_IMAGE, Constant.TYPE_MUSIC, Constant.TYPE_VIDEO -> {

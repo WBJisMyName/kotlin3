@@ -22,6 +22,7 @@ import com.transcend.otg.action.FileActionManager
 import com.transcend.otg.adapter.RecyclerViewAdapter
 import com.transcend.otg.databinding.FragmentBrowserBinding
 import com.transcend.otg.information.InfoActivity
+import com.transcend.otg.utilities.AppPref
 import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.RecyclerViewClickCallback
 import com.transcend.otg.viewmodels.BrowserViewModel
@@ -104,6 +105,9 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
         recyclerView.adapter = adapter
         recyclerView.setLayoutManager(lm)
         recyclerView.setHasFixedSize(true)
+
+        val viewType = AppPref.getViewType(context, mRoot, viewModel.mMediaType)
+        adapter?.setViewType(viewType)
     }
 
     fun startActionMode(){

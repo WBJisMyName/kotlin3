@@ -1,50 +1,71 @@
 package com.transcend.otg.utilities
 
 import android.content.Context
+import com.transcend.otg.adapter.RecyclerViewAdapter
 
 object AppPref {
 
     val SD_KEY = "String sd key"
     val SORT_BY = "Int sortBy key"
     val SORT_ORDER = "Int sortOrder key"
-    val OTG_KEY = "String otg key"
+    val View_Type = "String view type"
 
-    fun setSDKey(context: Context, value: String) {
+    fun setSDKey(context: Context?, value: String) {
+        if (context == null)
+            return
         PrefUtil.write(context, SD_KEY, PrefUtil.KEY_STRING, value)
     }
 
-    fun getSDKey(context: Context): String {
+    fun getSDKey(context: Context?): String {
+        if (context == null)
+            return ""
         return PrefUtil.read(context, SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
     }
 
-    fun setOTGKey(context: Context, sn: String?, uri: String) {
-        if (sn == null) return
-        val key: String = OTG_KEY + "-" +  sn
-        PrefUtil.write(context, SD_KEY, PrefUtil.KEY_STRING, uri)
+    fun setViewType(context: Context?, root: String, type: Int, value: Int) {
+        if (context == null)
+            return
+        val key = View_Type + "-" + root + "-" + type
+        PrefUtil.write(context, key, PrefUtil.KEY_INTEGER, value)
     }
 
-    fun getOTGKey(context: Context, sn: String?): String {
-        if (sn == null) return ""
-        val key: String = OTG_KEY + "-" +  sn
-        return PrefUtil.read(context, SD_KEY, PrefUtil.KEY_STRING, "") ?: ""
+    fun getViewType(context: Context?, root: String, type: Int): Int {
+        if (context == null)
+            return RecyclerViewAdapter.List
+        val key = View_Type + "-" + root + "-" + type
+        var default = RecyclerViewAdapter.List
+        when(type){
+            Constant.TYPE_IMAGE, Constant.TYPE_MUSIC, Constant.TYPE_VIDEO -> {
+                default = RecyclerViewAdapter.Grid
+            }
+        }
+        return PrefUtil.read(context, key, PrefUtil.KEY_INTEGER, default)
     }
 
-    fun setSortBy(context: Context, type: Int, value: Int){
+    fun setSortBy(context: Context?, type: Int, value: Int){
+        if (context == null)
+            return
         val key = SORT_BY + "-" + type
         PrefUtil.write(context, key, PrefUtil.KEY_INTEGER, value)
     }
 
-    fun getSortBy(context: Context, type: Int): Int{
+    fun getSortBy(context: Context?, type: Int): Int{
+        if (context == null)
+            return Constant.SORT_BY_DATE
         val key = SORT_BY + "-" + type
         return PrefUtil.read(context, key, PrefUtil.KEY_INTEGER, Constant.SORT_BY_DATE)
     }
 
-    fun setSortOrder(context: Context, type: Int, value: Int){
+    fun setSortOrder(context: Context?, type: Int, value: Int){
+        if (context == null)
+            return
         val key = SORT_ORDER + "-" + type
         PrefUtil.write(context, key, PrefUtil.KEY_INTEGER, value)
     }
 
-    fun getSortOrder(context: Context, type: Int): Int{
+    fun getSortOrder(context: Context?, type: Int): Int{
+        if (context == null)
+            return Constant.SORT_ORDER_AS
         val key = SORT_ORDER + "-" + type
         return PrefUtil.read(context, key, PrefUtil.KEY_INTEGER, Constant.SORT_ORDER_AS)
     }

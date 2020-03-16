@@ -290,12 +290,14 @@ class OTGFragment: BrowserFragment("/"){
                     val listLayoutManager = LinearLayoutManager(context)
                     recyclerView.layoutManager = listLayoutManager
                     adapter?.setViewType(RecyclerViewAdapter.List)
+                    AppPref.setViewType(context, mRoot, viewModel.mMediaType, RecyclerViewAdapter.List)
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
                 }
                 RecyclerViewAdapter.List -> {
                     val gridLayoutManager = GridLayoutManager(context, 3)
                     recyclerView.layoutManager = gridLayoutManager
                     adapter?.setViewType(RecyclerViewAdapter.Grid)
+                    AppPref.setViewType(context, mRoot, viewModel.mMediaType, RecyclerViewAdapter.Grid)
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
                 }
             }

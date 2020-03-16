@@ -1,14 +1,14 @@
 package com.transcend.otg.browser
 
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.lifecycle.ViewModelProviders
 import androidx.loader.content.Loader
 import com.transcend.otg.R
 import com.transcend.otg.action.FileActionManager
+import com.transcend.otg.action.dialog.FileActionNewFolderDialog
 import com.transcend.otg.action.loader.FolderCreateLoader
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.data.FileInfo
@@ -27,6 +27,15 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
 
     override fun setFileActionManager() {
         mFileActionManager = FileActionManager(mContext!!, FileActionManager.FileActionServiceType.PHONE, this)   //action manager
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        setHasOptionsMenu(true)     //設定選單
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun refreshView() {
@@ -176,38 +185,32 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
 
     }
 
-//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-//        inflater.inflate(R.menu.action_locate_menu, menu)
-//        super.onCreateOptionsMenu(menu, inflater)
-//    }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.action_locate_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
 
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        val id = item.itemId
-//        when(id){
-//            R.id.action_new_folder -> {
-//                if(mContext != null) {
-//                    val view = View.inflate(mContext, R.layout.dialog_folder_create, null)
-//                    val textLayout =
-//                        view.findViewById<TextInputLayout>(R.id.dialog_folder_create_name)
-//                    AlertDialog.Builder(mContext!!)
-//                        .setTitle("New Folder")
-//                        .setIcon(R.drawable.ic_tab_newfolder_grey)
-//                        .setView(view)
-//                        .setPositiveButton("Confirm", { dialog, whichButton ->
-//                            dialog_folder_create_name
-//                            val tmp = textLayout.editText?.text.toString()
-//                            mFileActionManager.createFolder(viewModel.mPath, tmp)   //通知action manager執行createFolder
-//                        })
-//                        .setNegativeButton("Cancel", { dialog, whichButton ->
-//                            println("cancel")
-//                        })
-//                        .setCancelable(true)
-//                        .show()
-//                }
-//            }
-//        }
-//        return super.onOptionsItemSelected(item)
-//    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        when(id){
+            R.id.action_new_folder -> {
+                val fileList = adapter?.mList
+                if (fileList == null)
+                    return false
+                val nameList: MutableList<String> = ArrayList<String>()
+                for (fileInfo in fileList){
+                    nameList.add(fileInfo.title.toLowerCase())
+                }
+
+                val newFolderDialog = object: FileActionNewFolderDialog(context!!, nameList){
+                    override fun onConfirm(newName: String) {
+                        mFileActionManager.createFolder(getPath(), newName)   //通知action manager執行createFolder
+                    }
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     fun getFileList(): List<FileInfo>?{
         return viewModel.items.value

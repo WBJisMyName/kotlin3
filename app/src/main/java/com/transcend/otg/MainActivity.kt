@@ -4,12 +4,15 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.storage.StorageManager
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -25,17 +28,18 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.snackbar.Snackbar
+import com.transcend.otg.browser.HomeFragment
 import com.transcend.otg.browser.OTGFragment
 import com.transcend.otg.browser.TabFragment
 import com.transcend.otg.databinding.ActivityMainBinding
 import com.transcend.otg.receiver.SDCardReceiver
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
 import com.transcend.otg.settings.EULAFragment
-import com.transcend.otg.settings.HomeFragment
 import com.transcend.otg.singleview.ViewPagerZoomFixed
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel
 import java.io.File
+import java.util.*
 
 class MainActivity : AppCompatActivity(),
     SDCardReceiver.SDCardObserver,
@@ -55,6 +59,7 @@ class MainActivity : AppCompatActivity(),
 
     private var oneSecond = true    //Permission 等待時間
     private val mSDPermission = 1009
+    private val mSDQPermission = 1007
 
     override fun onResume() {
         super.onResume()
@@ -126,7 +131,10 @@ class MainActivity : AppCompatActivity(),
                     arguments?.putString("root", Constant.LOCAL_ROOT)   //讀取本地路徑
                 }
                 R.id.sdFragment -> {
-                    arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
+                    if(checkSDPermission())
+                        arguments?.putString("root", SystemUtil().getSDLocation(this@MainActivity))   //讀取sd路徑
+                    else
+                        navController.popBackStack()
                 }
                 R.id.otgFragment -> {
                     arguments?.putString("root", "/")   //讀取本地路徑
@@ -236,20 +244,30 @@ class MainActivity : AppCompatActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == mSDPermission){
-            if (requestCode == RESULT_OK) {
+            if (resultCode == RESULT_OK) {
                 if (data != null && data.data != null) {
                     val uriTree = data.data
                     val dFile = DocumentFile.fromTreeUri(this, uriTree!!)
-                    if (dFile!!.exists()) {
-
-                        contentResolver.takePersistableUriPermission(
-                            uriTree,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        )
-
+                    if (dFile?.exists() ?: false) {
+                        contentResolver.takePersistableUriPermission(uriTree, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                         AppPref.setSDKey(this, uriTree.toString())
+                        goToBrowser(R.id.sdFragment)
+                    }
+                }
+            }
+        } else if (requestCode == mSDQPermission){
+            if (resultCode == RESULT_OK) {
+                if (data != null && data.data != null) {
+                    val uriTree = data.data
+                    if(checkSD(uriTree)){
+                        val dFile = DocumentFile.fromTreeUri(this, uriTree!!)
+                        if (dFile?.exists() ?: false) {
+                            contentResolver.takePersistableUriPermission(uriTree, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                            AppPref.setSDKey(this, uriTree.toString())
+                            goToBrowser(R.id.sdFragment)
+                        }
                     } else {
-
+                        showSelectWrongDialog()
                     }
                 }
             }
@@ -339,7 +357,7 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private fun checkSDPermission(): Boolean {
+    fun checkSDPermission(): Boolean {
         val sdKey = AppPref.getSDKey(this)
         Log.d(TAG, "sdKey: $sdKey")
         if (!sdKey.equals("")) {
@@ -350,8 +368,10 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        //TODO Permission of Android Q
-        if (MainApplication().OSisAfterNougat()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            requestSDCardQPermissionDialog(true)
+            return false
+        } else if (MainApplication().OSisAfterNougat()) {
             Log.d(TAG, ">N, SDK_INT: " + android.os.Build.VERSION.SDK_INT)
             requestSDCardPermission()
             oneSecond = false
@@ -404,11 +424,11 @@ class MainActivity : AppCompatActivity(),
         }
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("SD Card")
+        builder.setTitle(R.string.nav_sd)
         builder.setIcon(R.drawable.ic_drawer_microsd_grey)
         builder.setView(R.layout.dialog_connect_sd)
-        builder.setNegativeButton("Cancel", null)
-        builder.setPositiveButton("Confirm", null)
+        builder.setNegativeButton(getString(R.string.cancel), null)
+        builder.setPositiveButton(getString(R.string.confirm), null)
         builder.setCancelable(false)
         val dialog = builder.show()
         val posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
@@ -427,6 +447,127 @@ class MainActivity : AppCompatActivity(),
         val viewerPager = dialog.findViewById(R.id.viewer_pager_sd) as ViewPagerZoomFixed?
         viewerPager?.setAdapter(ViewerPagerAdapterSD(this))
         viewerPager?.setCurrentItem(0)
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private fun requestSDCardQPermissionDialog(isShowRemindDialog: Boolean) {
+        //*索取權限
+        val sdKey = AppPref.getSDKey(this)
+        if (!sdKey.equals("")) {
+            //釋放已記錄的權限
+            contentResolver.releasePersistableUriPermission(Uri.parse(sdKey), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            AppPref.setSDKey(this, "")
+        }
+
+        if (!isShowRemindDialog){
+            startSDQPermission()
+            return
+        }
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(R.string.reminder)
+        builder.setIcon(R.drawable.icon_elite_logo)
+        builder.setView(R.layout.dialog_ask_exit)
+        builder.setNegativeButton(getString(R.string.cancel), null)
+        builder.setPositiveButton(getString(R.string.confirm), null)
+        builder.setCancelable(false)
+        val dialog = builder.show()
+        val tv = dialog.findViewById<TextView>(R.id.message)
+        tv?.setText(getString(R.string.q_sd_permission_remind))
+        val posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+        posBtn.setOnClickListener {
+            startSDQPermission()
+        }
+        posBtn.textSize = 18f
+        val negBtn = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+        negBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        negBtn.textSize = 18f
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private fun showSelectWrongDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(R.string.reminder)
+        builder.setIcon(R.drawable.icon_elite_logo)
+        builder.setView(R.layout.dialog_ask_exit)
+        builder.setNegativeButton(getString(R.string.cancel), null)
+        builder.setPositiveButton(getString(R.string.permission_tryagain), null)
+        builder.setCancelable(false)
+        val dialog = builder.show()
+        val tv = dialog.findViewById<TextView>(R.id.message)
+        tv?.setText(getString(R.string.q_sd_permission_selectwrong))
+        val posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+        posBtn.setOnClickListener {
+            requestSDCardQPermissionDialog(false)
+        }
+        posBtn.textSize = 18f
+        val negBtn = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+        negBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+        negBtn.textSize = 18f
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private fun startSDQPermission(){
+        val sdPath = FileFactory.getInstance().getSdCardPath(this@MainActivity)
+        val storageManager = getSystemService(Context.STORAGE_SERVICE) as StorageManager
+        val storageVolume = storageManager.getStorageVolume(File(sdPath))
+        var intent: Intent? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            intent = storageVolume!!.createOpenDocumentTreeIntent()
+        }
+        try {
+            startActivityForResult(intent, mSDQPermission)
+        } catch (e: ActivityNotFoundException) {
+
+        }
+    }
+
+    private fun checkSD(uri: Uri?): Boolean {
+        if (!uri.toString().contains("primary")) {
+            if (uri != null) {
+                if (uri.path.toString().split(":").toTypedArray().size > 1) {
+//                    FirebaseAnalyticsFactory.getInstance(mContext).sendEvent(FirebaseAnalyticsFactory.FRAGMENT.PERMISSIONSD, FirebaseAnalyticsFactory.EVENT.PERMISSION_FAIL, null)
+                    snackBarShow(R.string.snackbar_plz_select_top)
+                } else {
+                    val rootDir = DocumentFile.fromTreeUri(this, uri) //sd root path
+                    if (rootDir != null && rootDir.exists()) {
+                        var bSDCard = false
+                        if (FileFactory().isSamsungStyle(this)) {
+                            val smSDPath: String? = FileFactory().getSamsungStyleOuterStoragePath(this)
+                            val rootName: String? = rootDir.getName()
+                            if (smSDPath != null && rootName != null) {
+                                if (smSDPath.contains(rootName)) bSDCard = true
+                            }
+                        } else {
+                            val sdCardFileName: ArrayList<String>? = FileFactory().getSDCardFileName(this)
+                            if (sdCardFileName == null)
+                                bSDCard = false
+                            else
+                                bSDCard = FileFactory.getInstance().doFileNameCompare(rootDir.listFiles(), sdCardFileName)
+                        }
+                        if (bSDCard) {
+                            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                            AppPref.setSDKey(this, uri.toString())
+//                            FirebaseAnalyticsFactory.getInstance(mContext).sendEvent(FirebaseAnalyticsFactory.FRAGMENT.PERMISSIONSD, FirebaseAnalyticsFactory.EVENT.PERMISSION_SUCCESS, null)
+                            return true
+                        } else {
+//                            FirebaseAnalyticsFactory.getInstance(mContext).sendEvent(FirebaseAnalyticsFactory.FRAGMENT.PERMISSIONSD, FirebaseAnalyticsFactory.EVENT.PERMISSION_FAIL, null)
+                            snackBarShow(R.string.snackbar_plz_select_sd)
+                        }
+                    } else {
+                        snackBarShow(R.string.no_sd)
+                    }
+                }
+            }
+        } else {
+//            FirebaseAnalyticsFactory.getInstance(mContext).sendEvent(FirebaseAnalyticsFactory.FRAGMENT.PERMISSIONSD, FirebaseAnalyticsFactory.EVENT.PERMISSION_FAIL, null)
+            snackBarShow(R.string.snackbar_plz_select_sd)
+        }
+        return false
     }
 
     private fun initBroadcast() {
@@ -466,5 +607,11 @@ class MainActivity : AppCompatActivity(),
                 viewModel.deleteAllFromRoot(Constant.STORAGEMODE_OTG)
             }
         }
+    }
+
+    private fun snackBarShow(resId: Int){
+        val fragment = this.supportFragmentManager.findFragmentById(R.id.container)
+        if (fragment != null && fragment.view != null)
+            Snackbar.make(fragment.view!!, resId, Snackbar.LENGTH_LONG).setAction("Action", null).show()
     }
 }

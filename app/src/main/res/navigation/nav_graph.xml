@@ -61,7 +61,7 @@
               tools:layout="@layout/fragment_statement"/>
 
     <fragment android:id="@+id/homeFragment"
-              android:name="com.transcend.otg.settings.HomeFragment"
+              android:name="com.transcend.otg.browser.HomeFragment"
               android:label="@string/homeTitle"
               tools:layout="@layout/fragment_home">
         <action android:id="@+id/action_homeFragment_to_feedbackFragment"

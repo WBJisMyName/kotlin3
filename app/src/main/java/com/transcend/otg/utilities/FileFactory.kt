@@ -3,8 +3,11 @@ package com.transcend.otg.utilities
 import android.content.Context
 import android.os.StatFs
 import android.os.storage.StorageManager
+import androidx.documentfile.provider.DocumentFile
 import java.io.File
+import java.lang.reflect.Array
 import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
 
 class FileFactory{
     private val mNotificationList: MutableList<Int> = ArrayList()
@@ -126,6 +129,110 @@ class FileFactory{
             e.printStackTrace()
         } catch (e: InvocationTargetException) {
             // TODO Auto-generated catch block
+            e.printStackTrace()
+        }
+        return null
+    }
+
+    fun getSDCardFileName(context: Context): ArrayList<String>? {
+        val mPath = getSdCardPath(context)
+        val sdName = ArrayList<String>()
+        if (mPath != null) {
+            val dir = File(mPath)
+            val files = dir.listFiles()
+            if (files != null) {
+                for (file in files) {
+                    if (file.isHidden) continue
+                    val name = file.name
+                    sdName.add(name)
+                }
+            }
+        }
+        return sdName
+    }
+
+    fun doFileNameCompare(tmpDFile: kotlin.Array<DocumentFile>, tmpFile: ArrayList<String>): Boolean {
+        var fileCount = 0
+        for (fi in tmpFile.indices) {
+            val name = tmpFile[fi]
+            for (df in tmpDFile.indices) {
+                if (name == tmpDFile[df].name) {
+                    fileCount++
+                    break
+                }
+            }
+        }
+        return if (fileCount == tmpFile.size) {
+            true
+        } else {
+            false
+        }
+    }
+
+    fun isSamsungStyle(mContext: Context): Boolean {
+        val mStorageManager = mContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+        var storageVolumeClazz: Class<*>? = null
+        try {
+            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume")
+            var getVolumeList: Method? = null
+            var getSubSystem: Method? = null
+            try {
+                getVolumeList = mStorageManager.javaClass.getMethod("getVolumeList")
+                getSubSystem = storageVolumeClazz.getMethod("getSubSystem")
+            } catch (e: NoSuchMethodException) {
+                e.printStackTrace()
+                return false
+            }
+            val result = getVolumeList.invoke(mStorageManager)
+            val length = Array.getLength(result)
+            for (i in 0 until length) {
+                val storageVolumeElement = Array.get(result, i)
+                val subSystem = getSubSystem.invoke(storageVolumeElement) as String
+                return true
+            }
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
+        } catch (e: InvocationTargetException) {
+            e.printStackTrace()
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        }
+        return false
+    }
+
+    fun getSamsungStyleOuterStoragePath(mContext: Context): String? {
+        val mStorageManager = mContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+        var storageVolumeClazz: Class<*>? = null
+        try {
+            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume")
+            var getVolumeList: Method? = null
+            var getPath: Method? = null
+            var isRemovable: Method? = null
+            var getSubSystem: Method? = null
+            try {
+                getVolumeList = mStorageManager.javaClass.getMethod("getVolumeList")
+                getPath = storageVolumeClazz.getMethod("getPath")
+                isRemovable = storageVolumeClazz.getMethod("isRemovable")
+                getSubSystem = storageVolumeClazz.getMethod("getSubSystem")
+            } catch (e: NoSuchMethodException) {
+                e.printStackTrace()
+            }
+            val result = getVolumeList!!.invoke(mStorageManager)
+            val length = Array.getLength(result)
+            for (i in 0 until length) {
+                val storageVolumeElement = Array.get(result, i)
+                val path = getPath!!.invoke(storageVolumeElement) as String
+                val removable = isRemovable!!.invoke(storageVolumeElement) as Boolean
+                val subSystem = getSubSystem!!.invoke(storageVolumeElement) as String
+                if (removable) {
+                    return if (subSystem.contains("sd")) path else continue
+                }
+            }
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
+        } catch (e: InvocationTargetException) {
+            e.printStackTrace()
+        } catch (e: IllegalAccessException) {
             e.printStackTrace()
         }
         return null

@@ -1,4 +1,4 @@
-package com.transcend.otg.settings
+package com.transcend.otg.browser
 
 
 import android.os.Bundle
@@ -77,9 +77,8 @@ class HomeFragment : Fragment() {
 
         mBinding.cardviewSD.setOnClickListener(object: View.OnClickListener{
             override fun onClick(p0: View?) {
-                (activity as MainActivity).goToBrowser(
-                    R.id.sdFragment
-                )
+                if((activity as MainActivity).checkSDPermission())
+                    (activity as MainActivity).goToBrowser(R.id.sdFragment)
             }
         })
 

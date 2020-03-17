@@ -40,6 +40,7 @@
     <string name="error">Error</string>
     <string name="done">Action Finished</string>
     <string name="media">Media</string>
+    <string name="reminder">Reminder</string>
 
     <!-- File information -->
     <string name="info_title">Information</string>
@@ -92,10 +93,10 @@
     <string name="resetPermissionDialog">You have refused permission for Transcend Elite to access the storage device. To reset, please go to App Info -&gt; Storage -&gt; Clear Data. This will not clear any data stored on the device.</string>
     <string name="couldnotfindappsopen">Could not find apps to open this file.</string>
     <string name="folderorfilenotfoumd">Folder/File is not found.</string>
+    <string name="snackbar_plz_select_sd">Please select SD card.</string>
+    <string name="snackbar_plz_select_top">Please select the root folder.</string>
     <string name="q_sd_permission_selectwrong">Please select the outermost layer of the SD card and allow access.</string>
-    <string name="q_otg_permission_selectwrong">Please select the outermost layer of USB and allow access.</string>
     <string name="q_sd_permission_remind">Elite has not yet obtained the rights to this SD card. Please select the outermost layer of the SD card and allow access.</string>
-    <string name="q_otg_permission_remind">Elite has not yet obtained the permissions of this USB. Please select the outermost layer of USB and allow access.</string>
     <string name="permission_tryagain">Try again</string>
     <string name="no_suitable_file">Could no find an app for that file!</string>
 

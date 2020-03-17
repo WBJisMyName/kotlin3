@@ -202,7 +202,7 @@ open class LocalFragment(root: String): BrowserFragment(root){
     }
 
     //重新整理，刪除該資料夾下的檔案列表並重新掃描
-    open fun doRefresh(){
+    override fun doRefresh(){
         viewModel.isLoading.set(true)
         destroyActionMode()
         viewModel.doRefresh(true)

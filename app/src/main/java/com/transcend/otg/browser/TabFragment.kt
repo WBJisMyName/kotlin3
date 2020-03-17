@@ -85,12 +85,6 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
             }
         }).attach()
 
-        mBinding.swiperefresh.setColorSchemeResources(R.color.c_06)
-        mBinding.swiperefresh.setOnRefreshListener {
-            mBinding.swiperefresh.setRefreshing(false)
-            (mBinding.viewPager.adapter as TabPagerAdapter).doRefresh(mBinding.viewPager.currentItem)
-        }
-
         mBinding.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
@@ -113,7 +107,7 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                     Constant.TYPE_MUSIC -> mAdapter.musicPage.refreshView()
                     Constant.TYPE_VIDEO -> mAdapter.videoPage.refreshView()
                     Constant.TYPE_DOC -> mAdapter.docPage.refreshView()
-                    else -> return mAdapter.allFilePage.refreshView()
+                    else -> mAdapter.allFilePage.refreshView()
                 }
             }
         })

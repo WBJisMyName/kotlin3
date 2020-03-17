@@ -97,7 +97,7 @@ class OTGFragment: BrowserFragment("/"){
         })
     }
 
-    fun doRefresh() {
+    override fun doRefresh() {
         viewModel.isLoading.set(true)
         destroyActionMode()
         viewModel.doRefresh(false)

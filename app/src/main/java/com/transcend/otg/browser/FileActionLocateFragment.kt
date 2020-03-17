@@ -114,6 +114,12 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
         mMenu?.findItem(R.id.action_new_folder)?.setVisible(true)
     }
 
+    override fun doRefresh() {
+        viewModel.isLoading.set(true)
+        destroyActionMode()
+        viewModel.doRefresh(true)
+    }
+
     fun buildStorageDeviceRoot(): ArrayList<FileInfo>{
         val list = ArrayList<FileInfo>()
         val localInfo = FileInfo()

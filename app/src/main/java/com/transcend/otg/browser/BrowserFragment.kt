@@ -79,8 +79,19 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
                     if (newState == RecyclerView.SCROLL_STATE_IDLE)
                         adapter?.lazyLoad()
                 }
+
+                if(!recyclerView.canScrollVertically(-1))//-1 for up, 1 for down, 0 will always return false.
+                    mBinding!!.swiperefresh.isEnabled = true
+                else
+                    mBinding!!.swiperefresh.isEnabled = false
             }
         })
+
+        mBinding!!.swiperefresh.setColorSchemeResources(R.color.c_06)
+        mBinding!!.swiperefresh.setOnRefreshListener {
+            mBinding!!.swiperefresh.setRefreshing(false)
+            doRefresh()
+        }
 
         return mBinding!!.root
     }
@@ -198,6 +209,7 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
     abstract fun setFileActionManager()
     abstract fun setDropdownList(path: String)
     abstract fun doLoadFiles(path: String)
+    abstract fun doRefresh()
     abstract fun getFragmentActicity(): AppCompatActivity
     abstract var mRecyclerViewClickCallback: RecyclerViewClickCallback
 }

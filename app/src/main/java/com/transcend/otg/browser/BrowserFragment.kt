@@ -127,14 +127,12 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
                 val listLayoutManager = LinearLayoutManager(context)
                 recyclerView.layoutManager = listLayoutManager
                 adapter?.setViewType(RecyclerViewAdapter.List)
-                AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.List)
             }
             RecyclerViewAdapter.Grid -> {
                 val gridColCount = if(UiHelper.isPad()) 6 else 3
                 val gridLayoutManager = GridLayoutManager(context, gridColCount)
                 recyclerView.layoutManager = gridLayoutManager
                 adapter?.setViewType(RecyclerViewAdapter.Grid)
-                AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.Grid)
             }
         }
     }

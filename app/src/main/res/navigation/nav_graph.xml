@@ -5,7 +5,7 @@
             app:startDestination="@id/homeFragment">
 
     <fragment android:id="@+id/browserFragment"
-              android:name="com.transcend.otg.browser.TabFragment"
+              android:name="com.transcend.otg.browser.LocalTabFragment"
               android:label="BrowserFragment"
               tools:layout="@layout/fragment_tab">
 
@@ -17,7 +17,7 @@
     </fragment>
 
     <fragment android:id="@+id/sdFragment"
-              android:name="com.transcend.otg.browser.TabFragment"
+              android:name="com.transcend.otg.browser.LocalTabFragment"
               android:label="BrowserFragment"
               tools:layout="@layout/fragment_tab">
 
@@ -29,7 +29,7 @@
     </fragment>
 
     <fragment android:id="@+id/otgFragment"
-            android:name="com.transcend.otg.browser.OTGFragment"
+            android:name="com.transcend.otg.browser.OTGTabFragment"
             android:label="BrowserFragment"
             tools:layout="@layout/fragment_browser">
 
@@ -90,7 +90,7 @@
             android:label="PermissionFragment" />
     <fragment
             android:id="@+id/tabFragment"
-            android:name="com.transcend.otg.browser.TabFragment"
+            android:name="com.transcend.otg.browser.LocalTabFragment"
             android:label="TabFragment" />
     <fragment
             android:id="@+id/settingsFragment"

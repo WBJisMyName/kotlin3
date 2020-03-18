@@ -26,17 +26,12 @@ open class ScanMediaFiles{
             return
 
         mSrc = src
-
         val thread = Thread(Runnable {
             when (type) {
-                Constant.TYPE_IMAGE -> scanLocalAllImage(
-                    MainApplication.getInstance()!!.getContext())
-                Constant.TYPE_MUSIC -> scanLocalAllMusics(
-                    MainApplication.getInstance()!!.getContext())
-                Constant.TYPE_VIDEO -> scanLocalAllVideos(
-                    MainApplication.getInstance()!!.getContext())
-                Constant.TYPE_DOC -> scanLocalAllDocs(
-                    MainApplication.getInstance()!!.getContext())
+                Constant.TYPE_IMAGE -> scanLocalAllImage(MainApplication.getInstance()!!.getContext())
+                Constant.TYPE_MUSIC -> scanLocalAllMusics(MainApplication.getInstance()!!.getContext())
+                Constant.TYPE_VIDEO -> scanLocalAllVideos(MainApplication.getInstance()!!.getContext())
+                Constant.TYPE_DOC -> scanLocalAllDocs(MainApplication.getInstance()!!.getContext())
             }
         })
         thread.start()
@@ -52,9 +47,7 @@ open class ScanMediaFiles{
                 Constant.TYPE_IMAGE,
                 Constant.ScanState.SCANNING
             )
-        else if (Constant.SD_ROOT != null && mSrc.equals(
-                Constant.SD_ROOT
-            ))
+        else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
             Constant.sdMediaScanState.set(
                 Constant.TYPE_IMAGE,
                 Constant.ScanState.SCANNING
@@ -115,11 +108,12 @@ open class ScanMediaFiles{
                         fileInfo.path = picPath
                         fileInfo.title = picName
                         fileInfo.lastModifyTime = picTime
-                        fileInfo.fileType =
-                            Constant.TYPE_IMAGE
+                        fileInfo.fileType = Constant.TYPE_IMAGE
                         fileInfo.size = picSize
                         fileInfo.defaultIcon = R.drawable.ic_filelist_pic_grey
                         fileInfo.parent = picPath.replace(picName, "")
+                        fileInfo.rootType = if (mSrc.equals(Constant.LOCAL_ROOT)) Constant.STORAGEMODE_LOCAL else Constant.STORAGEMODE_SD
+                        fileInfo.smallMediaIconResId = 1
 
                         insert(fileInfo)
                         fileList.add(fileInfo)
@@ -131,9 +125,7 @@ open class ScanMediaFiles{
                         Constant.TYPE_IMAGE,
                         Constant.ScanState.SCANNED
                     )
-                else if (Constant.SD_ROOT != null && mSrc.equals(
-                        Constant.SD_ROOT
-                    ))
+                else if (Constant.SD_ROOT != null && mSrc.equals(Constant.SD_ROOT))
                     Constant.sdMediaScanState.set(
                         Constant.TYPE_IMAGE,
                         Constant.ScanState.SCANNED
@@ -226,6 +218,8 @@ open class ScanMediaFiles{
                         fileInfo.size = musicSize
                         fileInfo.defaultIcon = R.drawable.ic_filelist_mp3_grey
                         fileInfo.parent = musicPath.replace(musicName, "")
+                        fileInfo.rootType = if (mSrc.equals(Constant.LOCAL_ROOT)) Constant.STORAGEMODE_LOCAL else Constant.STORAGEMODE_SD
+                        fileInfo.smallMediaIconResId = R.drawable.ic_browser_lable_music
                         insert(fileInfo)
                         fileList.add(fileInfo)
                     }
@@ -331,6 +325,8 @@ open class ScanMediaFiles{
                         fileInfo.size = videoSize
                         fileInfo.defaultIcon = R.drawable.ic_filelist_video_grey
                         fileInfo.parent = videoPath.replace(videoName, "")
+                        fileInfo.rootType = if (mSrc.equals(Constant.LOCAL_ROOT)) Constant.STORAGEMODE_LOCAL else Constant.STORAGEMODE_SD
+                        fileInfo.smallMediaIconResId = R.drawable.ic_cameraroll_video
                         insert(fileInfo)
                         fileList.add(fileInfo)
                     }
@@ -433,8 +429,8 @@ open class ScanMediaFiles{
                         fileInfo.title = name
                         fileInfo.lastModifyTime = docTime
                         fileInfo.size = docSize
-                        fileInfo.fileType =
-                            Constant.TYPE_DOC
+                        fileInfo.fileType = Constant.TYPE_DOC
+                        fileInfo.rootType = if (mSrc.equals(Constant.LOCAL_ROOT)) Constant.STORAGEMODE_LOCAL else Constant.STORAGEMODE_SD
                         insert(fileInfo)
                         fileList.add(fileInfo)
                     }

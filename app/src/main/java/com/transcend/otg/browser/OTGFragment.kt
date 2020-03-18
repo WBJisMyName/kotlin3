@@ -5,18 +5,16 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.view.*
-import android.widget.EditText
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import androidx.loader.content.Loader
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mjdev.libaums.fs.UsbFile
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService.ServiceBinder
@@ -24,23 +22,18 @@ import com.github.mjdev.libaums.server.http.server.AsyncHttpServer
 import com.transcend.otg.MainActivity
 import com.transcend.otg.R
 import com.transcend.otg.action.FileActionManager
-import com.transcend.otg.action.dialog.FileActionNewFolderDialog
 import com.transcend.otg.action.dialog.FileActionRenameDialog
 import com.transcend.otg.action.loader.*
-import com.transcend.otg.adapter.RecyclerViewAdapter
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.singleview.ImageActivity
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel
-import kotlinx.android.synthetic.main.fragment_browser.*
 import java.io.File
 import java.io.IOException
 import kotlin.concurrent.thread
 
 
-class OTGFragment: BrowserFragment("/"){
-
-    lateinit var mMenu: Menu
+open class OTGFragment: BrowserFragment("/"){
     val TAG = OTGFragment::class.java.simpleName
     private var serviceIntent: Intent? = null
     private var serverService: UsbFileHttpServerService? = null
@@ -58,7 +51,7 @@ class OTGFragment: BrowserFragment("/"){
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        setHasOptionsMenu(true)     //設定選單
+//        setHasOptionsMenu(true)     //設定選單
         serviceIntent = Intent(context, UsbFileHttpServerService::class.java)   //USB Server
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -197,112 +190,112 @@ class OTGFragment: BrowserFragment("/"){
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        mMenu = menu
-        inflater.inflate(R.menu.main_menu, menu)
-
-        val searchView: SearchView = menu.findItem(R.id.action_search).actionView as SearchView
-        val search_editText = searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-        search_editText.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorWhite))
-        search_editText.setTextColor(ContextCompat.getColor(context!!, R.color.c_02))
-        search_editText.setHintTextColor(ContextCompat.getColor(context!!, R.color.c_04))
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText == null)
-                    return false
-                if (newText.equals("")){
-                    viewModel.doReload()
-                } else {
-                    viewModel.doSearch(newText, Constant.TYPE_DIR)
-                }
-                return true
-            }
-        })
-
-        menu.findItem(R.id.action_search).setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
-            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                menu.findItem(R.id.action_more).setVisible(false)
-                return true
-            }
-
-            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                menu.findItem(R.id.action_more).setVisible(true)
-                doRefresh()
-                return true
-            }
-        })
-
-        menu.findItem(R.id.action_more).setOnMenuItemClickListener(object : MenuItem.OnMenuItemClickListener {
-            override fun onMenuItemClick(p0: MenuItem?): Boolean {
-                //設定顯示模式 list or grid
-                if (adapter?.mViewType == RecyclerViewAdapter.List)
-                    menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
-                else
-                    menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
-                return true
-            }
-        })
-
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        when(id){
-            R.id.action_view_type -> {  //List or Grid
-                changeViewType()
-            }
-            R.id.action_select_mode ->{
-                startActionMode()
-            }
-            R.id.action_new_folder -> {
-                val fileList = adapter?.mList
-                if (fileList == null)
-                    return false
-                val nameList: MutableList<String> = ArrayList<String>()
-                for (fileInfo in fileList){
-                    nameList.add(fileInfo.title.toLowerCase())
-                }
-
-                val newFolderDialog = object: FileActionNewFolderDialog(context!!, nameList){
-                    override fun onConfirm(newName: String) {
-                        mFileActionManager.createFolder(getPath(), newName)   //通知action manager執行createFolder
-                    }
-                }
-            }
-            R.id.action_selectAll -> {
-                selectAll()
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    fun changeViewType(){
-        if (adapter?.itemCount ?: 0 > 0){
-            val currentItemType = adapter?.getItemViewType(0)
-            when(currentItemType){
-                RecyclerViewAdapter.Grid -> {
-                    val listLayoutManager = LinearLayoutManager(context)
-                    recyclerView.layoutManager = listLayoutManager
-                    adapter?.setViewType(RecyclerViewAdapter.List)
-                    AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.List)
-                    mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
-                }
-                RecyclerViewAdapter.List -> {
-                    val gridColCount = if(UiHelper.isPad()) 6 else 3
-                    val gridLayoutManager = GridLayoutManager(context, gridColCount)
-                    recyclerView.layoutManager = gridLayoutManager
-                    adapter?.setViewType(RecyclerViewAdapter.Grid)
-                    AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.Grid)
-                    mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
-                }
-            }
-        }
-    }
+//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+//        mMenu = menu
+//        inflater.inflate(R.menu.main_menu, menu)
+//
+//        val searchView: SearchView = menu.findItem(R.id.action_search).actionView as SearchView
+//        val search_editText = searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
+//        search_editText.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorWhite))
+//        search_editText.setTextColor(ContextCompat.getColor(context!!, R.color.c_02))
+//        search_editText.setHintTextColor(ContextCompat.getColor(context!!, R.color.c_04))
+//        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+//            override fun onQueryTextSubmit(query: String?): Boolean {
+//                return true
+//            }
+//
+//            override fun onQueryTextChange(newText: String?): Boolean {
+//                if (newText == null)
+//                    return false
+//                if (newText.equals("")){
+//                    viewModel.doReload()
+//                } else {
+//                    viewModel.doSearch(newText, Constant.TYPE_DIR)
+//                }
+//                return true
+//            }
+//        })
+//
+//        menu.findItem(R.id.action_search).setOnActionExpandListener(object: MenuItem.OnActionExpandListener{
+//            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+//                menu.findItem(R.id.action_more).setVisible(false)
+//                return true
+//            }
+//
+//            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+//                menu.findItem(R.id.action_more).setVisible(true)
+//                doRefresh()
+//                return true
+//            }
+//        })
+//
+//        menu.findItem(R.id.action_more).setOnMenuItemClickListener(object : MenuItem.OnMenuItemClickListener {
+//            override fun onMenuItemClick(p0: MenuItem?): Boolean {
+//                //設定顯示模式 list or grid
+//                if (adapter?.mViewType == RecyclerViewAdapter.List)
+//                    menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
+//                else
+//                    menu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
+//                return true
+//            }
+//        })
+//
+//        super.onCreateOptionsMenu(menu, inflater)
+//    }
+//
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        val id = item.itemId
+//        when(id){
+//            R.id.action_view_type -> {  //List or Grid
+//                changeViewType()
+//            }
+//            R.id.action_select_mode ->{
+//                startActionMode()
+//            }
+//            R.id.action_new_folder -> {
+//                val fileList = adapter?.mList
+//                if (fileList == null)
+//                    return false
+//                val nameList: MutableList<String> = ArrayList<String>()
+//                for (fileInfo in fileList){
+//                    nameList.add(fileInfo.title.toLowerCase())
+//                }
+//
+//                val newFolderDialog = object: FileActionNewFolderDialog(context!!, nameList){
+//                    override fun onConfirm(newName: String) {
+//                        mFileActionManager.createFolder(getPath(), newName)   //通知action manager執行createFolder
+//                    }
+//                }
+//            }
+//            R.id.action_selectAll -> {
+//                selectAll()
+//            }
+//        }
+//        return super.onOptionsItemSelected(item)
+//    }
+//
+//    fun changeViewType(){
+//        if (adapter?.itemCount ?: 0 > 0){
+//            val currentItemType = adapter?.getItemViewType(0)
+//            when(currentItemType){
+//                RecyclerViewAdapter.Grid -> {
+//                    val listLayoutManager = LinearLayoutManager(context)
+//                    recyclerView.layoutManager = listLayoutManager
+//                    adapter?.setViewType(RecyclerViewAdapter.List)
+//                    AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.List)
+//                    mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
+//                }
+//                RecyclerViewAdapter.List -> {
+//                    val gridColCount = if(UiHelper.isPad()) 6 else 3
+//                    val gridLayoutManager = GridLayoutManager(context, gridColCount)
+//                    recyclerView.layoutManager = gridLayoutManager
+//                    adapter?.setViewType(RecyclerViewAdapter.Grid)
+//                    AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.Grid)
+//                    mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_list)
+//                }
+//            }
+//        }
+//    }
 
     override fun onBackPressed(): Boolean {
         //如果檔案讀取中，則中斷讀取檔案

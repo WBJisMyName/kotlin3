@@ -4,14 +4,17 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.transcend.otg.MainActivity
 import com.transcend.otg.adapter.RecyclerViewAdapter
+import com.transcend.otg.utilities.AppPref
+import com.transcend.otg.utilities.UiHelper
 import com.transcend.otg.viewmodels.BrowserViewModel
 import com.transcend.otg.viewmodels.MainActivityViewModel
 import kotlinx.android.synthetic.main.fragment_browser.*
 
-class MediaFragment(val mType: Int, val mediaRoot: String): LocalFragment(mediaRoot){
+class LocalMediaFragment(val mType: Int, val mediaRoot: String): LocalFragment(mediaRoot){
 
     override fun onResume() {
         viewModel.doLoadMediaFiles(mType, mediaRoot)
@@ -36,11 +39,26 @@ class MediaFragment(val mType: Int, val mediaRoot: String): LocalFragment(mediaR
         recyclerView.setHasFixedSize(true)
 
         startLoadingView()
+
+        val viewType = AppPref.getViewType(context, viewModel.mMediaType)
+        when(viewType){
+            RecyclerViewAdapter.List -> {
+                val listLayoutManager = LinearLayoutManager(context)
+                recyclerView.layoutManager = listLayoutManager
+                adapter?.setViewType(RecyclerViewAdapter.List)
+            }
+            RecyclerViewAdapter.Grid -> {
+                val gridColCount = if(UiHelper.isPad()) 6 else 3
+                val gridLayoutManager = GridLayoutManager(context, gridColCount)
+                recyclerView.layoutManager = gridLayoutManager
+                adapter?.setViewType(RecyclerViewAdapter.Grid)
+            }
+        }
     }
 
     fun startLoadingView() {
         viewModel.mMediaType = mType
-        viewModel.items.observe(this@MediaFragment, Observer { fileList ->
+        viewModel.items.observe(this@LocalMediaFragment, Observer { fileList ->
             adapter?.submitList(fileList)
             viewModel.isLoading.set(false)
             viewModel.isEmpty.set(fileList.size == 0)

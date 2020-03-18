@@ -25,7 +25,7 @@ import com.transcend.otg.databinding.FragmentTabBinding
 import com.transcend.otg.utilities.*
 import kotlinx.android.synthetic.main.fragment_browser.*
 
-class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<Boolean> {
+class LocalTabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<Boolean> {
 
     lateinit var mAdapter: TabPagerAdapter
     lateinit var mBinding: FragmentTabBinding
@@ -117,17 +117,17 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
     class TabPagerAdapter(fragmentActivity: FragmentActivity, root: String): FragmentStateAdapter(fragmentActivity) {
         val Pager_Count = 5
         var allFilePage: LocalFragment
-        var imagePage: MediaFragment
-        var musicPage: MediaFragment
-        var videoPage: MediaFragment
-        var docPage: MediaFragment
+        var imagePage: LocalMediaFragment
+        var musicPage: LocalMediaFragment
+        var videoPage: LocalMediaFragment
+        var docPage: LocalMediaFragment
 
         init{
             allFilePage = LocalFragment(root)
-            imagePage = MediaFragment(Constant.TYPE_IMAGE, root)
-            musicPage = MediaFragment(Constant.TYPE_MUSIC, root)
-            videoPage = MediaFragment(Constant.TYPE_VIDEO, root)
-            docPage = MediaFragment(Constant.TYPE_DOC, root)
+            imagePage = LocalMediaFragment(Constant.TYPE_IMAGE, root)
+            musicPage = LocalMediaFragment(Constant.TYPE_MUSIC, root)
+            videoPage = LocalMediaFragment(Constant.TYPE_VIDEO, root)
+            docPage = LocalMediaFragment(Constant.TYPE_DOC, root)
         }
 
         override fun getItemCount(): Int = Pager_Count

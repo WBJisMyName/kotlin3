@@ -9,20 +9,20 @@
 <!--            android:id="@+id/statementFragment"-->
 <!--            android:title="@string/statementTitle"-->
 <!--            android:icon="@drawable/ic_drawer_recent_grey"/>-->
-    <item
-            android:id="@+id/browserFragment"
-            android:title="@string/browserTitle"
-            android:icon="@drawable/ic_drawer_myphone_grey"/>
-
-    <item
-            android:id="@+id/sdFragment"
-            android:title="@string/nav_sd"
-            android:icon="@drawable/ic_drawer_microsd_grey"/>
-
-    <item
-            android:id="@+id/otgFragment"
-            android:title="@string/nav_otg"
-            android:icon="@drawable/ic_drawer_otg_grey"/>
+    <group android:id="@+id/browser">
+        <item
+                android:id="@+id/browserFragment"
+                android:icon="@drawable/ic_drawer_myphone_grey"
+                android:title="@string/browserTitle" />
+        <item
+                android:id="@+id/sdFragment"
+                android:icon="@drawable/ic_drawer_microsd_grey"
+                android:title="@string/nav_sd" />
+        <item
+                android:id="@+id/otgFragment"
+                android:icon="@drawable/ic_drawer_otg_grey"
+                android:title="@string/nav_otg" />
+    </group>
 
     <item
             android:id="@+id/settingsFragment"

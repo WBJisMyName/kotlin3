@@ -55,12 +55,12 @@ class ViewPagerAdapter(val mContext : Context) : PagerAdapter(){
                     .load(file)
                     .listener(object: RequestListener<Drawable> {
                         override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                            progress.setVisibility(View.GONE);
+                            progress.setVisibility(View.GONE)
                             return false
                         }
 
                         override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                            progress.setVisibility(View.GONE);
+                            progress.setVisibility(View.GONE)
                             return false
                         }
                     })
@@ -72,6 +72,7 @@ class ViewPagerAdapter(val mContext : Context) : PagerAdapter(){
         } else {
             val cache = MainApplication.thumbnailsCache?.get(item.path)
             if (cache != null) {
+                progress.visibility = View.GONE
                 imageview.scaleType = ImageView.ScaleType.FIT_CENTER  //設定顯示格式
                 imageview.setImageBitmap(cache)
             } else {

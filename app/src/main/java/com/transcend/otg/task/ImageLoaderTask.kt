@@ -154,7 +154,9 @@ open class ImageLoaderTask(internal val mPath: String,
             if (rotation != 0) {
                 matrix.preRotate(rotationInDegrees.toFloat())
             }
+            inputStream.close()
 
+            inputStream = UsbFileStreamFactory.createBufferedInputStream(file, UsbUtils.usbFileSystem!!)
             val options = BitmapFactory.Options()
             options.inJustDecodeBounds = true
             baos = ByteArrayOutputStream()
@@ -177,6 +179,7 @@ open class ImageLoaderTask(internal val mPath: String,
             options.inSampleSize  = scale
             options.inJustDecodeBounds = false
             inputStream.close()
+
             inputStream = UsbFileStreamFactory.createBufferedInputStream(file, UsbUtils.usbFileSystem!!)
             bitmap = BitmapFactory.decodeStream(inputStream, null, options)
             if (bitmap != null)

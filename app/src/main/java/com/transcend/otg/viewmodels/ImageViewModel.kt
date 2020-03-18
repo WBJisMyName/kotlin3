@@ -31,10 +31,12 @@ class ImageViewModel(application: Application) : AndroidViewModel(application){
     fun loadAllImageList(mPath: String){
         try {
             val thread = Thread(Runnable {
-                var rootPath = Constant.LOCAL_ROOT
+                var rootPath = Constant.STORAGEMODE_LOCAL
                 if(Constant.SD_ROOT != null && mPath.startsWith(Constant.SD_ROOT!!))
-                    rootPath = Constant.SD_ROOT
-                val finalList = repository.getAllFilesByTypeFromSrc(Constant.TYPE_IMAGE, rootPath)
+                    rootPath = Constant.STORAGEMODE_SD
+                else
+                    rootPath = Constant.STORAGEMODE_OTG
+                val finalList = repository.getMediaFiles(Constant.TYPE_IMAGE, rootPath)
                 (items as MutableLiveData).postValue(finalList)
             })
             thread.start()

@@ -35,6 +35,7 @@ object Constant{
         ScanState.NONE, //音樂
         ScanState.NONE, //影片
         ScanState.NONE) //文件
+    var otgMediaScanState = ScanState.NONE
     enum class ScanState{
         NONE, SCANNING, SCANNED
     }

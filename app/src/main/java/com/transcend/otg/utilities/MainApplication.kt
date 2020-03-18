@@ -21,7 +21,7 @@ class MainApplication: Application() {
 
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memoryClassBytes = am.memoryClass * 1024 * 1024   //app內存限制大小
-        mThumbnails = ThumbnailCache(memoryClassBytes / 2)
+        mThumbnails = ThumbnailCache(memoryClassBytes / 4)
         INSTANCE = this
         mContext = applicationContext
     }

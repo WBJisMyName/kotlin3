@@ -31,7 +31,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.snackbar.Snackbar
 import com.transcend.otg.browser.HomeFragment
 import com.transcend.otg.browser.OTGFragment
-import com.transcend.otg.browser.TabFragment
+import com.transcend.otg.browser.LocalTabFragment
 import com.transcend.otg.databinding.ActivityMainBinding
 import com.transcend.otg.receiver.SDCardReceiver
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
@@ -353,7 +353,7 @@ class MainActivity : AppCompatActivity(),
         if (fragment != null && fragment.view != null)
             Snackbar.make(fragment.view!!, resId, Snackbar.LENGTH_LONG).setAction("Action", null).show()
         val childFragment = fragment?.childFragmentManager?.fragments?.get(0)
-        if (childFragment is TabFragment){
+        if (childFragment is LocalTabFragment){
             childFragment.doRefresh()
         } else if (childFragment is OTGFragment){
             childFragment.doRefresh()

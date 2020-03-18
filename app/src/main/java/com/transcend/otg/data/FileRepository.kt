@@ -13,8 +13,8 @@ class FileRepository(application: Application) {
         return fileInfoDao.getAllFilesByType(type)
     }
 
-    fun getAllFilesByTypeFromSrc(type: Int, src: String): List<FileInfo> {
-        return fileInfoDao.getAllFilesByType(type, src+"%")
+    fun getMediaFiles(type: Int, root: Int): List<FileInfo> {
+        return fileInfoDao.getMediaFiles(type, root)
     }
 
     fun getSearchFiles(searchText: String, type: Int): List<FileInfo>{

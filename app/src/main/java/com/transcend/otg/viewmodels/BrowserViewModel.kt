@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.task.ScanFolderFilesTask
 import com.transcend.otg.task.ScanMediaFiles
+import com.transcend.otg.task.ScanOTGFilesTask
 import com.transcend.otg.utilities.Constant
 
 open class BrowserViewModel(application: Application) : AbstractViewModel(application) {
@@ -19,6 +20,7 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
 
     var items = MutableLiveData<List<FileInfo>>()   //檔案列表
     var scanTask: ScanFolderFilesTask? = null
+    var scanOTGTask: ScanOTGFilesTask? = null
 
     fun getFileInfo(path: String): FileInfo{
         val file: FileInfo? = repository.getFileInfo(path)  //可能為空
@@ -81,12 +83,12 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
                 if (Constant.sdMediaScanState[type] == Constant.ScanState.NONE)
                     scanMediaFiles(type, root)
                 else    //已掃描過則直接post資料上去
-                    items.postValue(sort(repository.getAllFilesByTypeFromSrc(type, root)))
+                    items.postValue(sort(repository.getMediaFiles(type, Constant.STORAGEMODE_SD)))
             } else if (root.equals(Constant.LOCAL_ROOT)){
                 if (Constant.localMediaScanState[type] == Constant.ScanState.NONE)
                     scanMediaFiles(type, root)
                 else    //已掃描過則直接post資料上去
-                    items.postValue(sort(repository.getAllFilesByTypeFromSrc(type, root)))
+                    items.postValue(sort(repository.getMediaFiles(type, Constant.STORAGEMODE_LOCAL)))
             }
         })
         thread.start()
@@ -184,5 +186,34 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
             }
         }
         scanTask.scanMediaFiles(type, root)
+    }
+
+    fun scanOTGFiles(){
+        if (Constant.otgMediaScanState == Constant.ScanState.NONE){
+            scanOTGTask = object:ScanOTGFilesTask(){
+                override fun onPostExecute(result: Boolean?) {
+                    super.onPostExecute(result)
+                    postItemValue()
+                }
+            }
+            scanOTGTask!!.execute()
+        } else{
+            val thread = Thread(Runnable {
+                while(Constant.otgMediaScanState != Constant.ScanState.SCANNED){
+
+                }
+                postItemValue()
+            })
+            thread.start()
+        }
+    }
+
+    fun postItemValue(){
+        val thread = Thread(Runnable {
+            if (items.value == null)
+                items.postValue(sort(repository.getMediaFiles(mMediaType, Constant.STORAGEMODE_OTG)))
+        })
+        thread.start()
+
     }
 }

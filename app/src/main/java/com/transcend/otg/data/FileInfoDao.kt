@@ -8,8 +8,8 @@ interface FileInfoDao {//data access object
     @Query("SELECT * FROM files WHERE fileType = :type ORDER BY title ASC, lastModifyTime ASC")
     fun getAllFilesByType(type: Int): List<FileInfo>
 
-    @Query("SELECT * FROM files WHERE fileType = :type AND path LIKE :src ORDER BY title ASC, lastModifyTime ASC")
-    fun getAllFilesByType(type: Int, src: String): List<FileInfo>
+    @Query("SELECT * FROM files WHERE fileType = :type AND rootType = :root ORDER BY title ASC, lastModifyTime ASC")
+    fun getMediaFiles(type: Int, root: Int): List<FileInfo>
 
     @Query("SELECT * FROM files WHERE fileType = :type AND title LIKE :searchText")
     fun getSearchFilesByType(searchText: String, type: Int): List<FileInfo>

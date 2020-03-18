@@ -22,10 +22,7 @@ import com.transcend.otg.action.loader.FolderCreateLoader
 import com.transcend.otg.action.loader.NullLoader
 import com.transcend.otg.adapter.RecyclerViewAdapter
 import com.transcend.otg.databinding.FragmentTabBinding
-import com.transcend.otg.utilities.AppPref
-import com.transcend.otg.utilities.BackpressCallback
-import com.transcend.otg.utilities.Constant
-import com.transcend.otg.utilities.LoaderID
+import com.transcend.otg.utilities.*
 import kotlinx.android.synthetic.main.fragment_browser.*
 
 class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<Boolean> {
@@ -317,7 +314,8 @@ class TabFragment: Fragment(), BackpressCallback, LoaderManager.LoaderCallbacks<
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
                 }
                 RecyclerViewAdapter.List -> {
-                    val gridLayoutManager = GridLayoutManager(context, 3)
+                    val gridColCount = if(UiHelper.isPad()) 6 else 3
+                    val gridLayoutManager = GridLayoutManager(context, gridColCount)
                     recyclerview?.layoutManager = gridLayoutManager
                     adapter?.setViewType(RecyclerViewAdapter.Grid)
                     AppPref.setViewType(context, mBinding.viewPager.currentItem, RecyclerViewAdapter.Grid)

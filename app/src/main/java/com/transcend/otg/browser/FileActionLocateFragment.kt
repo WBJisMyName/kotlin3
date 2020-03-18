@@ -100,7 +100,6 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
                 viewModel.doLoadFolders(Constant.LOCAL_ROOT)
                 thread {
                     Thread.sleep(100)   //睡0.1秒，避免黑畫面發生
-                    setDropdownList(Constant.LOCAL_ROOT)
                 }
             }
         } else {
@@ -108,7 +107,6 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
             viewModel.doLoadFolders(path)
             thread {
                 Thread.sleep(100)   //睡0.1秒，避免黑畫面發生
-                setDropdownList(path)
             }
         }
         mMenu?.findItem(R.id.action_new_folder)?.setVisible(true)

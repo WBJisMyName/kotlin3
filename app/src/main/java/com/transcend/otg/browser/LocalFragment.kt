@@ -77,7 +77,6 @@ open class LocalFragment(root: String): BrowserFragment(root){
         viewModel.doLoadFiles(path)
         thread {
             Thread.sleep(100)   //睡0.1秒，避免黑畫面發生
-            setDropdownList(path)
         }
     }
 
@@ -211,7 +210,7 @@ open class LocalFragment(root: String): BrowserFragment(root){
     override fun onBackPressed(): Boolean {
         //如果檔案讀取中，則中斷讀取檔案
         if (viewModel.isLoading.get()) {
-            viewModel.isCancelScanTask = true
+            viewModel.cancelScanTask()
             return false
         }
 

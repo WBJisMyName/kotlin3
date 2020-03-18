@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.MutableLiveData
 import com.transcend.otg.data.FileInfo
-import com.transcend.otg.task.ScanMediaFiles
 import com.transcend.otg.task.ScanFolderFilesTask
+import com.transcend.otg.task.ScanMediaFiles
 import com.transcend.otg.utilities.Constant
 
 open class BrowserViewModel(application: Application) : AbstractViewModel(application) {
@@ -17,9 +17,8 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
     var isEmpty = ObservableBoolean(false)
     var isOnSelectMode = ObservableBoolean(false)
 
-    var isCancelScanTask = false    //判斷是否取消掃描檔案任務
-
     var items = MutableLiveData<List<FileInfo>>()   //檔案列表
+    var scanTask: ScanFolderFilesTask? = null
 
     fun getFileInfo(path: String): FileInfo{
         val file: FileInfo? = repository.getFileInfo(path)  //可能為空
@@ -155,7 +154,7 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
     //撈資料夾檔案列表，撈完會post給liveData
     fun scanFolderFiles(isLocal: Boolean, parent: String, type: Int){
         isLoading.set(true)
-        val scanTask = object: ScanFolderFilesTask(isLocal, parent){
+        scanTask = object: ScanFolderFilesTask(isLocal, parent){
             override fun onPostExecute(result: List<FileInfo>?) {
                 super.onPostExecute(result)
                 if (result == null)
@@ -164,7 +163,13 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
                     items.postValue(sort(result))
             }
         }
-        scanTask.execute(type)
+        scanTask!!.execute(type)
+    }
+
+    fun cancelScanTask(){
+        scanTask?.cancel(true)
+        scanTask = null
+        isLoading.set(false)
     }
 
     fun scanMediaFiles(type: Int, root: String){

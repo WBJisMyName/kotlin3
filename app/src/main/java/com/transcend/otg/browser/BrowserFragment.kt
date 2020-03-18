@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.loader.app.LoaderManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.transcend.otg.R
@@ -25,6 +26,7 @@ import com.transcend.otg.information.InfoActivity
 import com.transcend.otg.utilities.AppPref
 import com.transcend.otg.utilities.BackpressCallback
 import com.transcend.otg.utilities.RecyclerViewClickCallback
+import com.transcend.otg.utilities.UiHelper
 import com.transcend.otg.viewmodels.BrowserViewModel
 import kotlinx.android.synthetic.main.fragment_browser.*
 
@@ -105,7 +107,9 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
                 fileList ->
             adapter?.submitList(fileList)
             viewModel.isLoading.set(false)
+            setDropdownList(viewModel.mPath)
             viewModel.isEmpty.set(fileList.size == 0)
+            recyclerView.scrollToPosition(0)
         })
 
         doLoadFiles(mRoot)    //讀取根目錄
@@ -118,7 +122,21 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
         recyclerView.setHasFixedSize(true)
 
         val viewType = AppPref.getViewType(context, viewModel.mMediaType)
-        adapter?.setViewType(viewType)
+        when(viewType){
+            RecyclerViewAdapter.List -> {
+                val listLayoutManager = LinearLayoutManager(context)
+                recyclerView.layoutManager = listLayoutManager
+                adapter?.setViewType(RecyclerViewAdapter.List)
+                AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.List)
+            }
+            RecyclerViewAdapter.Grid -> {
+                val gridColCount = if(UiHelper.isPad()) 6 else 3
+                val gridLayoutManager = GridLayoutManager(context, gridColCount)
+                recyclerView.layoutManager = gridLayoutManager
+                adapter?.setViewType(RecyclerViewAdapter.Grid)
+                AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.Grid)
+            }
+        }
     }
 
     fun startActionMode(){
@@ -169,9 +187,7 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
         val intent = Intent()
         intent.setClass(getFragmentActicity(), InfoActivity::class.java)
         intent.putExtras(args)
-        startActivityForResult(intent,
-            FileActionLocateActivity.REQUEST_CODE
-        )
+        startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE)
     }
 
     //開起目的地選擇頁面

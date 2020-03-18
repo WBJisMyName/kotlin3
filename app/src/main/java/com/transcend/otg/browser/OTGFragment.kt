@@ -108,7 +108,6 @@ class OTGFragment: BrowserFragment("/"){
         viewModel.doLoadFiles(path)
         thread {
             Thread.sleep(100)   //睡0.1秒，避免黑畫面發生
-            setDropdownList(path)
         }
     }
 
@@ -294,7 +293,8 @@ class OTGFragment: BrowserFragment("/"){
                     mMenu.findItem(R.id.action_view_type).setTitle(R.string.view_by_icons)
                 }
                 RecyclerViewAdapter.List -> {
-                    val gridLayoutManager = GridLayoutManager(context, 3)
+                    val gridColCount = if(UiHelper.isPad()) 6 else 3
+                    val gridLayoutManager = GridLayoutManager(context, gridColCount)
                     recyclerView.layoutManager = gridLayoutManager
                     adapter?.setViewType(RecyclerViewAdapter.Grid)
                     AppPref.setViewType(context, viewModel.mMediaType, RecyclerViewAdapter.Grid)
@@ -307,7 +307,7 @@ class OTGFragment: BrowserFragment("/"){
     override fun onBackPressed(): Boolean {
         //如果檔案讀取中，則中斷讀取檔案
         if (viewModel.isLoading.get()) {
-            viewModel.isCancelScanTask = true
+            viewModel.cancelScanTask()
             return false
         }
 

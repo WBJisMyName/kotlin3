@@ -21,6 +21,9 @@ object Constant{
     val STORAGEMODE_SD = 1
     val STORAGEMODE_OTG = 2
 
+    var mPortraitScreenWidth = 1920
+    var mPortraitScreenHeight = 1080
+
     //用以判斷是否已讀取過，因為有件資料庫不須重新讀取
     var localMediaScanState: MutableList<ScanState> = mutableListOf(ScanState.SCANNED,   //全部(此處理論上不會用到)
         ScanState.NONE, //圖片

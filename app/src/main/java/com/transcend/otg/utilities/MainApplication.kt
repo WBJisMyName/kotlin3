@@ -21,7 +21,7 @@ class MainApplication: Application() {
 
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memoryClassBytes = am.memoryClass * 1024 * 1024   //app內存限制大小
-        mThumbnails = ThumbnailCache(memoryClassBytes / 4)
+        mThumbnails = ThumbnailCache(memoryClassBytes / 2)
         INSTANCE = this
         mContext = applicationContext
     }
@@ -39,18 +39,18 @@ class MainApplication: Application() {
 
     companion object {
         lateinit var mContext: Context
-
+        private val mMute = Object()
         //取得Thumbnail cache，以便快速顯示
         val thumbnailsCache: ThumbnailCache?
             get() {
-                val app = mContext.applicationContext as MainApplication
+                val app = INSTANCE as MainApplication
                 return app.mThumbnails
             }
 
         private var INSTANCE: MainApplication? = null
         fun getInstance(): MainApplication? {
             if (INSTANCE == null) {
-                synchronized(MainApplication::class) {
+                synchronized(mMute) {
                     INSTANCE = MainApplication()
                 }
             }

@@ -355,6 +355,7 @@ class FileActionLocateActivity : AppCompatActivity(),
     override fun notifyUnmounted() {
         Constant.SD_ROOT = SystemUtil().getSDLocation(this)
         mFragment?.doLoadFiles(Constant.Storage_Device_Root)
+        viewModel.deleteAllFromRoot(Constant.STORAGEMODE_SD)
     }
 
     private fun initBroadcast() {
@@ -388,6 +389,7 @@ class FileActionLocateActivity : AppCompatActivity(),
                 checkOtgDevice()
             } else if (UsbManager.ACTION_USB_DEVICE_DETACHED == action){
                 checkOtgDevice()
+                viewModel.deleteAllFromRoot(Constant.STORAGEMODE_OTG)
             }
         }
     }

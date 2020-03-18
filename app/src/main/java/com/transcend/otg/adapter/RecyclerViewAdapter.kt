@@ -1,7 +1,7 @@
 package com.transcend.otg.adapter
 
-import android.graphics.Bitmap
 import android.graphics.Point
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +18,7 @@ import com.transcend.otg.task.ImageLoaderTask
 import com.transcend.otg.utilities.Constant
 import com.transcend.otg.utilities.MainApplication
 import com.transcend.otg.utilities.RecyclerViewClickCallback
+import com.transcend.otg.utilities.UiHelper
 import com.transcend.otg.viewmodels.BrowserViewModel
 import java.io.File
 import java.text.SimpleDateFormat
@@ -37,6 +38,12 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
     var mList = ArrayList<FileInfo>()
 
     var mLazyLoadCount = 30
+
+    var thumbnailSize = 30
+
+    init{
+        thumbnailSize = UiHelper.calculateGridItemWidth()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -143,18 +150,26 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
 
             if (item.path.startsWith(Constant.LOCAL_ROOT) || (Constant.SD_ROOT != null && item.path.startsWith(Constant.SD_ROOT!!))){
                 if (item.fileType == Constant.TYPE_IMAGE || item.fileType == Constant.TYPE_VIDEO) {
-                    Glide.with(itemView)
-                        .load(File(item.path))
-                        .placeholder(item.defaultIcon)
-                        .transform(CenterInside(), CenterCrop())
-                        .into(listItemBinding.itemIcon)
+                    try {
+                        Glide.with(itemView)
+                            .load(File(item.path))
+                            .placeholder(item.defaultIcon)
+                            .transform(CenterInside(), CenterCrop())
+                            .into(listItemBinding.itemIcon)
+                    } catch(e: IllegalArgumentException) {
+                        Log.e("Glide-tag", listItemBinding.itemIcon.tag.toString())
+                    }
                 } else if (item.fileType == Constant.TYPE_MUSIC) {
                     loadAlbumThumbnail(listItemBinding.itemIcon, item)
                 } else {
-                    Glide.with(itemView)
-                        .load(item.defaultIcon)
-                        .centerInside()
-                        .into(listItemBinding.itemIcon)
+                    try {
+                        Glide.with(itemView)
+                            .load(item.defaultIcon)
+                            .centerInside()
+                            .into(listItemBinding.itemIcon)
+                    } catch(e: IllegalArgumentException) {
+                        Log.e("Glide-tag", listItemBinding.itemIcon.tag.toString())
+                    }
                 }
             } else {
                 if (item.fileType == Constant.TYPE_IMAGE) {
@@ -163,16 +178,8 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                         listItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_CROP  //設定顯示格式
                         listItemBinding.itemIcon.setImageBitmap(cache)
                     } else {
-                        val thumbSize = Point(180, 180)
-                        val task = object : ImageLoaderTask(item.path, item.fileType, thumbSize) {
-                            override fun onFinished(bitmap: Bitmap?) {
-                                if (bitmap != null) {
-                                    MainApplication.thumbnailsCache?.put(item.path + Constant.thumbnailCacheTail, bitmap)  //將thumbnail記錄於Cache
-                                    listItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_CROP  //設定顯示格式
-                                    listItemBinding.itemIcon.setImageBitmap(bitmap)
-                                }
-                            }
-                        }
+                        val thumbSize = Point(thumbnailSize, thumbnailSize)
+                        val task = ImageLoaderTask(item.path, listItemBinding.itemIcon, item.fileType, thumbSize)
                         listItemBinding.itemIcon.tag = task
                         task.execute()
                     }
@@ -203,18 +210,26 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
 
             if (item.path.startsWith(Constant.LOCAL_ROOT) || (Constant.SD_ROOT != null && item.path.startsWith(Constant.SD_ROOT!!))){
                 if (item.fileType == Constant.TYPE_IMAGE || item.fileType == Constant.TYPE_VIDEO) {
-                    Glide.with(itemView)
-                        .load(File(item.path))
-                        .placeholder(item.defaultIcon)
-                        .transform(CenterInside(), CenterCrop())
-                        .into(gridItemBinding.itemIcon)
+                    try{
+                        Glide.with(itemView)
+                            .load(File(item.path))
+                            .placeholder(item.defaultIcon)
+                            .transform(CenterInside(), CenterCrop())
+                            .into(gridItemBinding.itemIcon)
+                    } catch(e: IllegalArgumentException) {
+                        Log.e("Glide-tag", gridItemBinding.itemIcon.tag.toString())
+                    }
                 } else if (item.fileType == Constant.TYPE_MUSIC) {
                     loadAlbumThumbnail(gridItemBinding.itemIcon, item)
                 } else {
-                    Glide.with(itemView)
-                        .load(item.defaultIcon)
-                        .centerInside()
-                        .into(gridItemBinding.itemIcon)
+                    try{
+                        Glide.with(itemView)
+                            .load(item.defaultIcon)
+                            .centerInside()
+                            .into(gridItemBinding.itemIcon)
+                    } catch(e: IllegalArgumentException) {
+                        Log.e("Glide-tag", gridItemBinding.itemIcon.tag.toString())
+                    }
                 }
             } else {
                 if (item.fileType == Constant.TYPE_IMAGE) {
@@ -223,16 +238,8 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
                         gridItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_CROP  //設定顯示格式
                         gridItemBinding.itemIcon.setImageBitmap(cache)
                     } else {
-                        val thumbSize = Point(180, 180)
-                        val task = object : ImageLoaderTask(item.path, item.fileType, thumbSize) {
-                            override fun onFinished(bitmap: Bitmap?) {
-                                if (bitmap != null) {
-                                    MainApplication.thumbnailsCache?.put(item.path + Constant.thumbnailCacheTail, bitmap)  //將thumbnail記錄於Cache
-                                    gridItemBinding.itemIcon.scaleType = ImageView.ScaleType.CENTER_CROP  //設定顯示格式
-                                    gridItemBinding.itemIcon.setImageBitmap(bitmap)
-                                }
-                            }
-                        }
+                        val thumbSize = Point(thumbnailSize, thumbnailSize)
+                        val task = ImageLoaderTask(item.path, gridItemBinding.itemIcon, item.fileType, thumbSize)
                         gridItemBinding.itemIcon.tag = task
                         task.execute()
                     }
@@ -259,17 +266,8 @@ open class RecyclerViewAdapter(recyclerViewClickCallback: RecyclerViewClickCallb
             imageView.setImageBitmap(cache)
             imageView.scaleType = ImageView.ScaleType.CENTER_CROP
         } else {
-            val thumbSize = Point(180, 180)
-            val task = object : ImageLoaderTask(fileInfo.path, fileInfo.fileType, thumbSize) {
-                override fun onFinished(bitmap: Bitmap?) {
-                    if (bitmap != null) {
-                        MainApplication.thumbnailsCache?.put(fileInfo.path + Constant.thumbnailCacheTail, bitmap)  //將thumbnail記錄於Cache
-                        imageView.setImageBitmap(bitmap)
-                        imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-                    }
-                }
-            }
-            imageView.tag = task
+            val thumbSize = Point(thumbnailSize, thumbnailSize)
+            val task = ImageLoaderTask(fileInfo.path, imageView, fileInfo.fileType, thumbSize)
             task.execute()
         }
     }

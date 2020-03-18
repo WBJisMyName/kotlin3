@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.storage.StorageManager
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -267,7 +268,8 @@ class MainActivity : AppCompatActivity(),
                             goToBrowser(R.id.sdFragment)
                         }
                     } else {
-                        showSelectWrongDialog()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                            showSelectWrongDialog()
                     }
                 }
             }
@@ -324,6 +326,7 @@ class MainActivity : AppCompatActivity(),
     override fun notifyUnmounted() {    //sd card unmount event
         Constant.SD_ROOT = SystemUtil().getSDLocation(this)
         binding.navigationView.menu.findItem(R.id.sdFragment).setVisible(false)
+        viewModel.deleteAllFromRoot(Constant.STORAGEMODE_SD)
         initHome()
     }
 
@@ -577,9 +580,16 @@ class MainActivity : AppCompatActivity(),
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
         filter.addAction(UsbManager.EXTRA_PERMISSION_GRANTED)
         registerReceiver(usbReceiver, filter)
-
+        getScreenSize()
         SDCardReceiver.instance.registerObserver(this)
         checkOtgDevice()
+    }
+
+    private fun getScreenSize(){
+        val displaymetrics = DisplayMetrics()
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics)
+        Constant.mPortraitScreenWidth = displaymetrics.widthPixels
+        Constant.mPortraitScreenHeight = displaymetrics.heightPixels
     }
 
     fun checkOtgDevice() {

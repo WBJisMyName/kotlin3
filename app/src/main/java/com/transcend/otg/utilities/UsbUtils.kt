@@ -16,6 +16,7 @@ object UsbUtils {
     var usbManager: UsbManager? = null
 
     fun clearDevice(){
+        usbMassStorageDevice = null
         usbDevice = null
         usbFileSystem = null
         Constant.OTG_ROOT = null

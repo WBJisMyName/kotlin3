@@ -311,17 +311,16 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
             holder.getMapFragmentAndCallback(OnMapReadyCallback { googleMap ->
                 mMap = googleMap
                 val converter = UnitConverter(context)
-                //Activity先送圖檔，此處應該已經有圖，但還是防呆
-//                if (thumbnailBitmap != null)
-//                    holder.imageThumbnail!!.setImageBitmap(thumbnailBitmap)
-//                else
-//                    holder.imageThumbnail!!.setImageResource(R.drawable.ic_photoinfo_name_grey)
 
-                Glide.with(context)
-                    .load(File(mPath))
-                    .placeholder(R.drawable.ic_browser_filetype_image)
-                    .transform(CenterInside(), CenterCrop())
-                    .into(holder.imageThumbnail!!)
+                try{
+                    Glide.with(context)
+                        .load(File(mPath))
+                        .placeholder(R.drawable.ic_browser_filetype_image)
+                        .transform(CenterInside(), CenterCrop())
+                        .into(holder.imageThumbnail!!)
+                } catch(e: IllegalArgumentException) {
+                    Log.e("Glide-tag", holder.imageThumbnail?.tag.toString())
+                }
 
                 //禁止拖動及移動地圖
                 mMap!!.getUiSettings().setAllGesturesEnabled(false)
@@ -436,11 +435,15 @@ class InfoAdapter(val context: Activity): RecyclerView.Adapter<InfoAdapter.ViewH
                     holder.mediaThumbnail!!.setImageResource(R.drawable.ic_musicinfo_title_grey)
                 else {
                     holder.mediaThumbnail!!.setImageResource(R.drawable.ic_videoinfo_resolution_grey)
-                    Glide.with(holder.itemView)
-                        .load(File(mPath))
-                        .placeholder(R.drawable.ic_videoinfo_resolution_grey)
-                        .transform(CenterInside(), CenterCrop())
-                        .into(holder.mediaThumbnail!!)
+                    try{
+                        Glide.with(holder.itemView)
+                            .load(File(mPath))
+                            .placeholder(R.drawable.ic_videoinfo_resolution_grey)
+                            .transform(CenterInside(), CenterCrop())
+                            .into(holder.mediaThumbnail!!)
+                    } catch(e: IllegalArgumentException) {
+                        Log.e("Glide-tag", "")
+                    }
                 }
             }
         }

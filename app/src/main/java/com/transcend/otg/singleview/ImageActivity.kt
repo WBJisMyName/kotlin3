@@ -33,7 +33,7 @@ class ImageActivity : AppCompatActivity(){
         mTitle = intent.getStringExtra("title")
 
         UiHelper.setSystemBarTranslucent(this)
-        var viewModel = ViewModelProviders.of(this).get(ImageViewModel::class.java)
+        val viewModel = ViewModelProviders.of(this).get(ImageViewModel::class.java)
         if (mFolderPath == null)
             viewModel.loadAllImageList(mFilePath!!)
         else
@@ -67,6 +67,10 @@ class ImageActivity : AppCompatActivity(){
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
+
+        imageDataBinding.toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
     }
 
     override fun onDestroy() {

@@ -15,6 +15,7 @@ import com.transcend.otg.action.FileActionManager
 import com.transcend.otg.action.dialog.FileActionRenameDialog
 import com.transcend.otg.action.loader.*
 import com.transcend.otg.data.FileInfo
+import com.transcend.otg.dialog.EncryptDialog
 import com.transcend.otg.singleview.ImageActivity
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel
@@ -22,6 +23,8 @@ import java.io.File
 import kotlin.concurrent.thread
 
 open class LocalFragment(root: String): BrowserFragment(root){
+
+    private var mEncryptDialog: EncryptDialog? = null
 
     override fun getFragmentActicity(): AppCompatActivity {
         return activity as MainActivity
@@ -116,6 +119,12 @@ open class LocalFragment(root: String): BrowserFragment(root){
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == FileActionLocateActivity.REQUEST_CODE){
             if (resultCode == AppCompatActivity.RESULT_OK){
+                if (mEncryptDialog?.isShowing() ?: false){
+                    val destPath = data?.getStringExtra("path")!!
+                    mEncryptDialog?.updatePath(destPath)
+                    return
+                }
+
                 val destPath = data?.getStringExtra("path")!!
                 val action_id = data?.getIntExtra("action_id", -1)
                 when(action_id){
@@ -175,6 +184,14 @@ open class LocalFragment(root: String): BrowserFragment(root){
                 else
                     startInfoActivity(list.get(0))
             }
+            R.id.action_encrypt -> {
+                mEncryptDialog = object:EncryptDialog(this@LocalFragment, viewModel.mPath){
+                    override fun onConfirm(newName: String, password: String, path: String) {
+                        val dest = path + File.separator + newName + getString(R.string.encrypt_subfilename)
+                        mFileActionManager.encrypt(dest, adapter?.getSelectedFilesPath()!!, password)
+                    }
+                }
+            }
         }
         return false
     }
@@ -185,8 +202,9 @@ open class LocalFragment(root: String): BrowserFragment(root){
         when(id){
             LoaderID.FILE_DELETE -> return DeleteLoader(MainApplication.getInstance()!!.getContext(), args?.getStringArrayList("paths")!!)
             LoaderID.FILE_RENAME -> return RenameLoader(MainApplication.getInstance()!!.getContext(), args?.getString("path")!!, args.getString("name")!!)
-            LoaderID.FILE_COPY -> return CopyLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args?.getString("path")!!)
-            LoaderID.FILE_MOVE -> return MoveLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args?.getString("path")!!)
+            LoaderID.FILE_COPY -> return CopyLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args.getString("path")!!)
+            LoaderID.FILE_MOVE -> return MoveLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args.getString("path")!!)
+            LoaderID.FILE_ENCRYPT -> return EncryptLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args.getString("path")!!, args.getString("name")!!)
             else -> return NullLoader(MainApplication.getInstance()!!.getContext())
         }
     }

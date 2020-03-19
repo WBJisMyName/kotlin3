@@ -126,6 +126,27 @@ abstract class NotificationAbstractLoader(val mActivity: Activity, val mSrcs: Li
         mHandler!!.post(mWatcher)
     }
 
+    var waiting_count = 0
+    protected fun startProgressWatcher(name: String, text: String) {
+        mThread = HandlerThread(TAG)
+        mThread!!.start()
+        mHandler = Handler(mThread!!.getLooper())
+
+        mWatcher = Runnable {
+            if (mHandler != null) {
+                mHandler!!.postDelayed(mWatcher, 1000)    //每一秒更新progress
+                var dot: String = ""
+                for (i in 0 .. (waiting_count)){
+                    dot = dot + "."
+                }
+                waiting_count = 3 % waiting_count++
+                updateProgress(name, text + dot)
+            }
+        }
+
+        mHandler!!.post(mWatcher)
+    }
+
     protected fun closeProgressWatcher() {
         if (mHandler != null) {
             mHandler!!.removeCallbacks(mWatcher)
@@ -166,6 +187,34 @@ abstract class NotificationAbstractLoader(val mActivity: Activity, val mSrcs: Li
         builder.setContentText(text)
         builder.setContentInfo(info)
         builder.setProgress(max, progress, indeterminate)
+        builder.setContentIntent(pendingIntent)
+        builder.setAutoCancel(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                TAG,
+                NotificationManager.IMPORTANCE_LOW
+            )
+            ntfMgr.createNotificationChannel(channel)
+            builder.setChannelId(channelId)
+        }
+        ntfMgr.notify(mNotificationID, builder.build())
+    }
+
+    protected fun updateProgress(name: String, text: String) {
+        val channelId = mNotificationID.toString()
+
+        val icon = R.drawable.icon_elite_logo
+
+        val ntfMgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val intent = mActivity.getIntent()
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val builder = NotificationCompat.Builder(context, channelId)
+        builder.setSmallIcon(icon)
+        builder.setContentTitle(name)
+        builder.setContentText(text)
         builder.setContentIntent(pendingIntent)
         builder.setAutoCancel(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -34,13 +34,27 @@
     <string name="nav_local">Local</string>
     <string name="nav_sd">SD Card</string>
     <string name="nav_otg">USB Storage</string>
-    <string name="invalid_name">Invalid name</string>
-    <string name="duplicate_name">Duplicate name</string>
     <string name="untitled_folder">Untitled Folder</string>
     <string name="error">Error</string>
     <string name="done">Action Finished</string>
     <string name="media">Media</string>
     <string name="reminder">Reminder</string>
+
+    <!-- Encrypt, Decrypt -->
+    <string name="encrypted_file">Encrypted file</string>
+    <string name="encrypt">Encryption</string>
+    <string name="decrypt">Decryption</string>
+    <string name="encrypt_filename">Encrypt File Name</string>
+    <string name="decrypt_filename">Decrypt Folder Name</string>
+    <string name="encrypting">Encrypting</string>
+    <string name="decrypting">Decrypting</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="destination">Destination</string>
+    <string name="invalid_name">Invalid name</string>
+    <string name="duplicate_name">Duplicate name</string>
+    <string name="illegal_name">Incorrect characters</string>
+    <string name="incorrect_password">Incorrect password</string>
 
     <!-- File information -->
     <string name="info_title">Information</string>

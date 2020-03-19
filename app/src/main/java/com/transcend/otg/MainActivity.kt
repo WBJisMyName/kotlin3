@@ -30,8 +30,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.snackbar.Snackbar
 import com.transcend.otg.browser.HomeFragment
-import com.transcend.otg.browser.OTGFragment
 import com.transcend.otg.browser.LocalTabFragment
+import com.transcend.otg.browser.OTGFragment
 import com.transcend.otg.databinding.ActivityMainBinding
 import com.transcend.otg.receiver.SDCardReceiver
 import com.transcend.otg.sdcard.ViewerPagerAdapterSD
@@ -500,7 +500,7 @@ class MainActivity : AppCompatActivity(),
         builder.setCancelable(false)
         val dialog = builder.show()
         val tv = dialog.findViewById<TextView>(R.id.message)
-        tv?.setText(getString(R.string.q_sd_permission_selectwrong))
+        tv?.setText(R.string.q_sd_permission_selectwrong)
         val posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
         posBtn.setOnClickListener {
             requestSDCardQPermissionDialog(false)

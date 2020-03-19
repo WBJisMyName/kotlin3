@@ -23,6 +23,8 @@ open class PhoneActionService : FileActionService() {
         ids[FileAction.COPY] = LoaderID.FILE_COPY
         ids[FileAction.MOVE] = LoaderID.FILE_MOVE
         ids[FileAction.DELETE] = LoaderID.FILE_DELETE
+        ids[FileAction.ENCRYPT] = LoaderID.FILE_ENCRYPT
+        ids[FileAction.DECRYPT] = LoaderID.FILE_DECRYPT
     }
 
     override fun rename(context: Context, path: String, name: String): AsyncTaskLoader<*>? {
@@ -47,5 +49,13 @@ open class PhoneActionService : FileActionService() {
 
     override fun share(context: Context, paths: ArrayList<String>, dest: String): AsyncTaskLoader<*>? {
         return null
+    }
+
+    override fun encrypt(context: Context, list: List<String>, dest: String, password: String): AsyncTaskLoader<*>? {
+        return EncryptLoader(context as Activity, list, dest, password)
+    }
+
+    override fun decrypt(context: Context, list: List<String>, dest: String): AsyncTaskLoader<*>? {
+        return CopyLoader(context as Activity, list, dest)
     }
 }

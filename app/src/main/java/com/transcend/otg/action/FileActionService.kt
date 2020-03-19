@@ -13,7 +13,7 @@ abstract class FileActionService {
     protected var mFileActionIDs: HashMap<FileAction, Int>
 
     enum class FileAction {
-        RENAME, COPY, MOVE, DELETE, CreateFOLDER, SHARE
+        RENAME, COPY, MOVE, DELETE, CreateFOLDER, SHARE, ENCRYPT, DECRYPT
     }
 
     init {
@@ -55,6 +55,7 @@ abstract class FileActionService {
             FileAction.DELETE -> return delete(context, paths)
             FileAction.CreateFOLDER -> return createFolder(context, path)
             FileAction.SHARE -> return share(context, paths, path)
+            FileAction.ENCRYPT -> return encrypt(context, paths, path, name)
         }
         return null
     }
@@ -82,4 +83,8 @@ abstract class FileActionService {
     protected abstract fun createFolder(context: Context, path: String): AsyncTaskLoader<*>?
 
     protected abstract fun share(context: Context, paths: ArrayList<String>, dest: String): AsyncTaskLoader<*>?
+
+    protected abstract fun encrypt(context: Context, list: List<String>, dest: String, password: String): AsyncTaskLoader<*>?
+
+    protected abstract fun decrypt(context: Context, list: List<String>, dest: String): AsyncTaskLoader<*>?
 }

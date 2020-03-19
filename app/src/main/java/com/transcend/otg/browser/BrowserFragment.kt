@@ -196,9 +196,7 @@ abstract class BrowserFragment(val mRoot: String): Fragment(),
         val intent = Intent()
         intent.setClass(getFragmentActicity(), FileActionLocateActivity::class.java)
         intent.putExtras(args)
-        startActivityForResult(intent,
-            FileActionLocateActivity.REQUEST_CODE
-        )
+        startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE)
     }
 
     //重讀路徑，直接從資料庫取出

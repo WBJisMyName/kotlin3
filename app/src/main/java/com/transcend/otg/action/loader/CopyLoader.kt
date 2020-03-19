@@ -17,7 +17,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 
-class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): NotificationAbstractLoader(activity, srcs, dest) {
+open class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): NotificationAbstractLoader(activity, srcs, dest) {
 
     init {
         TAG = CopyLoader::class.java.simpleName
@@ -59,7 +59,23 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
     private fun errorHandling(){
         deleteFailedFile()
         closeProgressWatcher()
-        updateResult(context.getString(R.string.copy), context.getString(R.string.error))
+        updateResult(context.getString(R.string.error))
+    }
+
+    open protected fun startProgressWatcher(file: File, total: Long){
+        startProgressWatcher(file, total, context.getString(R.string.copy))
+    }
+
+    open protected fun startProgressWatcher(file: UsbFile, total: Long){
+        startProgressWatcher(file, total, context.getString(R.string.copy))
+    }
+
+    open protected fun updateProgress(name: String, count: Long, total: Long){
+        updateProgress(context.getString(R.string.copy), name, count, total)
+    }
+
+    open protected fun updateResult(message: String){
+        updateResult(context.getString(R.string.copy), message)
     }
 
     private fun copy(): Boolean {
@@ -86,11 +102,11 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
                 }
             }
         }
-        updateResult(context.getString(R.string.copy), context.getString(R.string.done))
+        updateResult(context.getString(R.string.done))
         return true
     }
 
-    private fun copyDirectory(source: File, destination: String) {
+    protected fun copyDirectory(source: File, destination: String) {
         val name = createUniqueName(source, destination)
 
         var path: String? = null
@@ -122,7 +138,7 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
         }
     }
 
-    private fun copyFile(source: File, destination: String) {
+    protected fun copyFile(source: File, destination: String) {
         val name = createUniqueName(source, destination)
         val total = source.length()
 
@@ -130,23 +146,23 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
             Root.Local, Root.SD -> {
                 val target = File(destination, name)
                 current_file_path = target.path
-                startProgressWatcher(target, total, context.getString(R.string.copy))
+                startProgressWatcher(target, total)
                 FileUtils.copyFile(source, target)
                 insertFile(target)  //insert file
                 (mActivity).sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(target)))    //呼叫系統掃描該檔案
-                updateProgress(context.getString(R.string.copy), target.name, total, total)
+                updateProgress(target.name, total, total)
             }
             Root.OTG -> {
                 val target = UsbUtils.usbFileSystem?.rootDirectory?.search(destination)?.createFile(name)
                 current_file_path = target?.absolutePath
                 if (target == null) return
-                startProgressWatcher(target, total, context.getString(R.string.copy))
+                startProgressWatcher(target, total)
                 val outputStream = UsbFileStreamFactory.createBufferedOutputStream(target, UsbUtils.usbFileSystem!!)
                 FileUtils.copyFile(source, outputStream)
                 outputStream.flush()
                 outputStream.close()
                 insertFile(target)  //insert file
-                updateProgress(context.getString(R.string.copy), target.name, total, total)
+                updateProgress(target.name, total, total)
             }
         }
 
@@ -154,7 +170,7 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
         itemCount++
     }
 
-    private fun copyDirectory(source: UsbFile, destination: String) {
+    protected fun copyDirectory(source: UsbFile, destination: String) {
         val name = createUniqueName(source, destination)
 
         var path: String? = null
@@ -184,7 +200,7 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
         }
     }
 
-    private fun copyFile(source: UsbFile, destination: String) {
+    protected fun copyFile(source: UsbFile, destination: String) {
         val name = createUniqueName(source, destination)
         val total = source.length
 
@@ -192,21 +208,21 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
             Root.Local, Root.SD -> {
                 val target = File(destination, name)
                 current_file_path = target.path
-                startProgressWatcher(target, total, context.getString(R.string.copy))
+                startProgressWatcher(target, total)
 
                 val inputStream: InputStream = UsbFileStreamFactory.createBufferedInputStream(source, UsbUtils.usbFileSystem!!)
                 FileUtils.copyInputStreamToFile(inputStream, target)
                 inputStream.close()
                 insertFile(target)  //insert file
                 (mActivity).sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(target)))    //呼叫系統掃描該檔案
-                updateProgress(context.getString(R.string.copy), target.name, total, total)
+                updateProgress(target.name, total, total)
             }
             Root.OTG -> {
                 val target = UsbUtils.usbFileSystem?.rootDirectory?.search(destination)?.createFile(name)
                 current_file_path = target?.absolutePath
                 if (target == null) return
 
-                startProgressWatcher(target, total, context.getString(R.string.copy))
+                startProgressWatcher(target, total)
                 val inputStream: InputStream = UsbFileStreamFactory.createBufferedInputStream(source, UsbUtils.usbFileSystem!!)
                 val outputStream: OutputStream = UsbFileStreamFactory.createBufferedOutputStream(target, UsbUtils.usbFileSystem!!)
                 IOUtils.copy(inputStream, outputStream)
@@ -214,7 +230,7 @@ class CopyLoader(val activity: Activity, srcs: List<String>, dest: String): Noti
                 outputStream.flush()
                 outputStream.close()
                 insertFile(target)  //insert file
-                updateProgress(context.getString(R.string.copy), target.name, total, total)
+                updateProgress(target.name, total, total)
             }
         }
 

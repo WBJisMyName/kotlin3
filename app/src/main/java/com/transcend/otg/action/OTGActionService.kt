@@ -21,6 +21,8 @@ class OTGActionService: PhoneActionService(){
         ids[FileAction.COPY] = LoaderID.FILE_COPY
         ids[FileAction.MOVE] = LoaderID.FILE_MOVE
         ids[FileAction.DELETE] = LoaderID.FILE_DELETE
+        ids[FileAction.ENCRYPT] = LoaderID.FILE_ENCRYPT
+        ids[FileAction.DECRYPT] = LoaderID.FILE_DECRYPT
     }
 
     override fun getRootPath(context: Context): String? {

@@ -100,6 +100,10 @@ class FileActionManager @JvmOverloads constructor(
 //        }
     }
 
+    fun encrypt(dest: String, paths: ArrayList<String>, password: String){
+        createLoader(FileActionService.FileAction.ENCRYPT, password, dest, paths)
+    }
+
     private fun createLoader(
         type: FileActionService.FileAction,
         name: String?,

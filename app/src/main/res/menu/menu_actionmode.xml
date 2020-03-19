@@ -51,6 +51,12 @@
                 android:icon="@drawable/ic_tab_selectall_grey"
                 android:title="@string/selectAll"
                 app:showAsAction="never" />
+
+            <item
+                    android:id="@+id/action_encrypt"
+                    android:icon="@drawable/ic_encrypt_gray"
+                    android:title="@string/encrypt"
+                    app:showAsAction="never" />
         </menu>
 
     </item>

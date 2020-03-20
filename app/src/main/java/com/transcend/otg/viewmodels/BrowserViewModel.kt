@@ -27,10 +27,6 @@ open class BrowserViewModel(application: Application) : AbstractViewModel(applic
         return file ?: FileInfo()
     }
 
-    fun getCurrentPathFiles(): List<FileInfo>{
-        return getAllFiles(mPath)
-    }
-
     fun doLoadFiles(path: String){  //讀取路徑
         mPath = path
         isLoading.set(true)

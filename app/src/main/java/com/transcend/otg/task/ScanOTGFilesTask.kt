@@ -13,6 +13,7 @@ import com.transcend.otg.utilities.UsbUtils
 open class ScanOTGFilesTask: AsyncTask<Unit, Unit, Boolean>() {
 
     val repository = FileRepository(MainApplication.getInstance()!!) //存取資料庫用
+    val encryptSubTitle: String = MainApplication.getInstance()!!.getString(R.string.encrypt_subfilename)
 
     override fun doInBackground(vararg p0: Unit?): Boolean {
         Constant.otgMediaScanState = Constant.ScanState.SCANNING
@@ -84,6 +85,10 @@ open class ScanOTGFilesTask: AsyncTask<Unit, Unit, Boolean>() {
                 info.smallMediaIconResId = R.drawable.ic_cameraroll_video
             }
             else -> {
+                if(("."+MimeUtil.getMimeTypeDetail(info.path)).equals(encryptSubTitle)){
+                    info.fileType = Constant.TYPE_ENCRYPT
+                    info.defaultIcon = R.drawable.ic_filelist_lockfile_grey
+                } else
                 info.defaultIcon = R.drawable.ic_filelist_others_grey
             }
         }

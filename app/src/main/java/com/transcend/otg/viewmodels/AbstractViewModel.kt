@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.transcend.otg.data.FileInfo
 import com.transcend.otg.data.FileRepository
+import com.transcend.otg.utilities.Constant
 
 open class AbstractViewModel(application: Application) : AndroidViewModel(application) {
     val repository = FileRepository(application)    //資料庫存取用
@@ -42,5 +43,14 @@ open class AbstractViewModel(application: Application) : AndroidViewModel(applic
 
     fun getAllFiles(parent: String): List<FileInfo>{
         return repository.getAllFileInfos(parent)
+    }
+
+    fun getFolderNames(parent: String): ArrayList<String>{
+        val files = repository.getFiles(parent, Constant.TYPE_DIR)
+        val names = ArrayList<String>()
+        for (file in files){
+            names.add(file.title)
+        }
+        return names
     }
 }

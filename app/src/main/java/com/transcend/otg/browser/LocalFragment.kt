@@ -12,10 +12,11 @@ import androidx.loader.content.Loader
 import com.transcend.otg.MainActivity
 import com.transcend.otg.R
 import com.transcend.otg.action.FileActionManager
+import com.transcend.otg.action.dialog.DecryptDialog
+import com.transcend.otg.action.dialog.EncryptDialog
 import com.transcend.otg.action.dialog.FileActionRenameDialog
 import com.transcend.otg.action.loader.*
 import com.transcend.otg.data.FileInfo
-import com.transcend.otg.dialog.EncryptDialog
 import com.transcend.otg.singleview.ImageActivity
 import com.transcend.otg.utilities.*
 import com.transcend.otg.viewmodels.MainActivityViewModel
@@ -25,6 +26,7 @@ import kotlin.concurrent.thread
 open class LocalFragment(root: String): BrowserFragment(root){
 
     private var mEncryptDialog: EncryptDialog? = null
+    private var mDecryptDialog: DecryptDialog? = null
 
     override fun getFragmentActicity(): AppCompatActivity {
         return activity as MainActivity
@@ -100,6 +102,15 @@ open class LocalFragment(root: String): BrowserFragment(root){
                         activity?.startActivity(intent)
                     }
                     Constant.TYPE_DIR -> doLoadFiles(fileInfo.path)
+                    Constant.TYPE_ENCRYPT -> {
+                        mDecryptDialog = object: DecryptDialog(this@LocalFragment, fileInfo.path){
+                            override fun onConfirm(newFolderPath: String, password: String, mFilePath: String) {
+                                val list = ArrayList<String>()
+                                list.add(mFilePath)
+                                mFileActionManager.decrypt(newFolderPath, list, password)
+                            }
+                        }
+                    }
                     else -> {
                         MediaUtils.openIn(mContext, fileInfo)
                     }
@@ -122,6 +133,10 @@ open class LocalFragment(root: String): BrowserFragment(root){
                 if (mEncryptDialog?.isShowing() ?: false){
                     val destPath = data?.getStringExtra("path")!!
                     mEncryptDialog?.updatePath(destPath)
+                    return
+                } else if (mDecryptDialog?.isShowing() ?: false){
+                    val destPath = data?.getStringExtra("path")!!
+                    mDecryptDialog?.updatePath(destPath)
                     return
                 }
 
@@ -185,7 +200,8 @@ open class LocalFragment(root: String): BrowserFragment(root){
                     startInfoActivity(list.get(0))
             }
             R.id.action_encrypt -> {
-                mEncryptDialog = object:EncryptDialog(this@LocalFragment, viewModel.mPath){
+                mEncryptDialog = object:
+                    EncryptDialog(this@LocalFragment, viewModel.mPath){
                     override fun onConfirm(newName: String, password: String, path: String) {
                         val dest = path + File.separator + newName + getString(R.string.encrypt_subfilename)
                         mFileActionManager.encrypt(dest, adapter?.getSelectedFilesPath()!!, password)
@@ -205,6 +221,7 @@ open class LocalFragment(root: String): BrowserFragment(root){
             LoaderID.FILE_COPY -> return CopyLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args.getString("path")!!)
             LoaderID.FILE_MOVE -> return MoveLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args.getString("path")!!)
             LoaderID.FILE_ENCRYPT -> return EncryptLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args.getString("path")!!, args.getString("name")!!)
+            LoaderID.FILE_DECRYPT -> return DecryptLoader(activity as MainActivity, args?.getStringArrayList("paths")!!, args.getString("path")!!, args.getString("name")!!)
             else -> return NullLoader(MainApplication.getInstance()!!.getContext())
         }
     }

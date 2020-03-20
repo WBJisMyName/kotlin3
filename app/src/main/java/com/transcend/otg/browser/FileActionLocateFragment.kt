@@ -184,7 +184,7 @@ class FileActionLocateFragment: BrowserFragment(Constant.Storage_Device_Root){
 
     override fun onLoadFinished(loader: Loader<Boolean>, success: Boolean?) {
         if (loader is FolderCreateLoader){
-            viewModel.doRefresh(true)
+            viewModel.doLoadFolders(viewModel.mPath)
         }
     }
 

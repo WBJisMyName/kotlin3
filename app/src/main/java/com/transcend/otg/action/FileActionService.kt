@@ -56,6 +56,7 @@ abstract class FileActionService {
             FileAction.CreateFOLDER -> return createFolder(context, path)
             FileAction.SHARE -> return share(context, paths, path)
             FileAction.ENCRYPT -> return encrypt(context, paths, path, name)
+            FileAction.DECRYPT -> return encrypt(context, paths, path, name)
         }
         return null
     }
@@ -86,5 +87,5 @@ abstract class FileActionService {
 
     protected abstract fun encrypt(context: Context, list: List<String>, dest: String, password: String): AsyncTaskLoader<*>?
 
-    protected abstract fun decrypt(context: Context, list: List<String>, dest: String): AsyncTaskLoader<*>?
+    protected abstract fun decrypt(context: Context, list: List<String>, dest: String, password: String): AsyncTaskLoader<*>?
 }

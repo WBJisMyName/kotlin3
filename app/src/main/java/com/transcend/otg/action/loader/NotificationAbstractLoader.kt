@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.mjdev.libaums.fs.UsbFile
 import com.transcend.otg.R
@@ -139,7 +140,8 @@ abstract class NotificationAbstractLoader(val mActivity: Activity, val mSrcs: Li
                 for (i in 0 .. (waiting_count)){
                     dot = dot + "."
                 }
-                waiting_count = 3 % waiting_count++
+                waiting_count = (waiting_count+1) % 5
+                Log.e("NotificationAbstractLoader", "Count: " + waiting_count)
                 updateProgress(name, text + dot)
             }
         }
@@ -183,8 +185,8 @@ abstract class NotificationAbstractLoader(val mActivity: Activity, val mSrcs: Li
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(context, channelId)
         builder.setSmallIcon(icon)
-        builder.setContentTitle(name)
-        builder.setContentText(text)
+        builder.setContentTitle(text)
+        builder.setContentText(name)
         builder.setContentInfo(info)
         builder.setProgress(max, progress, indeterminate)
         builder.setContentIntent(pendingIntent)

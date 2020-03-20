@@ -54,9 +54,11 @@ class EncryptLoader(activity: Activity, srcs: List<String>, dest: String, val en
             return (isCreateCacheFolder && isCopyToCacheFolder && isEncrypt)
         } catch (e: IOException) {
             e.printStackTrace()
+            closeProgressWatcher()
             updateResult(mActivity.getString(R.string.encrypt), mActivity.getString(R.string.error))
         } catch (e: ZipException) {
             e.printStackTrace()
+            closeProgressWatcher()
             updateResult(mActivity.getString(R.string.encrypt), mActivity.getString(R.string.error))
         }
         //任務結束，刪除快取檔案
@@ -138,6 +140,7 @@ class EncryptLoader(activity: Activity, srcs: List<String>, dest: String, val en
             return false
         }
         val target = File(mDest)
+        insertFile(target)
         mActivity.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(target)))
         updateResult(context.getString(R.string.done))
         closeProgressWatcher()

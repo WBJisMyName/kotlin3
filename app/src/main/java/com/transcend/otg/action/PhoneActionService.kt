@@ -55,7 +55,7 @@ open class PhoneActionService : FileActionService() {
         return EncryptLoader(context as Activity, list, dest, password)
     }
 
-    override fun decrypt(context: Context, list: List<String>, dest: String): AsyncTaskLoader<*>? {
-        return CopyLoader(context as Activity, list, dest)
+    override fun decrypt(context: Context, list: List<String>, dest: String, password: String): AsyncTaskLoader<*>? {
+        return DecryptLoader(context as Activity, list, dest, password)
     }
 }

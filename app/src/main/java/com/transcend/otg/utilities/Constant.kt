@@ -15,7 +15,8 @@ object Constant{
     val TYPE_MUSIC = 2
     val TYPE_VIDEO = 3
     val TYPE_DOC = 4
-    val TYPE_OTHERS = 5
+    val TYPE_ENCRYPT = 5
+    val TYPE_OTHERS = 6
 
     val STORAGEMODE_LOCAL = 0
     val STORAGEMODE_SD = 1
